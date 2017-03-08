@@ -102,10 +102,10 @@ shared class MediaBrowserFragment() extends Fragment() {
     }
 
     object connectivityChangeReceiver extends BroadcastReceiver() {
-        variable Boolean oldOnline = false;
+        variable value oldOnline = false;
         shared actual void onReceive(Context context, Intent intent) {
             if (currentMediaId exists) {
-                Boolean isOnline = NetworkHelper.isOnline(context);
+                value isOnline = NetworkHelper.isOnline(context);
                 if (isOnline != oldOnline) {
                     oldOnline = isOnline;
                     checkForUserVisibleErrors(false);
@@ -204,6 +204,7 @@ shared class MediaBrowserFragment() extends Fragment() {
         this.currentMediaId = mediaId else mediaFragmentListener?.mediaBrowser?.root;
 
         updateTitle();
+
         mediaFragmentListener?.mediaBrowser?.unsubscribe(currentMediaId);
         mediaFragmentListener?.mediaBrowser?.subscribe(currentMediaId,
             object extends MediaBrowser.SubscriptionCallback() {

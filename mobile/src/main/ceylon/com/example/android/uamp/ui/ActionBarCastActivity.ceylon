@@ -55,10 +55,6 @@ import android.view {
     View
 }
 
-import ceylon.language.meta.model {
-    Class
-}
-
 import com.example.android.uamp {
     R,
     MusicService
@@ -78,6 +74,9 @@ import com.google.android.gms.cast.framework {
 import java.lang {
     CharSequence
 }
+import ceylon.language.meta.model {
+    Class
+}
 
 shared abstract class BaseActivity()
         extends ActionBarCastActivity()
@@ -86,7 +85,7 @@ shared abstract class BaseActivity()
     value tag = LogHelper.makeLogTag(`BaseActivity`);
 
     shared actual late MediaBrowser mediaBrowser;
-    late PlaybackControlsFragment controlsFragment;
+    late variable PlaybackControlsFragment controlsFragment;
 
     void showPlaybackControls() {
         LogHelper.d(tag, "showPlaybackControls");
@@ -199,8 +198,6 @@ shared abstract class BaseActivity()
         mediaController?.unregisterCallback(MediaControllerCallback());
         mediaBrowser.disconnect();
     }
-
-//    shared actual MediaBrowser? mediaBrowser => mediaBrowser;
 
 }
 
@@ -332,26 +329,20 @@ shared abstract class ActionBarCastActivity()
             layout.addDrawerListener(object satisfies DrawerLayout.DrawerListener {
                 shared actual void onDrawerClosed(View drawerView) {
                     mDrawerToggle?.onDrawerClosed(drawerView);
-                    if (itemToOpenWhenDrawerCloses>=0) {
+                    if (itemToOpenWhenDrawerCloses>=0,
+                        exists activityClass
+                                = if (itemToOpenWhenDrawerCloses == R.Id.navigation_allmusic)
+                                    then `MusicPlayerActivity`
+                                else if (itemToOpenWhenDrawerCloses == R.Id.navigation_playlists)
+                                    then `PlaceholderActivity`
+                                else null) {
                         value extras
                                 = ActivityOptions.makeCustomAnimation(outer,
                                     R.Anim.fade_in,
                                     R.Anim.fade_out)
                                 .toBundle();
-                        Class<Object>? activityClass;
-                        if (itemToOpenWhenDrawerCloses == R.Id.navigation_allmusic) {
-                            activityClass = `MusicPlayerActivity`;
-                        }
-                        else if (itemToOpenWhenDrawerCloses == R.Id.navigation_playlists) {
-                            activityClass = `PlaceholderActivity`;
-                        }
-                        else {
-                            activityClass = null;
-                        }
-                        if (exists activityClass) {
-                            startActivity(Intent(outer, activityClass), extras);
-                            finish();
-                        }
+                        startActivity(Intent(outer, activityClass of Class<Object>), extras);
+                        finish();
                     }
                 }
                 shared actual void onDrawerStateChanged(Integer newState)
@@ -375,14 +366,11 @@ shared abstract class ActionBarCastActivity()
     }
 
     void populateDrawerItems(NavigationView navigationView) {
-        navigationView.setNavigationItemSelectedListener(object
-                satisfies NavigationView.OnNavigationItemSelectedListener {
-            shared actual Boolean onNavigationItemSelected(MenuItem menuItem) {
-                menuItem.setChecked(true);
-                itemToOpenWhenDrawerCloses = menuItem.itemId;
-                drawerLayout?.closeDrawers();
-                return true;
-            }
+        navigationView.setNavigationItemSelectedListener((menuItem) {
+            menuItem.setChecked(true);
+            itemToOpenWhenDrawerCloses = menuItem.itemId;
+            drawerLayout?.closeDrawers();
+            return true;
         });
 
         Object self = this; //TODO: remove temp hack

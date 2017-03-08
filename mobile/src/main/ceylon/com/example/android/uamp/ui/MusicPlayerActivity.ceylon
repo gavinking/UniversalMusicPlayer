@@ -105,8 +105,8 @@ shared class MusicPlayerActivity
 
     void initializeFromParams(Bundle? savedInstanceState, Intent intent) {
         String? mediaId;
-        if (intent.action exists,
-            intent.action==MediaStore.intentActionMediaPlayFromSearch) {
+        if (exists action = intent.action,
+            action == MediaStore.intentActionMediaPlayFromSearch) {
             mVoiceSearchParams = intent.extras;
             LogHelper.d(tag, "Starting from voice search query=",
                 mVoiceSearchParams?.getString(SearchManager.query));
@@ -139,14 +139,7 @@ shared class MusicPlayerActivity
         }
     }
 
-    shared String? mediaId {
-        if (exists fragment = browseFragment) {
-            return fragment.mediaId;
-        }
-        else {
-            return null;
-        }
-    }
+    shared String? mediaId => browseFragment?.mediaId;
 
     shared actual void onMediaControllerConnected() {
         if (exists params = mVoiceSearchParams) {

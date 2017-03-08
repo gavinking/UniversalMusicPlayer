@@ -260,11 +260,8 @@ shared class CastPlayback(MusicProvider musicProvider, Context context)
     }
 
     shared actual void onSendingRemoteMediaRequest() {}
-
     shared actual void onAdBreakStatusUpdated() {}
-
     shared actual void onQueueStatusUpdated() {}
-
     shared actual void onPreloadStatusUpdated() {}
 }
 

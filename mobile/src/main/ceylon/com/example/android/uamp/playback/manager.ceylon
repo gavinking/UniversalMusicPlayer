@@ -63,24 +63,29 @@ shared class PlaybackManager(
     void setCustomAction(PlaybackState.Builder stateBuilder) {
         if (exists currentMusic = queueManager.currentMusic,
             exists mediaId = currentMusic.description.mediaId) {
-            String musicId = MediaIDHelper.extractMusicIDFromMediaID(mediaId);
-            Integer favoriteIcon = musicProvider.isFavorite(musicId)
-                then R.Drawable.ic_star_on
-                else R.Drawable.ic_star_off;
+            value musicId = MediaIDHelper.extractMusicIDFromMediaID(mediaId);
+            value favoriteIcon
+                    = musicProvider.isFavorite(musicId)
+                    then R.Drawable.ic_star_on
+                    else R.Drawable.ic_star_off;
             LogHelper.d(tag, "updatePlaybackState, setting Favorite custom action of music ", musicId, " current favorite=", musicProvider.isFavorite(musicId));
-            Bundle customActionExtras = Bundle();
+            value customActionExtras = Bundle();
             WearHelper.setShowCustomActionOnWear(customActionExtras, true);
-            stateBuilder.addCustomAction(PlaybackState.CustomAction.Builder(customActionThumbsUp, resources.getString(R.String.favorite), favoriteIcon).setExtras(customActionExtras).build());
+            stateBuilder.addCustomAction(PlaybackState.CustomAction.Builder(customActionThumbsUp,
+                        resources.getString(R.String.favorite), favoriteIcon)
+                .setExtras(customActionExtras).build());
         }
     }
 
     shared void updatePlaybackState(String? error) {
         LogHelper.d(tag, "updatePlaybackState, playback state=``currentPlayback.state``");
-        variable Integer position = PlaybackState.playbackPositionUnknown;
-        if (currentPlayback.connected) {
-            position = currentPlayback.currentStreamPosition;
-        }
-        value stateBuilder = PlaybackState.Builder().setActions(availableActions);
+        value position
+                = currentPlayback.connected
+                then currentPlayback.currentStreamPosition
+                else PlaybackState.playbackPositionUnknown;
+        value stateBuilder
+                = PlaybackState.Builder()
+                .setActions(availableActions);
         setCustomAction(stateBuilder);
         variable value state = currentPlayback.state;
         if (exists error) {
@@ -180,7 +185,7 @@ shared class PlaybackManager(
             LogHelper.i(tag, "onCustomAction: favorite for current track");
             if (exists currentMusic = queueManager.currentMusic,
                 exists mediaId = currentMusic.description.mediaId) {
-                String musicId = MediaIDHelper.extractMusicIDFromMediaID(mediaId);
+                value musicId = MediaIDHelper.extractMusicIDFromMediaID(mediaId);
                 musicProvider.setFavorite(musicId, !musicProvider.isFavorite(musicId));
             }
             updatePlaybackState(null);
@@ -223,8 +228,8 @@ shared class PlaybackManager(
     currentPlayback.setCallback(callback);
 
     shared void switchToPlayback(Playback playback, Boolean resumePlaying) {
-        Integer oldState = playback.state;
-        Integer pos = playback.currentStreamPosition;
+        value oldState = playback.state;
+        value pos = playback.currentStreamPosition;
         value currentMediaId = playback.currentMediaId;
         playback.stop(false);
         playback.setCallback(callback);
@@ -269,8 +274,9 @@ shared class QueueManager(
 
     value tag = LogHelper.makeLogTag(`QueueManager`);
 
-    variable value mPlayingQueue = Collections.synchronizedList(ArrayList<MediaSession.QueueItem>());
-    variable Integer mCurrentIndex = 0;
+    variable value mPlayingQueue
+            = Collections.synchronizedList(ArrayList<MediaSession.QueueItem>());
+    variable value mCurrentIndex = 0;
 
     shared Boolean isSameBrowsingCategory(String mediaId) {
         value newBrowseHierarchy = MediaIDHelper.getHierarchy(mediaId);
@@ -354,7 +360,10 @@ shared class QueueManager(
 
     void setCurrentQueue(String title, List<MediaSession.QueueItem> newQueue, String? initialMediaId = null) {
         mPlayingQueue = newQueue;
-        value index = if (exists initialMediaId) then QueueHelper.getMusicIndexOnQueue(mPlayingQueue, initialMediaId) else 0;
+        value index
+                = if (exists initialMediaId)
+                then QueueHelper.getMusicIndexOnQueue(mPlayingQueue, initialMediaId)
+                else 0;
         mCurrentIndex = largest(index, 0);
         listener.onQueueUpdated(title, newQueue);
     }
@@ -373,7 +382,7 @@ shared class QueueManager(
                         musicProvider.updateMusicArt(musicId, bitmap, icon);
                         if (exists currentMusic = outer.currentMusic) {
                             assert (exists mediaId = currentMusic.description.mediaId);
-                            String currentPlayingId = MediaIDHelper.extractMusicIDFromMediaID(mediaId);
+                            value currentPlayingId = MediaIDHelper.extractMusicIDFromMediaID(mediaId);
                             if (musicId == currentPlayingId) {
                                 assert (exists music = musicProvider.getMusic(currentPlayingId));
                                 listener.onMetadataChanged(music);
