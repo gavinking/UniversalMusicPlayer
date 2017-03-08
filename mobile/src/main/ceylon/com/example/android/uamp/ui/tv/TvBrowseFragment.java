@@ -17,6 +17,8 @@ package com.example.android.uamp.ui.tv;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.media.session.MediaController;
+import android.media.session.MediaSession;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v17.leanback.app.BrowseSupportFragment;
@@ -251,10 +253,9 @@ public class TvBrowseFragment extends BrowseSupportFragment {
                             item.getDescription().getTitle());
                     startActivity(intent);
 
-                } else if (clickedItem instanceof MediaSessionCompat.QueueItem) {
-                    MediaSessionCompat.QueueItem item = (MediaSessionCompat.QueueItem) clickedItem;
-                    MediaControllerCompat mediaController = getActivity()
-                            .getSupportMediaController();
+                } else if (clickedItem instanceof MediaSession.QueueItem) {
+                    MediaSession.QueueItem item = (MediaSession.QueueItem) clickedItem;
+                    MediaController mediaController = getActivity().getMediaController();
 
                     if (!QueueHelper.isQueueItemPlaying(getActivity(), item)) {
                         mediaController.getTransportControls()

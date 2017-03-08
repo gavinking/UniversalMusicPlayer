@@ -17,6 +17,7 @@
 package com.example.android.uamp.utils;
 
 import android.content.Context;
+import android.media.browse.MediaBrowser;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.media.MediaBrowserCompat;
@@ -147,7 +148,7 @@ public class MediaIDHelper {
      * @return boolean indicating whether media item matches currently playing media item
      */
     public static boolean isMediaItemPlaying(Context context,
-                                             MediaBrowserCompat.MediaItem mediaItem) {
+                                             MediaBrowser.MediaItem mediaItem) {
         // Media item is considered to be playing or paused based on the controller's current
         // media id
         MediaControllerCompat controller = ((FragmentActivity) context)

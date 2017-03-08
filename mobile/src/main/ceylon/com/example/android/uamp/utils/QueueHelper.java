@@ -17,6 +17,8 @@
 package com.example.android.uamp.utils;
 
 import android.content.Context;
+import android.media.session.MediaController;
+import android.media.session.MediaSession;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.media.MediaMetadataCompat;
@@ -226,10 +228,10 @@ public class QueueHelper {
      * @return boolean indicating whether queue item matches currently playing queue item
      */
     public static boolean isQueueItemPlaying(Context context,
-                                             MediaSessionCompat.QueueItem queueItem) {
+                                             MediaSession.QueueItem queueItem) {
         // Queue item is considered to be playing or paused based on both the controller's
         // current media id and the controller's active queue item id
-        MediaControllerCompat controller = ((FragmentActivity) context).getSupportMediaController();
+        MediaController controller = ((FragmentActivity) context).getMediaController();
         if (controller != null && controller.getPlaybackState() != null) {
             long currentPlayingQueueId = controller.getPlaybackState().getActiveQueueItemId();
             String currentPlayingMediaId = controller.getMetadata().getDescription()

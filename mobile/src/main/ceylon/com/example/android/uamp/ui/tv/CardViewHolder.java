@@ -27,6 +27,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.MediaDescription;
 import android.net.Uri;
 import android.support.v17.leanback.widget.ImageCardView;
 import android.support.v17.leanback.widget.Presenter;
@@ -84,7 +85,7 @@ public class CardViewHolder extends Presenter.ViewHolder {
      * Set the view in this holder to represent the media metadata in {@code description}
      *
      **/
-    public void setupCardView(final Context context, MediaDescriptionCompat description) {
+    public void setupCardView(final Context context, MediaDescription description) {
         mCardView.setTitleText(description.getTitle());
         mCardView.setContentText(description.getSubtitle());
         mCardView.setMainImageDimensions(CARD_WIDTH, CARD_HEIGHT);

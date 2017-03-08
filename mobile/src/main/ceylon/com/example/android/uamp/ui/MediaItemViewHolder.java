@@ -20,6 +20,10 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.MediaDescription;
+import android.media.browse.MediaBrowser;
+import android.media.session.MediaController;
+import android.media.session.PlaybackState;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
@@ -53,7 +57,7 @@ public class MediaItemViewHolder {
 
     // Returns a view for use in media item list.
     static View setupListView(Activity activity, View convertView, ViewGroup parent,
-                              MediaBrowserCompat.MediaItem item) {
+                              MediaBrowser.MediaItem item) {
         if (sColorStateNotPlaying == null || sColorStatePlaying == null) {
             initializeColorStateLists(activity);
         }
@@ -75,7 +79,7 @@ public class MediaItemViewHolder {
             cachedState = (Integer) convertView.getTag(R.id.tag_mediaitem_state_cache);
         }
 
-        MediaDescriptionCompat description = item.getDescription();
+        MediaDescription description = item.getDescription();
         holder.mTitleView.setText(description.getTitle());
         holder.mDescriptionView.setText(description.getSubtitle());
 
@@ -130,7 +134,7 @@ public class MediaItemViewHolder {
         }
     }
 
-    public static int getMediaItemState(Context context, MediaBrowserCompat.MediaItem mediaItem) {
+    public static int getMediaItemState(Context context, MediaBrowser.MediaItem mediaItem) {
         int state = STATE_NONE;
         // Set state to playable first, then override to playing or paused state if needed
         if (mediaItem.isPlayable()) {
@@ -144,13 +148,13 @@ public class MediaItemViewHolder {
     }
 
     public static int getStateFromController(Context context) {
-        MediaControllerCompat controller = ((FragmentActivity) context)
-                .getSupportMediaController();
-        PlaybackStateCompat pbState = controller.getPlaybackState();
+        MediaController controller = ((FragmentActivity) context)
+                .getMediaController();
+        PlaybackState pbState = controller.getPlaybackState();
         if (pbState == null ||
-                pbState.getState() == PlaybackStateCompat.STATE_ERROR) {
+                pbState.getState() == PlaybackState.STATE_ERROR) {
             return MediaItemViewHolder.STATE_NONE;
-        } else if (pbState.getState() == PlaybackStateCompat.STATE_PLAYING) {
+        } else if (pbState.getState() == PlaybackState.STATE_PLAYING) {
             return  MediaItemViewHolder.STATE_PLAYING;
         } else {
             return MediaItemViewHolder.STATE_PAUSED;

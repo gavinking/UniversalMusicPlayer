@@ -18,6 +18,9 @@ package com.example.android.uamp.ui.tv;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.session.MediaController;
+import android.media.session.MediaSession;
+import android.media.session.PlaybackState;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -322,11 +325,11 @@ public class TvPlaybackFragment extends PlaybackOverlaySupportFragment {
             if (clickedItem instanceof MediaSessionCompat.QueueItem) {
                 LogHelper.d(TAG, "item: ", clickedItem.toString());
 
-                MediaControllerCompat controller = getActivity().getSupportMediaController();
-                MediaSessionCompat.QueueItem item = (MediaSessionCompat.QueueItem) clickedItem;
+                MediaController controller = getActivity().getMediaController();
+                MediaSession.QueueItem item = (MediaSession.QueueItem) clickedItem;
                 if (!QueueHelper.isQueueItemPlaying(getActivity(), item)
                         || controller.getPlaybackState().getState()
-                        != PlaybackStateCompat.STATE_PLAYING) {
+                        != PlaybackState.STATE_PLAYING) {
                     controller.getTransportControls().skipToQueueItem(item.getQueueId());
                 }
             }

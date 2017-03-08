@@ -17,6 +17,8 @@ package com.example.android.uamp.ui.tv;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.media.browse.MediaBrowser;
+import android.media.session.MediaController;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v17.leanback.app.VerticalGridSupportFragment;
@@ -115,12 +117,12 @@ public class TvVerticalGridFragment extends VerticalGridSupportFragment {
         public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item,
                                   RowPresenter.ViewHolder rowViewHolder, Row row) {
 
-            MediaControllerCompat controller = getActivity().getSupportMediaController();
+            MediaController controller = getActivity().getMediaController();
             if (controller == null) {
                 return;
             }
-            MediaControllerCompat.TransportControls controls = controller.getTransportControls();
-            MediaBrowserCompat.MediaItem mediaItem = (MediaBrowserCompat.MediaItem) item;
+            MediaController.TransportControls controls = controller.getTransportControls();
+            MediaBrowser.MediaItem mediaItem = (MediaBrowser.MediaItem) item;
 
             if (!MediaIDHelper.isMediaItemPlaying(getActivity(), mediaItem)) {
                 controls.playFromMediaId(mediaItem.getMediaId(), null);

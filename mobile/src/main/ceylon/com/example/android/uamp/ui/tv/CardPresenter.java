@@ -16,6 +16,9 @@
 package com.example.android.uamp.ui.tv;
 
 import android.content.Context;
+import android.media.MediaDescription;
+import android.media.browse.MediaBrowser;
+import android.media.session.MediaSession;
 import android.support.v17.leanback.widget.ImageCardView;
 import android.support.v17.leanback.widget.Presenter;
 import android.support.v4.media.MediaBrowserCompat;
@@ -47,18 +50,18 @@ public class CardPresenter extends Presenter {
 
     @Override
     public void onBindViewHolder(Presenter.ViewHolder viewHolder, Object item) {
-        MediaDescriptionCompat description;
+        MediaDescription description;
         final CardViewHolder cardViewHolder = (CardViewHolder) viewHolder;
 
         // Determine description and playing state of item based on instance type
         cardViewHolder.setState(MediaItemViewHolder.STATE_NONE);
-        if (item instanceof  MediaBrowserCompat.MediaItem) {
-            MediaBrowserCompat.MediaItem mediaItem = (MediaBrowserCompat.MediaItem) item;
+        if (item instanceof MediaBrowser.MediaItem) {
+            MediaBrowser.MediaItem mediaItem = (MediaBrowser.MediaItem) item;
             LogHelper.d(TAG, "onBindViewHolder MediaItem: ", mediaItem.toString());
             description = mediaItem.getDescription();
             cardViewHolder.setState(MediaItemViewHolder.getMediaItemState(mContext, mediaItem));
-        } else if (item instanceof MediaSessionCompat.QueueItem) {
-            MediaSessionCompat.QueueItem queueItem = (MediaSessionCompat.QueueItem) item;
+        } else if (item instanceof MediaSession.QueueItem) {
+            MediaSession.QueueItem queueItem = (MediaSession.QueueItem) item;
             LogHelper.d(TAG, "onBindViewHolder QueueItem: ", queueItem.toString());
             description = queueItem.getDescription();
             if (QueueHelper.isQueueItemPlaying(mContext, queueItem)) {
