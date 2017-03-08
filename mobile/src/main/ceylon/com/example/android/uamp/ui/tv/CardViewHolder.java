@@ -31,7 +31,7 @@ import android.media.MediaDescription;
 import android.net.Uri;
 import android.support.v17.leanback.widget.ImageCardView;
 import android.support.v17.leanback.widget.Presenter;
-import android.support.v4.media.MediaDescriptionCompat;
+import android.media.MediaDescription;
 import android.view.View;
 
 import com.example.android.uamp.AlbumArtCache;

@@ -24,9 +24,6 @@ import android.net {
 import android.os {
     Bundle
 }
-import android.support.v4.media.session {
-    PlaybackStateCompat
-}
 import android.view {
     LayoutInflater,
     View,
@@ -83,7 +80,7 @@ shared class MediaBrowserFragment() extends Fragment() {
         else if (exists controller = activity.mediaController,
                 controller.metadata exists,
                 exists playbackState = controller.playbackState,
-                playbackState.state == PlaybackStateCompat.stateError,
+                playbackState.state == PlaybackState.stateError,
                 playbackState.errorMessage exists) {
             errorMessage.setText(playbackState.errorMessage);
             return true;

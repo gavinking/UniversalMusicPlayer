@@ -21,9 +21,9 @@ import android.media.browse.MediaBrowser;
 import android.media.session.MediaSession;
 import android.support.v17.leanback.widget.ImageCardView;
 import android.support.v17.leanback.widget.Presenter;
-import android.support.v4.media.MediaBrowserCompat;
-import android.support.v4.media.MediaDescriptionCompat;
-import android.support.v4.media.session.MediaSessionCompat;
+import android.media.browse.MediaBrowser;
+import android.media.MediaDescription;
+import android.media.session.MediaSession;
 import android.view.ViewGroup;
 
 import com.example.android.uamp.R;

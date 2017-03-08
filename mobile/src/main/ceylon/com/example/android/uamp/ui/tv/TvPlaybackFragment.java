@@ -46,10 +46,10 @@ import android.support.v17.leanback.widget.PlaybackControlsRowPresenter;
 import android.support.v17.leanback.widget.Presenter;
 import android.support.v17.leanback.widget.Row;
 import android.support.v17.leanback.widget.RowPresenter;
-import android.support.v4.media.MediaMetadataCompat;
-import android.support.v4.media.session.MediaControllerCompat;
-import android.support.v4.media.session.MediaSessionCompat;
-import android.support.v4.media.session.PlaybackStateCompat;
+import android.media.MediaMetadata;
+import android.media.session.MediaController;
+import android.media.session.MediaSession;
+import android.media.session.PlaybackState;
 
 import com.example.android.uamp.AlbumArtCache;
 import com.example.android.uamp.utils.LogHelper;
@@ -73,7 +73,7 @@ public class TvPlaybackFragment extends PlaybackOverlaySupportFragment {
     private SkipNextAction mSkipNextAction;
     private SkipPreviousAction mSkipPreviousAction;
     private PlaybackControlsRow mPlaybackControlsRow;
-    private List <MediaSessionCompat.QueueItem> mPlaylistQueue;
+    private List <MediaSession.QueueItem> mPlaylistQueue;
     private int mDuration;
     private Handler mHandler;
     private Runnable mRunnable;
@@ -103,7 +103,7 @@ public class TvPlaybackFragment extends PlaybackOverlaySupportFragment {
         setFadingEnabled(false);
     }
 
-    private void initializePlaybackControls(MediaMetadataCompat metadata) {
+    private void initializePlaybackControls(MediaMetadata metadata) {
         setupRows();
         addPlaybackControlsRow(metadata);
         setAdapter(mRowsAdapter);
@@ -120,11 +120,11 @@ public class TvPlaybackFragment extends PlaybackOverlaySupportFragment {
                 if (getActivity() == null) {
                     return;
                 }
-                MediaControllerCompat controller = getActivity().getSupportMediaController();
+                MediaController controller = getActivity().getMediaController();
                 if (controller == null) {
                     return;
                 }
-                MediaControllerCompat.TransportControls controls = controller.getTransportControls();
+                MediaController.TransportControls controls = controller.getTransportControls();
                 if (action.getId() == mPlayPauseAction.getId()) {
                     if (mPlayPauseAction.getIndex() == PlayPauseAction.PLAY) {
                         controls.play();
@@ -150,7 +150,7 @@ public class TvPlaybackFragment extends PlaybackOverlaySupportFragment {
                 playbackControlsRowPresenter);
     }
 
-    private void addPlaybackControlsRow(MediaMetadataCompat metadata) {
+    private void addPlaybackControlsRow(MediaMetadata metadata) {
 
         mPlaybackControlsRow = new PlaybackControlsRow(new MutableMediaMetadataHolder(metadata));
         mRowsAdapter.add(mPlaybackControlsRow);
@@ -170,7 +170,7 @@ public class TvPlaybackFragment extends PlaybackOverlaySupportFragment {
         mPrimaryActionsAdapter.add(mSkipNextAction);
     }
 
-    protected void updatePlayListRow(List<MediaSessionCompat.QueueItem> playlistQueue) {
+    protected void updatePlayListRow(List<MediaSession.QueueItem> playlistQueue) {
         if (QueueHelper.equals(mPlaylistQueue, playlistQueue)) {
             // if the playlist queue hasn't changed, we don't need to update it
             return;
@@ -185,13 +185,13 @@ public class TvPlaybackFragment extends PlaybackOverlaySupportFragment {
         }
         mListRowAdapter.clear();
         for (int i = 0; i < playlistQueue.size(); i++) {
-            MediaSessionCompat.QueueItem item = playlistQueue.get(i);
+            MediaSession.QueueItem item = playlistQueue.get(i);
             mListRowAdapter.add(item);
         }
 
         if (mListRow == null) {
             int queueSize = 0;
-            MediaControllerCompat controller = getActivity().getSupportMediaController();
+            MediaController controller = getActivity().getMediaController();
             if (controller != null && controller.getQueue() != null) {
                 queueSize = controller.getQueue().size();
             }
@@ -272,11 +272,11 @@ public class TvPlaybackFragment extends PlaybackOverlaySupportFragment {
         );
     }
 
-    protected void updateMetadata(MediaMetadataCompat metadata) {
+    protected void updateMetadata(MediaMetadata metadata) {
         if (mPlaybackControlsRow == null) {
             initializePlaybackControls(metadata);
         }
-        mDuration = (int) metadata.getLong(MediaMetadataCompat.METADATA_KEY_DURATION);
+        mDuration = (int) metadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
         mPlaybackControlsRow.setTotalTime(mDuration);
         ((MutableMediaMetadataHolder) mPlaybackControlsRow.getItem()).metadata = metadata;
         mRowsAdapter.notifyArrayItemRangeChanged(
@@ -284,7 +284,7 @@ public class TvPlaybackFragment extends PlaybackOverlaySupportFragment {
         updateAlbumArt(metadata.getDescription().getIconUri());
     }
 
-    protected void updatePlaybackState(PlaybackStateCompat state) {
+    protected void updatePlaybackState(PlaybackState state) {
         if (mPlaybackControlsRow == null) {
             // We only update playback state after we get a valid metadata.
             return;
@@ -292,17 +292,17 @@ public class TvPlaybackFragment extends PlaybackOverlaySupportFragment {
         mLastPosition = state.getPosition();
         mLastPositionUpdateTime = state.getLastPositionUpdateTime();
         switch (state.getState()) {
-            case PlaybackStateCompat.STATE_PLAYING:
+            case PlaybackState.STATE_PLAYING:
                 startProgressAutomation();
                 mPlayPauseAction.setIndex(PlayPauseAction.PAUSE);
                 break;
-            case PlaybackStateCompat.STATE_PAUSED:
+            case PlaybackState.STATE_PAUSED:
                 stopProgressAutomation();
                 mPlayPauseAction.setIndex(PlayPauseAction.PLAY);
                 break;
         }
 
-        MediaControllerCompat controller = getActivity().getSupportMediaController();
+        MediaController controller = getActivity().getMediaController();
         updatePlayListRow(controller.getQueue());
         mRowsAdapter.notifyArrayItemRangeChanged(
                 mRowsAdapter.indexOf(mPlaybackControlsRow), 1);
@@ -322,7 +322,7 @@ public class TvPlaybackFragment extends PlaybackOverlaySupportFragment {
         public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object clickedItem,
                                   RowPresenter.ViewHolder rowViewHolder, Row row) {
 
-            if (clickedItem instanceof MediaSessionCompat.QueueItem) {
+            if (clickedItem instanceof MediaSession.QueueItem) {
                 LogHelper.d(TAG, "item: ", clickedItem.toString());
 
                 MediaController controller = getActivity().getMediaController();
@@ -337,8 +337,8 @@ public class TvPlaybackFragment extends PlaybackOverlaySupportFragment {
     }
 
     private static final class MutableMediaMetadataHolder {
-        MediaMetadataCompat metadata;
-        public MutableMediaMetadataHolder(MediaMetadataCompat metadata) {
+        MediaMetadata metadata;
+        public MutableMediaMetadataHolder(MediaMetadata metadata) {
             this.metadata = metadata;
         }
     }

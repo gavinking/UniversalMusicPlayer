@@ -17,7 +17,7 @@
 //
 //import com.example.android.uamp.MusicService;
 //
-//import static android.support.v4.media.session.MediaSessionCompat.QueueItem;
+//import static android.media.session.MediaSession.QueueItem;
 //
 ///**
 // * Interface representing either Local or Remote Playback. The {@link MusicService} works

@@ -30,8 +30,8 @@ import android.support.v17.leanback.widget.Row;
 import android.support.v17.leanback.widget.RowPresenter;
 import android.support.v17.leanback.widget.VerticalGridPresenter;
 import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v4.media.MediaBrowserCompat;
-import android.support.v4.media.session.MediaControllerCompat;
+import android.media.browse.MediaBrowser;
+import android.media.session.MediaController;
 import android.text.TextUtils;
 
 import com.example.android.uamp.utils.LogHelper;
@@ -80,7 +80,7 @@ public class TvVerticalGridFragment extends VerticalGridSupportFragment {
         if (TextUtils.equals(mMediaId, mediaId)) {
             return;
         }
-        MediaBrowserCompat mediaBrowser = mMediaFragmentListener.getMediaBrowser();
+        MediaBrowser mediaBrowser = mMediaFragmentListener.getMediaBrowser();
 
         // First, unsubscribe from old mediaId:
         if (mMediaId != null) {
@@ -96,7 +96,7 @@ public class TvVerticalGridFragment extends VerticalGridSupportFragment {
     @Override
     public void onStop() {
         super.onStop();
-        MediaBrowserCompat mediaBrowser = mMediaFragmentListener.getMediaBrowser();
+        MediaBrowser mediaBrowser = mMediaFragmentListener.getMediaBrowser();
         if (mediaBrowser != null && mediaBrowser.isConnected() && mMediaId != null) {
             mediaBrowser.unsubscribe(mMediaId);
         }
@@ -109,7 +109,7 @@ public class TvVerticalGridFragment extends VerticalGridSupportFragment {
     }
 
     public interface MediaFragmentListener {
-        MediaBrowserCompat getMediaBrowser();
+        MediaBrowser getMediaBrowser();
     }
 
     private final class ItemViewClickedListener implements OnItemViewClickedListener {
@@ -138,14 +138,14 @@ public class TvVerticalGridFragment extends VerticalGridSupportFragment {
         }
     }
 
-    private final MediaBrowserCompat.SubscriptionCallback mSubscriptionCallback =
-            new MediaBrowserCompat.SubscriptionCallback() {
+    private final MediaBrowser.SubscriptionCallback mSubscriptionCallback =
+            new MediaBrowser.SubscriptionCallback() {
         @Override
         public void onChildrenLoaded(@NonNull String parentId, @NonNull
-                List<MediaBrowserCompat.MediaItem> children) {
+                List<MediaBrowser.MediaItem> children) {
             mAdapter.clear();
             for (int i = 0; i < children.size(); i++) {
-                MediaBrowserCompat.MediaItem item = children.get(i);
+                MediaBrowser.MediaItem item = children.get(i);
                 if (!item.isPlayable()) {
                     LogHelper.e(TAG, "Cannot show non-playable items. Ignoring ", item.getMediaId());
                 } else {

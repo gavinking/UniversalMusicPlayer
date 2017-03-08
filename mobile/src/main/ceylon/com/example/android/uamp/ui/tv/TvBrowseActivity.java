@@ -21,8 +21,8 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.media.MediaBrowserCompat;
-import android.support.v4.media.session.MediaControllerCompat;
+import android.media.browse.MediaBrowser;
+import android.media.session.MediaController;
 
 import com.example.android.uamp.MusicService;
 import com.example.android.uamp.R;
@@ -38,7 +38,7 @@ public class TvBrowseActivity extends FragmentActivity
     public static final String SAVED_MEDIA_ID="com.example.android.uamp.MEDIA_ID";
     public static final String BROWSE_TITLE = "com.example.android.uamp.BROWSE_TITLE";
 
-    private MediaBrowserCompat mMediaBrowser;
+    private MediaBrowser mMediaBrowser;
 
     private String mMediaId;
     private String mBrowseTitle;
@@ -50,7 +50,7 @@ public class TvBrowseActivity extends FragmentActivity
 
         setContentView(R.layout.tv_activity_player);
 
-        mMediaBrowser = new MediaBrowserCompat(this,
+        mMediaBrowser = new MediaBrowser(this,
                 new ComponentName(this, MusicService.class),
                 mConnectionCallback, null);
     }
@@ -99,24 +99,24 @@ public class TvBrowseActivity extends FragmentActivity
     }
 
     @Override
-    public MediaBrowserCompat getMediaBrowser() {
+    public MediaBrowser getMediaBrowser() {
         return mMediaBrowser;
     }
 
-    private final MediaBrowserCompat.ConnectionCallback mConnectionCallback =
-            new MediaBrowserCompat.ConnectionCallback() {
+    private final MediaBrowser.ConnectionCallback mConnectionCallback =
+            new MediaBrowser.ConnectionCallback() {
                 @Override
                 public void onConnected() {
                     LogHelper.d(TAG, "onConnected: session token ",
                             mMediaBrowser.getSessionToken());
-                    try {
-                        MediaControllerCompat mediaController = new MediaControllerCompat(
+//                    try {
+                        MediaController mediaController = new MediaController(
                                 TvBrowseActivity.this, mMediaBrowser.getSessionToken());
-                        setSupportMediaController(mediaController);
+                        setMediaController(mediaController);
                         navigateToBrowser(mMediaId);
-                    } catch (RemoteException e) {
-                        LogHelper.e(TAG, e, "could not connect media controller");
-                    }
+//                    } catch (RemoteException e) {
+//                        LogHelper.e(TAG, e, "could not connect media controller");
+//                    }
                 }
 
                 @Override
@@ -127,7 +127,7 @@ public class TvBrowseActivity extends FragmentActivity
                 @Override
                 public void onConnectionSuspended() {
                     LogHelper.d(TAG, "onConnectionSuspended");
-                    setSupportMediaController(null);
+                    setMediaController(null);
                 }
             };
 }

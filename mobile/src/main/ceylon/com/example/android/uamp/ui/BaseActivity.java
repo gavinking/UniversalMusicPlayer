@@ -22,11 +22,11 @@
 //import android.os.Bundle;
 //import android.os.RemoteException;
 //import android.support.annotation.NonNull;
-//import android.support.v4.media.MediaBrowserCompat;
-//import android.support.v4.media.MediaMetadataCompat;
-//import android.support.v4.media.session.MediaControllerCompat;
-//import android.support.v4.media.session.MediaSessionCompat;
-//import android.support.v4.media.session.PlaybackStateCompat;
+//import android.media.browse.MediaBrowser;
+//import android.media.MediaMetadata;
+//import android.media.session.MediaController;
+//import android.media.session.MediaSession;
+//import android.media.session.PlaybackState;
 //
 //import com.example.android.uamp.MusicService;
 //import com.example.android.uamp.R;
@@ -41,7 +41,7 @@
 //
 //    private static final String TAG = LogHelper.makeLogTag(BaseActivity.class);
 //
-//    private MediaBrowserCompat mMediaBrowser;
+//    private MediaBrowser mMediaBrowser;
 //    private PlaybackControlsFragment mControlsFragment;
 //
 //    @Override
@@ -64,7 +64,7 @@
 //
 //        // Connect a media browser just to get the media session token. There are other ways
 //        // this can be done, for example by sharing the session token directly.
-//        mMediaBrowser = new MediaBrowserCompat(this,
+//        mMediaBrowser = new MediaBrowser(this,
 //            new ComponentName(this, MusicService.class), mConnectionCallback, null);
 //    }
 //
@@ -88,14 +88,14 @@
 //    protected void onStop() {
 //        super.onStop();
 //        LogHelper.d(TAG, "Activity onStop");
-//        if (getSupportMediaController() != null) {
-//            getSupportMediaController().unregisterCallback(mMediaControllerCallback);
+//        if (getMediaController() != null) {
+//            getMediaController().unregisterCallback(mMediaControllerCallback);
 //        }
 //        mMediaBrowser.disconnect();
 //    }
 //
 //    @Override
-//    public MediaBrowserCompat getMediaBrowser() {
+//    public MediaBrowser getMediaBrowser() {
 //        return mMediaBrowser;
 //    }
 //
@@ -129,24 +129,24 @@
 //     * @return true if the MediaSession's state requires playback controls to be visible.
 //     */
 //    protected boolean shouldShowControls() {
-//        MediaControllerCompat mediaController = getSupportMediaController();
+//        MediaController mediaController = getMediaController();
 //        if (mediaController == null ||
 //            mediaController.getMetadata() == null ||
 //            mediaController.getPlaybackState() == null) {
 //            return false;
 //        }
 //        switch (mediaController.getPlaybackState().getState()) {
-//            case PlaybackStateCompat.STATE_ERROR:
-//            case PlaybackStateCompat.STATE_NONE:
-//            case PlaybackStateCompat.STATE_STOPPED:
+//            case PlaybackState.STATE_ERROR:
+//            case PlaybackState.STATE_NONE:
+//            case PlaybackState.STATE_STOPPED:
 //                return false;
 //            default:
 //                return true;
 //        }
 //    }
 //
-//    private void connectToSession(MediaSessionCompat.Token token) throws RemoteException {
-//        MediaControllerCompat mediaController = new MediaControllerCompat(this, token);
+//    private void connectToSession(MediaSession.Token token) throws RemoteException {
+//        MediaController mediaController = new MediaController(this, token);
 //        setSupportMediaController(mediaController);
 //        mediaController.registerCallback(mMediaControllerCallback);
 //
@@ -166,10 +166,10 @@
 //    }
 //
 //    // Callback that ensures that we are showing the controls
-//    private final MediaControllerCompat.Callback mMediaControllerCallback =
-//        new MediaControllerCompat.Callback() {
+//    private final MediaController.Callback mMediaControllerCallback =
+//        new MediaController.Callback() {
 //            @Override
-//            public void onPlaybackStateChanged(@NonNull PlaybackStateCompat state) {
+//            public void onPlaybackStateChanged(@NonNull PlaybackState state) {
 //                if (shouldShowControls()) {
 //                    showPlaybackControls();
 //                } else {
@@ -180,7 +180,7 @@
 //            }
 //
 //            @Override
-//            public void onMetadataChanged(MediaMetadataCompat metadata) {
+//            public void onMetadataChanged(MediaMetadata metadata) {
 //                if (shouldShowControls()) {
 //                    showPlaybackControls();
 //                } else {
@@ -191,8 +191,8 @@
 //            }
 //        };
 //
-//    private final MediaBrowserCompat.ConnectionCallback mConnectionCallback =
-//        new MediaBrowserCompat.ConnectionCallback() {
+//    private final MediaBrowser.ConnectionCallback mConnectionCallback =
+//        new MediaBrowser.ConnectionCallback() {
 //            @Override
 //            public void onConnected() {
 //                LogHelper.d(TAG, "onConnected");

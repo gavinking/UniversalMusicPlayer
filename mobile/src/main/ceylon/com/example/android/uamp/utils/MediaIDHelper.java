@@ -20,8 +20,8 @@ import android.content.Context;
 import android.media.browse.MediaBrowser;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.media.MediaBrowserCompat;
-import android.support.v4.media.session.MediaControllerCompat;
+import android.media.browse.MediaBrowser;
+import android.media.session.MediaController;
 import android.text.TextUtils;
 
 import java.util.Arrays;
@@ -143,16 +143,15 @@ public class MediaIDHelper {
     /**
      * Determine if media item is playing (matches the currently playing media item).
      *
-     * @param context for retrieving the {@link MediaControllerCompat}
-     * @param mediaItem to compare to currently playing {@link MediaBrowserCompat.MediaItem}
+     * @param context for retrieving the {@link MediaController}
+     * @param mediaItem to compare to currently playing {@link MediaBrowser.MediaItem}
      * @return boolean indicating whether media item matches currently playing media item
      */
     public static boolean isMediaItemPlaying(Context context,
                                              MediaBrowser.MediaItem mediaItem) {
         // Media item is considered to be playing or paused based on the controller's current
         // media id
-        MediaControllerCompat controller = ((FragmentActivity) context)
-                .getSupportMediaController();
+        MediaController controller = ((FragmentActivity) context).getMediaController();
         if (controller != null && controller.getMetadata() != null) {
             String currentPlayingMediaId = controller.getMetadata().getDescription()
                     .getMediaId();

@@ -20,8 +20,8 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.media.MediaMetadataCompat;
-import android.support.v4.media.session.MediaSessionCompat;
+import android.media.MediaMetadata;
+import android.media.session.MediaSession;
 
 import com.example.android.uamp.AlbumArtCache;
 import com.example.android.uamp.R;
@@ -48,7 +48,7 @@ import java.util.List;
 //    private Resources mResources;
 //
 //    // "Now playing" queue:
-//    private List<MediaSessionCompat.QueueItem> mPlayingQueue;
+//    private List<MediaSession.QueueItem> mPlayingQueue;
 //    private int mCurrentIndex;
 //
 //    public QueueManager(@NonNull MusicProvider musicProvider,
@@ -58,13 +58,13 @@ import java.util.List;
 //        this.mListener = listener;
 //        this.mResources = resources;
 //
-//        mPlayingQueue = Collections.synchronizedList(new ArrayList<MediaSessionCompat.QueueItem>());
+//        mPlayingQueue = Collections.synchronizedList(new ArrayList<MediaSession.QueueItem>());
 //        mCurrentIndex = 0;
 //    }
 //
 //    public boolean isSameBrowsingCategory(@NonNull String mediaId) {
 //        String[] newBrowseHierarchy = MediaIDHelper.getHierarchy(mediaId);
-//        MediaSessionCompat.QueueItem current = getCurrentMusic();
+//        MediaSession.QueueItem current = getCurrentMusic();
 //        if (current == null) {
 //            return false;
 //        }
@@ -114,7 +114,7 @@ import java.util.List;
 //    }
 //
 //    public boolean setQueueFromSearch(String query, Bundle extras) {
-//        List<MediaSessionCompat.QueueItem> queue =
+//        List<MediaSession.QueueItem> queue =
 //                QueueHelper.getPlayingQueueFromSearch(query, extras, mMusicProvider);
 //        setCurrentQueue(mResources.getString(R.string.search_queue_title), queue);
 //        updateMetadata();
@@ -148,7 +148,7 @@ import java.util.List;
 //        updateMetadata();
 //    }
 //
-//    public MediaSessionCompat.QueueItem getCurrentMusic() {
+//    public MediaSession.QueueItem getCurrentMusic() {
 //        if (!QueueHelper.isIndexPlayable(mCurrentIndex, mPlayingQueue)) {
 //            return null;
 //        }
@@ -162,11 +162,11 @@ import java.util.List;
 //        return mPlayingQueue.size();
 //    }
 //
-//    protected void setCurrentQueue(String title, List<MediaSessionCompat.QueueItem> newQueue) {
+//    protected void setCurrentQueue(String title, List<MediaSession.QueueItem> newQueue) {
 //        setCurrentQueue(title, newQueue, null);
 //    }
 //
-//    protected void setCurrentQueue(String title, List<MediaSessionCompat.QueueItem> newQueue,
+//    protected void setCurrentQueue(String title, List<MediaSession.QueueItem> newQueue,
 //                                   String initialMediaId) {
 //        mPlayingQueue = newQueue;
 //        int index = 0;
@@ -178,14 +178,14 @@ import java.util.List;
 //    }
 //
 //    public void updateMetadata() {
-//        MediaSessionCompat.QueueItem currentMusic = getCurrentMusic();
+//        MediaSession.QueueItem currentMusic = getCurrentMusic();
 //        if (currentMusic == null) {
 //            mListener.onMetadataRetrieveError();
 //            return;
 //        }
 //        final String musicId = MediaIDHelper.extractMusicIDFromMediaID(
 //                currentMusic.getDescription().getMediaId());
-//        MediaMetadataCompat metadata = mMusicProvider.getMusic(musicId);
+//        MediaMetadata metadata = mMusicProvider.getMusic(musicId);
 //        if (metadata == null) {
 //            throw new IllegalArgumentException("Invalid musicId " + musicId);
 //        }
@@ -203,7 +203,7 @@ import java.util.List;
 //                    mMusicProvider.updateMusicArt(musicId, bitmap, icon);
 //
 //                    // If we are still playing the same music, notify the listeners:
-//                    MediaSessionCompat.QueueItem currentMusic = getCurrentMusic();
+//                    MediaSession.QueueItem currentMusic = getCurrentMusic();
 //                    if (currentMusic == null) {
 //                        return;
 //                    }
@@ -218,9 +218,9 @@ import java.util.List;
 //    }
 //
 //    public interface MetadataUpdateListener {
-//        void onMetadataChanged(MediaMetadataCompat metadata);
+//        void onMetadataChanged(MediaMetadata metadata);
 //        void onMetadataRetrieveError();
 //        void onCurrentQueueIndexUpdated(int queueIndex);
-//        void onQueueUpdated(String title, List<MediaSessionCompat.QueueItem> newQueue);
+//        void onQueueUpdated(String title, List<MediaSession.QueueItem> newQueue);
 //    }
 //}

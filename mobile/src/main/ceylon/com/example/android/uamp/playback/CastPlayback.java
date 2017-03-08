@@ -17,8 +17,8 @@
 //
 //import android.content.Context;
 //import android.net.Uri;
-//import android.support.v4.media.MediaMetadataCompat;
-//import android.support.v4.media.session.PlaybackStateCompat;
+//import android.media.MediaMetadata;
+//import android.media.session.PlaybackState;
 //import android.text.TextUtils;
 //
 //import com.example.android.uamp.model.MusicProvider;
@@ -37,7 +37,7 @@
 //import org.json.JSONException;
 //import org.json.JSONObject;
 //
-//import static android.support.v4.media.session.MediaSessionCompat.QueueItem;
+//import static android.media.session.MediaSession.QueueItem;
 //
 ///**
 // * An implementation of Playback that talks to Cast.
@@ -79,7 +79,7 @@
 //    @Override
 //    public void stop(boolean notifyListeners) {
 //        mRemoteMediaClient.removeListener(mRemoteMediaClientListener);
-//        mState = PlaybackStateCompat.STATE_STOPPED;
+//        mState = PlaybackState.STATE_STOPPED;
 //        if (notifyListeners && mCallback != null) {
 //            mCallback.onPlaybackStatusChanged(mState);
 //        }
@@ -112,7 +112,7 @@
 //    public void play(QueueItem item) {
 //        try {
 //            loadMedia(item.getDescription().getMediaId(), true);
-//            mState = PlaybackStateCompat.STATE_BUFFERING;
+//            mState = PlaybackState.STATE_BUFFERING;
 //            if (mCallback != null) {
 //                mCallback.onPlaybackStatusChanged(mState);
 //            }
@@ -199,7 +199,7 @@
 //
 //    private void loadMedia(String mediaId, boolean autoPlay) throws JSONException {
 //        String musicId = MediaIDHelper.extractMusicIDFromMediaID(mediaId);
-//        MediaMetadataCompat track = mMusicProvider.getMusic(musicId);
+//        MediaMetadata track = mMusicProvider.getMusic(musicId);
 //        if (track == null) {
 //            throw new IllegalArgumentException("Invalid mediaId " + mediaId);
 //        }
@@ -221,34 +221,34 @@
 //     * @param customData custom data specifies the local mediaId used by the player.
 //     * @return mediaInfo {@link com.google.android.gms.cast.MediaInfo}
 //     */
-//    private static MediaInfo toCastMediaMetadata(MediaMetadataCompat track,
+//    private static MediaInfo toCastMediaMetadata(MediaMetadata track,
 //                                                 JSONObject customData) {
-//        MediaMetadata mediaMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MUSIC_TRACK);
-//        mediaMetadata.putString(MediaMetadata.KEY_TITLE,
+//        MediaMetadata MediaMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MUSIC_TRACK);
+//        MediaMetadata.putString(MediaMetadata.KEY_TITLE,
 //                track.getDescription().getTitle() == null ? "" :
 //                        track.getDescription().getTitle().toString());
-//        mediaMetadata.putString(MediaMetadata.KEY_SUBTITLE,
+//        MediaMetadata.putString(MediaMetadata.KEY_SUBTITLE,
 //                track.getDescription().getSubtitle() == null ? "" :
 //                    track.getDescription().getSubtitle().toString());
-//        mediaMetadata.putString(MediaMetadata.KEY_ALBUM_ARTIST,
-//                track.getString(MediaMetadataCompat.METADATA_KEY_ALBUM_ARTIST));
-//        mediaMetadata.putString(MediaMetadata.KEY_ALBUM_TITLE,
-//                track.getString(MediaMetadataCompat.METADATA_KEY_ALBUM));
+//        MediaMetadata.putString(MediaMetadata.KEY_ALBUM_ARTIST,
+//                track.getString(MediaMetadata.METADATA_KEY_ALBUM_ARTIST));
+//        MediaMetadata.putString(MediaMetadata.KEY_ALBUM_TITLE,
+//                track.getString(MediaMetadata.METADATA_KEY_ALBUM));
 //        WebImage image = new WebImage(
 //                new Uri.Builder().encodedPath(
-//                        track.getString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI))
+//                        track.getString(MediaMetadata.METADATA_KEY_ALBUM_ART_URI))
 //                        .build());
 //        // First image is used by the receiver for showing the audio album art.
-//        mediaMetadata.addImage(image);
+//        MediaMetadata.addImage(image);
 //        // Second image is used by Cast Companion Library on the full screen activity that is shown
 //        // when the cast dialog is clicked.
-//        mediaMetadata.addImage(image);
+//        MediaMetadata.addImage(image);
 //
 //        //noinspection ResourceType
 //        return new MediaInfo.Builder(track.getString(customMetadataTrackSource_.get_()))
 //                .setContentType(MIME_TYPE_AUDIO_MPEG)
 //                .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
-//                .setMetadata(mediaMetadata)
+//                .setMetadata(MediaMetadata)
 //                .setCustomData(customData)
 //                .build();
 //    }
@@ -297,20 +297,20 @@
 //                }
 //                break;
 //            case MediaStatus.PLAYER_STATE_BUFFERING:
-//                mState = PlaybackStateCompat.STATE_BUFFERING;
+//                mState = PlaybackState.STATE_BUFFERING;
 //                if (mCallback != null) {
 //                    mCallback.onPlaybackStatusChanged(mState);
 //                }
 //                break;
 //            case MediaStatus.PLAYER_STATE_PLAYING:
-//                mState = PlaybackStateCompat.STATE_PLAYING;
+//                mState = PlaybackState.STATE_PLAYING;
 //                setMetadataFromRemote();
 //                if (mCallback != null) {
 //                    mCallback.onPlaybackStatusChanged(mState);
 //                }
 //                break;
 //            case MediaStatus.PLAYER_STATE_PAUSED:
-//                mState = PlaybackStateCompat.STATE_PAUSED;
+//                mState = PlaybackState.STATE_PAUSED;
 //                setMetadataFromRemote();
 //                if (mCallback != null) {
 //                    mCallback.onPlaybackStatusChanged(mState);

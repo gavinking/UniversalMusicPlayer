@@ -6,6 +6,7 @@ import android.content {
 }
 import android.media {
     AudioManager,
+    MediaMetadata,
     MediaPlayer {
         OnCompletionListener,
         OnErrorListener,
@@ -22,14 +23,11 @@ import android.net.wifi {
 import android.os {
     PowerManager
 }
-import android.support.v4.media {
-    MediaMetadataCompat
-}
-import android.support.v4.media.session {
-    MediaSessionCompat {
+import android.media.session {
+    MediaSession {
         QueueItem
     },
-    PlaybackStateCompat
+    PlaybackState
 }
 
 import com.example.android.uamp {
@@ -45,7 +43,7 @@ import com.example.android.uamp.utils {
 }
 import com.google.android.gms.cast {
     MediaInfo,
-    MediaMetadata,
+    MediaData=MediaMetadata,
     MediaStatus
 }
 import com.google.android.gms.cast.framework {
@@ -79,13 +77,13 @@ shared class CastPlayback(MusicProvider musicProvider, Context context)
     value mimeTypeAudioMpeg = "audio/mpeg";
     value itemId = "itemId";
 
-    function toCastMediaMetadata(MediaMetadataCompat track, JSONObject customData) {
-        value metadata = MediaMetadata(MediaMetadata.mediaTypeMusicTrack);
-        metadata.putString(MediaMetadata.keyTitle, track.description.title?.string else "");
-        metadata.putString(MediaMetadata.keySubtitle, track.description.subtitle?.string else "");
-        metadata.putString(MediaMetadata.keyAlbumArtist, track.getString(MediaMetadataCompat.metadataKeyAlbumArtist));
-        metadata.putString(MediaMetadata.keyAlbumTitle, track.getString(MediaMetadataCompat.metadataKeyAlbum));
-        value image = WebImage(Uri.Builder().encodedPath(track.getString(MediaMetadataCompat.metadataKeyAlbumArtUri)).build());
+    function toCastMediaMetadata(MediaMetadata track, JSONObject customData) {
+        value metadata = MediaData(MediaData.mediaTypeMusicTrack);
+        metadata.putString(MediaData.keyTitle, track.description.title?.string else "");
+        metadata.putString(MediaData.keySubtitle, track.description.subtitle?.string else "");
+        metadata.putString(MediaData.keyAlbumArtist, track.getString(MediaMetadata.metadataKeyAlbumArtist));
+        metadata.putString(MediaData.keyAlbumTitle, track.getString(MediaMetadata.metadataKeyAlbum));
+        value image = WebImage(Uri.Builder().encodedPath(track.getString(MediaMetadata.metadataKeyAlbumArtUri)).build());
         metadata.addImage(image);
         metadata.addImage(image);
         return MediaInfo.Builder(track.getString(customMetadataTrackSource))
@@ -114,7 +112,7 @@ shared class CastPlayback(MusicProvider musicProvider, Context context)
 
     shared actual void stop(Boolean notifyListeners) {
         remoteMediaClient.removeListener(this);
-        state = PlaybackStateCompat.stateStopped;
+        state = PlaybackState.stateStopped;
         if (notifyListeners) {
             callback?.onPlaybackStatusChanged(state);
         }
@@ -134,7 +132,7 @@ shared class CastPlayback(MusicProvider musicProvider, Context context)
         try {
             assert (exists id = item.description.mediaId);
             loadMedia(id, true);
-            state = PlaybackStateCompat.stateBuffering;
+            state = PlaybackState.stateBuffering;
             callback?.onPlaybackStatusChanged(state);
         }
         catch (JSONException e) {
@@ -233,16 +231,16 @@ shared class CastPlayback(MusicProvider musicProvider, Context context)
             }
         }
         else if (status == MediaStatus.playerStateBuffering) {
-            state = PlaybackStateCompat.stateBuffering;
+            state = PlaybackState.stateBuffering;
             callback?.onPlaybackStatusChanged(state);
         }
         else if (status == MediaStatus.playerStatePlaying) {
-            state = PlaybackStateCompat.statePlaying;
+            state = PlaybackState.statePlaying;
             setMetadataFromRemote();
             callback?.onPlaybackStatusChanged(state);
         }
         else if (status == MediaStatus.playerStatePaused) {
-            state = PlaybackStateCompat.statePaused;
+            state = PlaybackState.statePaused;
             setMetadataFromRemote();
             callback?.onPlaybackStatusChanged(state);
         }
@@ -306,7 +304,7 @@ shared class LocalPlayback(Context context, MusicProvider musicProvider)
     assert (is WifiManager wifiManager = context.getSystemService(Context.wifiService));
     value wifiLock = wifiManager.createWifiLock(WifiManager.wifiModeFull, "uAmp_lock");
 
-    shared actual variable Integer state = PlaybackStateCompat.stateNone;
+    shared actual variable Integer state = PlaybackState.stateNone;
 
     shared actual variable String? currentMediaId = null;
 
@@ -331,7 +329,7 @@ shared class LocalPlayback(Context context, MusicProvider musicProvider)
     shared actual void start() {}
 
     shared actual void stop(Boolean notifyListeners) {
-        state = PlaybackStateCompat.stateStopped;
+        state = PlaybackState.stateStopped;
         if (notifyListeners) {
             callback?.onPlaybackStatusChanged(state);
         }
@@ -367,19 +365,19 @@ shared class LocalPlayback(Context context, MusicProvider musicProvider)
             currentPosition = 0;
             currentMediaId = mediaId;
         }
-        if (state == PlaybackStateCompat.statePaused,
+        if (state == PlaybackState.statePaused,
             !mediaHasChanged,
             mediaPlayer exists) {
             configMediaPlayerState();
         } else {
-            state = PlaybackStateCompat.stateStopped;
+            state = PlaybackState.stateStopped;
             relaxResources(false);
             assert (exists id = item.description.mediaId);
             value track = musicProvider.getMusic(MediaIDHelper.extractMusicIDFromMediaID(id));
             value source = track?.getString(customMetadataTrackSource)?.replace(" ", "%20");
             try {
                 value player = createMediaPlayerIfNeeded();
-                state = PlaybackStateCompat.stateBuffering;
+                state = PlaybackState.stateBuffering;
                 player.setAudioStreamType(AudioManager.streamMusic);
                 player.setDataSource(source);
                 player.prepareAsync();
@@ -394,14 +392,14 @@ shared class LocalPlayback(Context context, MusicProvider musicProvider)
     }
 
     shared actual void pause() {
-        if (state == PlaybackStateCompat.statePlaying) {
+        if (state == PlaybackState.statePlaying) {
             if (exists player = mediaPlayer, player.playing) {
                 player.pause();
                 currentPosition = player.currentPosition;
             }
             relaxResources(false);
         }
-        state = PlaybackStateCompat.statePaused;
+        state = PlaybackState.statePaused;
         callback?.onPlaybackStatusChanged(state);
         unregisterAudioNoisyReceiver();
     }
@@ -410,7 +408,7 @@ shared class LocalPlayback(Context context, MusicProvider musicProvider)
         LogHelper.d(tag, "seekTo called with ", position);
         if (exists player = mediaPlayer) {
             if (player.playing) {
-                state = PlaybackStateCompat.stateBuffering;
+                state = PlaybackState.stateBuffering;
             }
             registerAudioNoisyReceiver();
             player.seekTo(position);
@@ -446,7 +444,7 @@ shared class LocalPlayback(Context context, MusicProvider musicProvider)
         LogHelper.d(tag, "configMediaPlayerState. mAudioFocus=", audioFocus);
         switch (audioFocus)
         case (AudioFocus.noFocusNoDuck) {
-            if (state == PlaybackStateCompat.statePlaying) {
+            if (state == PlaybackState.statePlaying) {
                 pause();
             }
         } else {
@@ -458,10 +456,10 @@ shared class LocalPlayback(Context context, MusicProvider musicProvider)
                     LogHelper.d(tag, "configMediaPlayerState startMediaPlayer. seeking to ", currentPosition);
                     if (currentPosition == player.currentPosition) {
                         player.start();
-                        state = PlaybackStateCompat.statePlaying;
+                        state = PlaybackState.statePlaying;
                     } else {
                         player.seekTo(currentPosition);
-                        state = PlaybackStateCompat.stateBuffering;
+                        state = PlaybackState.stateBuffering;
                     }
                 }
                 playOnFocusGain = false;
@@ -479,7 +477,7 @@ shared class LocalPlayback(Context context, MusicProvider musicProvider)
                 || focusChange == AudioManager.audiofocusLossTransientCanDuck) {
             value canDuck = focusChange == AudioManager.audiofocusLossTransientCanDuck;
             audioFocus = canDuck then AudioFocus.noFocusCanDuck else AudioFocus.noFocusNoDuck;
-            if (state == PlaybackStateCompat.statePlaying, !canDuck) {
+            if (state == PlaybackState.statePlaying, !canDuck) {
                 playOnFocusGain = true;
             }
         } else {
@@ -491,10 +489,10 @@ shared class LocalPlayback(Context context, MusicProvider musicProvider)
     shared actual void onSeekComplete(MediaPlayer mp) {
         LogHelper.d(tag, "onSeekComplete from MediaPlayer:", mp.currentPosition);
         currentPosition = mp.currentPosition;
-        if (state == PlaybackStateCompat.stateBuffering) {
+        if (state == PlaybackState.stateBuffering) {
             registerAudioNoisyReceiver();
             mediaPlayer?.start();
-            state = PlaybackStateCompat.statePlaying;
+            state = PlaybackState.statePlaying;
         }
         callback?.onPlaybackStatusChanged(state);
     }

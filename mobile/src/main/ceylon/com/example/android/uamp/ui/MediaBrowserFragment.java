@@ -25,10 +25,10 @@
 //import android.os.Bundle;
 //import android.support.annotation.NonNull;
 //import android.support.v4.app.FragmentActivity;
-//import android.support.v4.media.MediaBrowserCompat;
-//import android.support.v4.media.MediaMetadataCompat;
-//import android.support.v4.media.session.MediaControllerCompat;
-//import android.support.v4.media.session.PlaybackStateCompat;
+//import android.media.browse.MediaBrowser;
+//import android.media.MediaMetadata;
+//import android.media.session.MediaController;
+//import android.media.session.PlaybackState;
 //import android.view.LayoutInflater;
 //import android.view.View;
 //import android.view.ViewGroup;
@@ -50,9 +50,9 @@
 // * A Fragment that lists all the various browsable queues available
 // * from a {@link android.service.media.MediaBrowserService}.
 // * <p/>
-// * It uses a {@link MediaBrowserCompat} to connect to the {@link com.example.android.uamp.MusicService}.
+// * It uses a {@link MediaBrowser} to connect to the {@link com.example.android.uamp.MusicService}.
 // * Once connected, the fragment subscribes to get all the children.
-// * All {@link MediaBrowserCompat.MediaItem}'s that can be browsed are shown in a ListView.
+// * All {@link MediaBrowser.MediaItem}'s that can be browsed are shown in a ListView.
 // */
 //public class MediaBrowserFragment extends Fragment {
 //
@@ -86,10 +86,10 @@
 //
 //    // Receive callbacks from the MediaController. Here we update our state such as which queue
 //    // is being shown, the current title and description and the PlaybackState.
-//    private final MediaControllerCompat.Callback mMediaControllerCallback =
-//            new MediaControllerCompat.Callback() {
+//    private final MediaController.Callback mMediaControllerCallback =
+//            new MediaController.Callback() {
 //        @Override
-//        public void onMetadataChanged(MediaMetadataCompat metadata) {
+//        public void onMetadataChanged(MediaMetadata metadata) {
 //            super.onMetadataChanged(metadata);
 //            if (metadata == null) {
 //                return;
@@ -100,7 +100,7 @@
 //        }
 //
 //        @Override
-//        public void onPlaybackStateChanged(@NonNull PlaybackStateCompat state) {
+//        public void onPlaybackStateChanged(@NonNull PlaybackState state) {
 //            super.onPlaybackStateChanged(state);
 //            LogHelper.d(TAG, "Received state change: ", state);
 //            checkForUserVisibleErrors(false);
@@ -108,17 +108,17 @@
 //        }
 //    };
 //
-//    private final MediaBrowserCompat.SubscriptionCallback mSubscriptionCallback =
-//        new MediaBrowserCompat.SubscriptionCallback() {
+//    private final MediaBrowser.SubscriptionCallback mSubscriptionCallback =
+//        new MediaBrowser.SubscriptionCallback() {
 //            @Override
 //            public void onChildrenLoaded(@NonNull String parentId,
-//                                         @NonNull List<MediaBrowserCompat.MediaItem> children) {
+//                                         @NonNull List<MediaBrowser.MediaItem> children) {
 //                try {
 //                    LogHelper.d(TAG, "fragment onChildrenLoaded, parentId=" + parentId +
 //                        "  count=" + children.size());
 //                    checkForUserVisibleErrors(children.isEmpty());
 //                    mBrowserAdapter.clear();
-//                    for (MediaBrowserCompat.MediaItem item : children) {
+//                    for (MediaBrowser.MediaItem item : children) {
 //                        mBrowserAdapter.add(item);
 //                    }
 //                    mBrowserAdapter.notifyDataSetChanged();
@@ -160,7 +160,7 @@
 //            @Override
 //            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 //                checkForUserVisibleErrors(false);
-//                MediaBrowserCompat.MediaItem item = mBrowserAdapter.getItem(position);
+//                MediaBrowser.MediaItem item = mBrowserAdapter.getItem(position);
 //                mMediaFragmentListener.onMediaItemSelected(item);
 //            }
 //        });
@@ -173,7 +173,7 @@
 //        super.onStart();
 //
 //        // fetch browsing information to fill the listview:
-//        MediaBrowserCompat mediaBrowser = mMediaFragmentListener.getMediaBrowser();
+//        MediaBrowser mediaBrowser = mMediaFragmentListener.getMediaBrowser();
 //
 //        LogHelper.d(TAG, "fragment.onStart, mediaId=", mMediaId,
 //                "  onConnected=" + mediaBrowser.isConnected());
@@ -190,12 +190,12 @@
 //    @Override
 //    public void onStop() {
 //        super.onStop();
-//        MediaBrowserCompat mediaBrowser = mMediaFragmentListener.getMediaBrowser();
+//        MediaBrowser mediaBrowser = mMediaFragmentListener.getMediaBrowser();
 //        if (mediaBrowser != null && mediaBrowser.isConnected() && mMediaId != null) {
 //            mediaBrowser.unsubscribe(mMediaId);
 //        }
-//        MediaControllerCompat controller = ((FragmentActivity) getActivity())
-//                .getSupportMediaController();
+//        MediaController controller = ((FragmentActivity) getActivity())
+//                .getMediaController();
 //        if (controller != null) {
 //            controller.unregisterCallback(mMediaControllerCallback);
 //        }
@@ -249,8 +249,8 @@
 //        mMediaFragmentListener.getMediaBrowser().subscribe(mMediaId, mSubscriptionCallback);
 //
 //        // Add MediaController callback so we can redraw the list when metadata changes:
-//        MediaControllerCompat controller = ((FragmentActivity) getActivity())
-//                .getSupportMediaController();
+//        MediaController controller = ((FragmentActivity) getActivity())
+//                .getMediaController();
 //        if (controller != null) {
 //            controller.registerCallback(mMediaControllerCallback);
 //        }
@@ -264,12 +264,12 @@
 //            showError = true;
 //        } else {
 //            // otherwise, if state is ERROR and metadata!=null, use playback state error message:
-//            MediaControllerCompat controller = ((FragmentActivity) getActivity())
-//                    .getSupportMediaController();
+//            MediaController controller = ((FragmentActivity) getActivity())
+//                    .getMediaController();
 //            if (controller != null
 //                && controller.getMetadata() != null
 //                && controller.getPlaybackState() != null
-//                && controller.getPlaybackState().getState() == PlaybackStateCompat.STATE_ERROR
+//                && controller.getPlaybackState().getState() == PlaybackState.STATE_ERROR
 //                && controller.getPlaybackState().getErrorMessage() != null) {
 //                mErrorMessage.setText(controller.getPlaybackState().getErrorMessage());
 //                showError = true;
@@ -291,10 +291,10 @@
 //            return;
 //        }
 //
-//        MediaBrowserCompat mediaBrowser = mMediaFragmentListener.getMediaBrowser();
-//        mediaBrowser.getItem(mMediaId, new MediaBrowserCompat.ItemCallback() {
+//        MediaBrowser mediaBrowser = mMediaFragmentListener.getMediaBrowser();
+//        mediaBrowser.getItem(mMediaId, new MediaBrowser.ItemCallback() {
 //            @Override
-//            public void onItemLoaded(MediaBrowserCompat.MediaItem item) {
+//            public void onItemLoaded(MediaBrowser.MediaItem item) {
 //                mMediaFragmentListener.setToolbarTitle(
 //                        item.getDescription().getTitle());
 //            }
@@ -302,22 +302,22 @@
 //    }
 //
 //    // An adapter for showing the list of browsed MediaItem's
-//    private static class BrowseAdapter extends ArrayAdapter<MediaBrowserCompat.MediaItem> {
+//    private static class BrowseAdapter extends ArrayAdapter<MediaBrowser.MediaItem> {
 //
 //        public BrowseAdapter(Activity context) {
-//            super(context, R.layout.media_list_item, new ArrayList<MediaBrowserCompat.MediaItem>());
+//            super(context, R.layout.media_list_item, new ArrayList<MediaBrowser.MediaItem>());
 //        }
 //
 //        @Override
 //        public View getView(int position, View convertView, ViewGroup parent) {
-//            MediaBrowserCompat.MediaItem item = getItem(position);
+//            MediaBrowser.MediaItem item = getItem(position);
 //            return MediaItemViewHolder.setupListView((Activity) getContext(), convertView, parent,
 //                    item);
 //        }
 //    }
 //
 //    public interface MediaFragmentListener extends MediaBrowserProvider {
-//        void onMediaItemSelected(MediaBrowserCompat.MediaItem item);
+//        void onMediaItemSelected(MediaBrowser.MediaItem item);
 //        void setToolbarTitle(CharSequence title);
 //    }
 //

@@ -21,8 +21,8 @@
 //import android.os.Bundle;
 //import android.os.SystemClock;
 //import android.support.annotation.NonNull;
-//import android.support.v4.media.session.MediaSessionCompat;
-//import android.support.v4.media.session.PlaybackStateCompat;
+//import android.media.session.MediaSession;
+//import android.media.session.PlaybackState;
 //
 //import com.example.android.uamp.R;
 //import com.example.android.uamp.model.MusicProvider;
@@ -62,7 +62,7 @@
 //        return mPlayback;
 //    }
 //
-//    public MediaSessionCompat.Callback getMediaSessionCallback() {
+//    public MediaSession.Callback getMediaSessionCallback() {
 //        return mMediaSessionCallback;
 //    }
 //
@@ -71,7 +71,7 @@
 //     */
 //    public void handlePlayRequest() {
 //        LogHelper.d(TAG, "handlePlayRequest: mState=" + mPlayback.getState());
-//        MediaSessionCompat.QueueItem currentMusic = mQueueManager.getCurrentMusic();
+//        MediaSession.QueueItem currentMusic = mQueueManager.getCurrentMusic();
 //        if (currentMusic != null) {
 //            mServiceCallback.onPlaybackStart();
 //            mPlayback.play(currentMusic);
@@ -111,13 +111,13 @@
 //     */
 //    public void updatePlaybackState(String error) {
 //        LogHelper.d(TAG, "updatePlaybackState, playback state=" + mPlayback.getState());
-//        long position = PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN;
+//        long position = PlaybackState.PLAYBACK_POSITION_UNKNOWN;
 //        if (mPlayback != null && mPlayback.isConnected()) {
 //            position = mPlayback.getCurrentStreamPosition();
 //        }
 //
 //        //noinspection ResourceType
-//        PlaybackStateCompat.Builder stateBuilder = new PlaybackStateCompat.Builder()
+//        PlaybackState.Builder stateBuilder = new PlaybackState.Builder()
 //                .setActions(getAvailableActions());
 //
 //        setCustomAction(stateBuilder);
@@ -128,27 +128,27 @@
 //            // Error states are really only supposed to be used for errors that cause playback to
 //            // stop unexpectedly and persist until the user takes action to fix it.
 //            stateBuilder.setErrorMessage(error);
-//            state = PlaybackStateCompat.STATE_ERROR;
+//            state = PlaybackState.STATE_ERROR;
 //        }
 //        //noinspection ResourceType
 //        stateBuilder.setState(state, position, 1.0f, SystemClock.elapsedRealtime());
 //
 //        // Set the activeQueueItemId if the current index is valid.
-//        MediaSessionCompat.QueueItem currentMusic = mQueueManager.getCurrentMusic();
+//        MediaSession.QueueItem currentMusic = mQueueManager.getCurrentMusic();
 //        if (currentMusic != null) {
 //            stateBuilder.setActiveQueueItemId(currentMusic.getQueueId());
 //        }
 //
 //        mServiceCallback.onPlaybackStateUpdated(stateBuilder.build());
 //
-//        if (state == PlaybackStateCompat.STATE_PLAYING ||
-//                state == PlaybackStateCompat.STATE_PAUSED) {
+//        if (state == PlaybackState.STATE_PLAYING ||
+//                state == PlaybackState.STATE_PAUSED) {
 //            mServiceCallback.onNotificationRequired();
 //        }
 //    }
 //
-//    private void setCustomAction(PlaybackStateCompat.Builder stateBuilder) {
-//        MediaSessionCompat.QueueItem currentMusic = mQueueManager.getCurrentMusic();
+//    private void setCustomAction(PlaybackState.Builder stateBuilder) {
+//        MediaSession.QueueItem currentMusic = mQueueManager.getCurrentMusic();
 //        if (currentMusic == null) {
 //            return;
 //        }
@@ -164,7 +164,7 @@
 //                musicId, " current favorite=", mMusicProvider.isFavorite(musicId));
 //        Bundle customActionExtras = new Bundle();
 //        WearHelper.setShowCustomActionOnWear(customActionExtras, true);
-//        stateBuilder.addCustomAction(new PlaybackStateCompat.CustomAction.Builder(
+//        stateBuilder.addCustomAction(new PlaybackState.CustomAction.Builder(
 //                CUSTOM_ACTION_THUMBS_UP, mResources.getString(R.string.favorite), favoriteIcon)
 //                .setExtras(customActionExtras)
 //                .build());
@@ -172,15 +172,15 @@
 //
 //    private long getAvailableActions() {
 //        long actions =
-//                PlaybackStateCompat.ACTION_PLAY_PAUSE |
-//                PlaybackStateCompat.ACTION_PLAY_FROM_MEDIA_ID |
-//                PlaybackStateCompat.ACTION_PLAY_FROM_SEARCH |
-//                PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS |
-//                PlaybackStateCompat.ACTION_SKIP_TO_NEXT;
+//                PlaybackState.ACTION_PLAY_PAUSE |
+//                PlaybackState.ACTION_PLAY_FROM_MEDIA_ID |
+//                PlaybackState.ACTION_PLAY_FROM_SEARCH |
+//                PlaybackState.ACTION_SKIP_TO_PREVIOUS |
+//                PlaybackState.ACTION_SKIP_TO_NEXT;
 //        if (mPlayback.isPlaying()) {
-//            actions |= PlaybackStateCompat.ACTION_PAUSE;
+//            actions |= PlaybackState.ACTION_PAUSE;
 //        } else {
-//            actions |= PlaybackStateCompat.ACTION_PLAY;
+//            actions |= PlaybackState.ACTION_PLAY;
 //        }
 //        return actions;
 //    }
@@ -239,13 +239,13 @@
 //        // finally swap the instance
 //        mPlayback = playback;
 //        switch (oldState) {
-//            case PlaybackStateCompat.STATE_BUFFERING:
-//            case PlaybackStateCompat.STATE_CONNECTING:
-//            case PlaybackStateCompat.STATE_PAUSED:
+//            case PlaybackState.STATE_BUFFERING:
+//            case PlaybackState.STATE_CONNECTING:
+//            case PlaybackState.STATE_PAUSED:
 //                mPlayback.pause();
 //                break;
-//            case PlaybackStateCompat.STATE_PLAYING:
-//                MediaSessionCompat.QueueItem currentMusic = mQueueManager.getCurrentMusic();
+//            case PlaybackState.STATE_PLAYING:
+//                MediaSession.QueueItem currentMusic = mQueueManager.getCurrentMusic();
 //                if (resumePlaying && currentMusic != null) {
 //                    mPlayback.play(currentMusic);
 //                } else if (!resumePlaying) {
@@ -254,7 +254,7 @@
 //                    mPlayback.stop(true);
 //                }
 //                break;
-//            case PlaybackStateCompat.STATE_NONE:
+//            case PlaybackState.STATE_NONE:
 //                break;
 //            default:
 //                LogHelper.d(TAG, "Default called. Old state is ", oldState);
@@ -262,7 +262,7 @@
 //    }
 //
 //
-//    private class MediaSessionCallback extends MediaSessionCompat.Callback {
+//    private class MediaSessionCallback extends MediaSession.Callback {
 //        @Override
 //        public void onPlay() {
 //            LogHelper.d(TAG, "play");
@@ -329,7 +329,7 @@
 //        public void onCustomAction(@NonNull String action, Bundle extras) {
 //            if (CUSTOM_ACTION_THUMBS_UP.equals(action)) {
 //                LogHelper.i(TAG, "onCustomAction: favorite for current track");
-//                MediaSessionCompat.QueueItem currentMusic = mQueueManager.getCurrentMusic();
+//                MediaSession.QueueItem currentMusic = mQueueManager.getCurrentMusic();
 //                if (currentMusic != null) {
 //                    String mediaId = currentMusic.getDescription().getMediaId();
 //                    if (mediaId != null) {
@@ -349,7 +349,7 @@
 //         * Handle free and contextual searches.
 //         * <p/>
 //         * All voice searches on Android Auto are sent to this method through a connected
-//         * {@link android.support.v4.media.session.MediaControllerCompat}.
+//         * {@link android.media.session.MediaController}.
 //         * <p/>
 //         * Threads and async handling:
 //         * Search, as a potentially slow operation, should run in another thread.
@@ -362,7 +362,7 @@
 //        public void onPlayFromSearch(final String query, final Bundle extras) {
 //            LogHelper.d(TAG, "playFromSearch  query=", query, " extras=", extras);
 //
-//            mPlayback.setState(PlaybackStateCompat.STATE_CONNECTING);
+//            mPlayback.setState(PlaybackState.STATE_CONNECTING);
 //            boolean successSearch = mQueueManager.setQueueFromSearch(query, extras);
 //            if (successSearch) {
 //                handlePlayRequest();
@@ -381,6 +381,6 @@
 //
 //        void onPlaybackStop();
 //
-//        void onPlaybackStateUpdated(PlaybackStateCompat newState);
+//        void onPlaybackStateUpdated(PlaybackState newState);
 //    }
 //}

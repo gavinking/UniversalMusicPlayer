@@ -5,9 +5,9 @@ import android.os {
     Bundle,
     SystemClock
 }
-import android.support.v4.media.session {
-    MediaSessionCompat,
-    PlaybackStateCompat
+import android.media.session {
+    MediaSession,
+    PlaybackState
 }
 
 import com.example.android.uamp {
@@ -32,8 +32,8 @@ import java.util {
 import android.graphics {
     Bitmap
 }
-import android.support.v4.media {
-    MediaMetadataCompat
+import android.media {
+    MediaMetadata
 }
 
 shared class PlaybackManager(
@@ -42,25 +42,25 @@ shared class PlaybackManager(
         MusicProvider musicProvider,
         QueueManager queueManager,
         variable Playback currentPlayback)
-        extends MediaSessionCompat.Callback() {
+        extends MediaSession.Callback() {
 
     value tag = LogHelper.makeLogTag(`PlaybackManager`);
 
     value customActionThumbsUp = "com.example.android.uamp.THUMBS_UP";
 
     Integer availableActions
-            => PlaybackStateCompat.actionPlayPause
-            .or(PlaybackStateCompat.actionPlayFromMediaId)
-            .or(PlaybackStateCompat.actionPlayFromSearch)
-            .or(PlaybackStateCompat.actionSkipToPrevious)
-            .or(PlaybackStateCompat.actionSkipToNext)
+            => PlaybackState.actionPlayPause
+            .or(PlaybackState.actionPlayFromMediaId)
+            .or(PlaybackState.actionPlayFromSearch)
+            .or(PlaybackState.actionSkipToPrevious)
+            .or(PlaybackState.actionSkipToNext)
             .or(currentPlayback.playing
-                    then PlaybackStateCompat.actionPause
-                    else PlaybackStateCompat.actionPlay);
+                    then PlaybackState.actionPause
+                    else PlaybackState.actionPlay);
 
     shared Playback playback => currentPlayback;
 
-    void setCustomAction(PlaybackStateCompat.Builder stateBuilder) {
+    void setCustomAction(PlaybackState.Builder stateBuilder) {
         if (exists currentMusic = queueManager.currentMusic,
             exists mediaId = currentMusic.description.mediaId) {
             String musicId = MediaIDHelper.extractMusicIDFromMediaID(mediaId);
@@ -70,30 +70,30 @@ shared class PlaybackManager(
             LogHelper.d(tag, "updatePlaybackState, setting Favorite custom action of music ", musicId, " current favorite=", musicProvider.isFavorite(musicId));
             Bundle customActionExtras = Bundle();
             WearHelper.setShowCustomActionOnWear(customActionExtras, true);
-            stateBuilder.addCustomAction(PlaybackStateCompat.CustomAction.Builder(customActionThumbsUp, resources.getString(R.String.favorite), favoriteIcon).setExtras(customActionExtras).build());
+            stateBuilder.addCustomAction(PlaybackState.CustomAction.Builder(customActionThumbsUp, resources.getString(R.String.favorite), favoriteIcon).setExtras(customActionExtras).build());
         }
     }
 
     shared void updatePlaybackState(String? error) {
         LogHelper.d(tag, "updatePlaybackState, playback state=``currentPlayback.state``");
-        variable Integer position = PlaybackStateCompat.playbackPositionUnknown;
+        variable Integer position = PlaybackState.playbackPositionUnknown;
         if (currentPlayback.connected) {
             position = currentPlayback.currentStreamPosition;
         }
-        value stateBuilder = PlaybackStateCompat.Builder().setActions(availableActions);
+        value stateBuilder = PlaybackState.Builder().setActions(availableActions);
         setCustomAction(stateBuilder);
         variable value state = currentPlayback.state;
         if (exists error) {
             stateBuilder.setErrorMessage(error);
-            state = PlaybackStateCompat.stateError;
+            state = PlaybackState.stateError;
         }
         stateBuilder.setState(state, position, 1.0f, SystemClock.elapsedRealtime());
         if (exists currentMusic = queueManager.currentMusic) {
             stateBuilder.setActiveQueueItemId(currentMusic.queueId);
         }
         serviceCallback.onPlaybackStateUpdated(stateBuilder.build());
-        if (state == PlaybackStateCompat.statePlaying
-         || state == PlaybackStateCompat.statePaused) {
+        if (state == PlaybackState.statePlaying
+         || state == PlaybackState.statePaused) {
             serviceCallback.onNotificationRequired();
         }
     }
@@ -191,7 +191,7 @@ shared class PlaybackManager(
 
     shared actual void onPlayFromSearch(String query, Bundle extras) {
         LogHelper.d(tag, "playFromSearch  query=", query, " extras=", extras);
-        currentPlayback.state = PlaybackStateCompat.stateConnecting;
+        currentPlayback.state = PlaybackState.stateConnecting;
         value successSearch = queueManager.setQueueFromSearch(query, extras);
         if (successSearch) {
             handlePlayRequest();
@@ -233,10 +233,10 @@ shared class PlaybackManager(
         playback.start();
         this.currentPlayback = playback;
 
-        if (oldState == PlaybackStateCompat.stateBuffering) {
+        if (oldState == PlaybackState.stateBuffering) {
             playback.pause();
         }
-        else if (oldState == PlaybackStateCompat.statePlaying) {
+        else if (oldState == PlaybackState.statePlaying) {
             if (resumePlaying,
                 exists currentMusic = queueManager.currentMusic) {
                 playback.play(currentMusic);
@@ -246,7 +246,7 @@ shared class PlaybackManager(
                 playback.stop(true);
             }
         }
-        else if (oldState == PlaybackStateCompat.stateNone) {
+        else if (oldState == PlaybackState.stateNone) {
         }
         else {
             LogHelper.d(tag, "Default called. Old state is ", oldState);
@@ -259,7 +259,7 @@ shared interface PlaybackServiceCallback {
     shared formal void onPlaybackStart();
     shared formal void onNotificationRequired();
     shared formal void onPlaybackStop();
-    shared formal void onPlaybackStateUpdated(PlaybackStateCompat newState);
+    shared formal void onPlaybackStateUpdated(PlaybackState newState);
 }
 
 shared class QueueManager(
@@ -269,7 +269,7 @@ shared class QueueManager(
 
     value tag = LogHelper.makeLogTag(`QueueManager`);
 
-    variable value mPlayingQueue = Collections.synchronizedList(ArrayList<MediaSessionCompat.QueueItem>());
+    variable value mPlayingQueue = Collections.synchronizedList(ArrayList<MediaSession.QueueItem>());
     variable Integer mCurrentIndex = 0;
 
     shared Boolean isSameBrowsingCategory(String mediaId) {
@@ -346,13 +346,13 @@ shared class QueueManager(
         updateMetadata();
     }
 
-    shared MediaSessionCompat.QueueItem? currentMusic
+    shared MediaSession.QueueItem? currentMusic
             => QueueHelper.isIndexPlayable(mCurrentIndex, mPlayingQueue)
             then mPlayingQueue.get(mCurrentIndex);
 
     shared Integer currentQueueSize => mPlayingQueue?.size() else 0;
 
-    void setCurrentQueue(String title, List<MediaSessionCompat.QueueItem> newQueue, String? initialMediaId = null) {
+    void setCurrentQueue(String title, List<MediaSession.QueueItem> newQueue, String? initialMediaId = null) {
         mPlayingQueue = newQueue;
         value index = if (exists initialMediaId) then QueueHelper.getMusicIndexOnQueue(mPlayingQueue, initialMediaId) else 0;
         mCurrentIndex = largest(index, 0);
@@ -391,8 +391,8 @@ shared class QueueManager(
 }
 
 shared interface MetadataUpdateListener {
-    shared formal void onMetadataChanged(MediaMetadataCompat metadata) ;
+    shared formal void onMetadataChanged(MediaMetadata metadata) ;
     shared formal void onMetadataRetrieveError() ;
     shared formal void onCurrentQueueIndexUpdated(Integer queueIndex) ;
-    shared formal void onQueueUpdated(String title, List<MediaSessionCompat.QueueItem> newQueue) ;
+    shared formal void onQueueUpdated(String title, List<MediaSession.QueueItem> newQueue) ;
 }

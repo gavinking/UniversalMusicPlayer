@@ -23,8 +23,8 @@ package com.example.android.uamp.playback;
 //import android.media.MediaPlayer;
 //import android.net.wifi.WifiManager;
 //import android.os.PowerManager;
-//import android.support.v4.media.MediaMetadataCompat;
-//import android.support.v4.media.session.PlaybackStateCompat;
+//import android.media.MediaMetadata;
+//import android.media.session.PlaybackState;
 //import android.text.TextUtils;
 //
 //import com.example.android.uamp.MusicService;
@@ -40,7 +40,7 @@ package com.example.android.uamp.playback;
 //import static android.media.MediaPlayer.OnErrorListener;
 //import static android.media.MediaPlayer.OnPreparedListener;
 //import static android.media.MediaPlayer.OnSeekCompleteListener;
-//import static android.support.v4.media.session.MediaSessionCompat.QueueItem;
+//import static android.media.session.MediaSession.QueueItem;
 //
 ///**
 // * A class that implements local media playback using {@link android.media.MediaPlayer}
@@ -103,7 +103,7 @@ package com.example.android.uamp.playback;
 //        // Create the Wifi lock (this does not acquire the lock, this just creates it)
 //        this.mWifiLock = ((WifiManager) context.getSystemService(Context.WIFI_SERVICE))
 //                .createWifiLock(WifiManager.WIFI_MODE_FULL, "uAmp_lock");
-//        this.mState = PlaybackStateCompat.STATE_NONE;
+//        this.mState = PlaybackState.STATE_NONE;
 //    }
 //
 //    @Override
@@ -112,7 +112,7 @@ package com.example.android.uamp.playback;
 //
 //    @Override
 //    public void stop(boolean notifyListeners) {
-//        mState = PlaybackStateCompat.STATE_STOPPED;
+//        mState = PlaybackState.STATE_STOPPED;
 //        if (notifyListeners && mCallback != null) {
 //            mCallback.onPlaybackStatusChanged(mState);
 //        }
@@ -169,12 +169,12 @@ package com.example.android.uamp.playback;
 //            mCurrentMediaId = mediaId;
 //        }
 //
-//        if (mState == PlaybackStateCompat.STATE_PAUSED && !mediaHasChanged && mMediaPlayer != null) {
+//        if (mState == PlaybackState.STATE_PAUSED && !mediaHasChanged && mMediaPlayer != null) {
 //            configMediaPlayerState();
 //        } else {
-//            mState = PlaybackStateCompat.STATE_STOPPED;
+//            mState = PlaybackState.STATE_STOPPED;
 //            relaxResources(false); // release everything except MediaPlayer
-//            MediaMetadataCompat track = mMusicProvider.getMusic(
+//            MediaMetadata track = mMusicProvider.getMusic(
 //                    MediaIDHelper.extractMusicIDFromMediaID(item.getDescription().getMediaId()));
 //
 //            //noinspection ResourceType
@@ -186,7 +186,7 @@ package com.example.android.uamp.playback;
 //            try {
 //                createMediaPlayerIfNeeded();
 //
-//                mState = PlaybackStateCompat.STATE_BUFFERING;
+//                mState = PlaybackState.STATE_BUFFERING;
 //
 //                mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
 //                mMediaPlayer.setDataSource(source);
@@ -218,7 +218,7 @@ package com.example.android.uamp.playback;
 //
 //    @Override
 //    public void pause() {
-//        if (mState == PlaybackStateCompat.STATE_PLAYING) {
+//        if (mState == PlaybackState.STATE_PLAYING) {
 //            // Pause media player and cancel the 'foreground service' state.
 //            if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
 //                mMediaPlayer.pause();
@@ -227,7 +227,7 @@ package com.example.android.uamp.playback;
 //            // while paused, retain the MediaPlayer but give up audio focus
 //            relaxResources(false);
 //        }
-//        mState = PlaybackStateCompat.STATE_PAUSED;
+//        mState = PlaybackState.STATE_PAUSED;
 //        if (mCallback != null) {
 //            mCallback.onPlaybackStatusChanged(mState);
 //        }
@@ -243,7 +243,7 @@ package com.example.android.uamp.playback;
 //            mCurrentPosition = position;
 //        } else {
 //            if (mMediaPlayer.isPlaying()) {
-//                mState = PlaybackStateCompat.STATE_BUFFERING;
+//                mState = PlaybackState.STATE_BUFFERING;
 //            }
 //            registerAudioNoisyReceiver();
 //            mMediaPlayer.seekTo(position);
@@ -311,7 +311,7 @@ package com.example.android.uamp.playback;
 //        LogHelper.d(TAG, "configMediaPlayerState. mAudioFocus=", mAudioFocus);
 //        if (mAudioFocus == AUDIO_NO_FOCUS_NO_DUCK) {
 //            // If we don't have audio focus and can't duck, we have to pause,
-//            if (mState == PlaybackStateCompat.STATE_PLAYING) {
+//            if (mState == PlaybackState.STATE_PLAYING) {
 //                pause();
 //            }
 //        } else {  // we have audio focus:
@@ -330,10 +330,10 @@ package com.example.android.uamp.playback;
 //                        mCurrentPosition);
 //                    if (mCurrentPosition == mMediaPlayer.getCurrentPosition()) {
 //                        mMediaPlayer.start();
-//                        mState = PlaybackStateCompat.STATE_PLAYING;
+//                        mState = PlaybackState.STATE_PLAYING;
 //                    } else {
 //                        mMediaPlayer.seekTo(mCurrentPosition);
-//                        mState = PlaybackStateCompat.STATE_BUFFERING;
+//                        mState = PlaybackState.STATE_BUFFERING;
 //                    }
 //                }
 //                mPlayOnFocusGain = false;
@@ -365,7 +365,7 @@ package com.example.android.uamp.playback;
 //
 //            // If we are playing, we need to reset media player by calling configMediaPlayerState
 //            // with mAudioFocus properly set.
-//            if (mState == PlaybackStateCompat.STATE_PLAYING && !canDuck) {
+//            if (mState == PlaybackState.STATE_PLAYING && !canDuck) {
 //                // If we don't have audio focus and can't duck, we save the information that
 //                // we were playing, so that we can resume playback once we get the focus back.
 //                mPlayOnFocusGain = true;
@@ -385,10 +385,10 @@ package com.example.android.uamp.playback;
 //    public void onSeekComplete(MediaPlayer mp) {
 //        LogHelper.d(TAG, "onSeekComplete from MediaPlayer:", mp.getCurrentPosition());
 //        mCurrentPosition = mp.getCurrentPosition();
-//        if (mState == PlaybackStateCompat.STATE_BUFFERING) {
+//        if (mState == PlaybackState.STATE_BUFFERING) {
 //            registerAudioNoisyReceiver();
 //            mMediaPlayer.start();
-//            mState = PlaybackStateCompat.STATE_PLAYING;
+//            mState = PlaybackState.STATE_PLAYING;
 //        }
 //        if (mCallback != null) {
 //            mCallback.onPlaybackStatusChanged(mState);

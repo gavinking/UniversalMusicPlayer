@@ -26,12 +26,13 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
-import android.support.v4.media.MediaBrowserCompat.MediaItem;
-import android.support.v4.media.MediaBrowserServiceCompat;
-import android.support.v4.media.MediaMetadataCompat;
+import android.media.browse.MediaBrowser.MediaItem;
+import android.service.media.MediaBrowserService;
+import android.media.MediaMetadata;
+import android.media.session.MediaSession;
+import android.media.session.PlaybackState;
 import android.support.v4.media.session.MediaButtonReceiver;
 import android.support.v4.media.session.MediaSessionCompat;
-import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v7.media.MediaRouter;
 
 import com.example.android.uamp.model.Callback;
@@ -92,7 +93,7 @@ import static com.example.android.uamp.utils.MediaIDHelper.MEDIA_ID_ROOT;
  *      {@link android.media.session.MediaSession#setQueue(java.util.List)})
  *
  * <li> Declare and export the service in AndroidManifest with an intent receiver for the action
- *      android.media.browse.MediaBrowserService
+ *      android.service.media.MediaBrowserService
  *
  * </ul>
  *
@@ -116,7 +117,7 @@ import static com.example.android.uamp.utils.MediaIDHelper.MEDIA_ID_ROOT;
  * @see <a href="README.md">README.md</a> for more details.
  *
  */
-public class MusicService extends MediaBrowserServiceCompat implements
+public class MusicService extends MediaBrowserService implements
         PlaybackServiceCallback {
 
     private static final String TAG = LogHelper.makeLogTag(MusicService.class);
@@ -141,7 +142,7 @@ public class MusicService extends MediaBrowserServiceCompat implements
     private MusicProvider mMusicProvider;
     private PlaybackManager mPlaybackManager;
 
-    private MediaSessionCompat mSession;
+    private MediaSession mSession;
     private MediaNotificationManager mMediaNotificationManager;
     private Bundle mSessionExtras;
     private final DelayedStopHandler mDelayedStopHandler = new DelayedStopHandler(this);
@@ -174,7 +175,7 @@ public class MusicService extends MediaBrowserServiceCompat implements
         QueueManager queueManager = new QueueManager(mMusicProvider, getResources(),
                 new MetadataUpdateListener() {
                     @Override
-                    public Object onMetadataChanged(MediaMetadataCompat metadata) {
+                    public Object onMetadataChanged(MediaMetadata metadata) {
                         mSession.setMetadata(metadata);
                         return null;
                     }
@@ -194,7 +195,7 @@ public class MusicService extends MediaBrowserServiceCompat implements
 
                     @Override
                     public Object onQueueUpdated(String title,
-                                               List<MediaSessionCompat.QueueItem> newQueue) {
+                                               List<MediaSession.QueueItem> newQueue) {
                         mSession.setQueue(newQueue);
                         mSession.setQueueTitle(title);
                         return null;
@@ -206,11 +207,11 @@ public class MusicService extends MediaBrowserServiceCompat implements
                 playback);
 
         // Start a new MediaSession
-        mSession = new MediaSessionCompat(this, "MusicService");
+        mSession = new MediaSession(this, "MusicService");
         setSessionToken(mSession.getSessionToken());
         mSession.setCallback(mPlaybackManager);
-        mSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS |
-                MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
+        mSession.setFlags(MediaSession.FLAG_HANDLES_MEDIA_BUTTONS |
+                MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
 
         Context context = getApplicationContext();
         Intent intent = new Intent(context, NowPlayingActivity.class);
@@ -261,7 +262,7 @@ public class MusicService extends MediaBrowserServiceCompat implements
                 }
             } else {
                 // Try to handle the intent as a media button event wrapped by MediaButtonReceiver
-                MediaButtonReceiver.handleIntent(mSession, startIntent);
+                MediaButtonReceiver.handleIntent(MediaSessionCompat.fromMediaSession(this,mSession), startIntent);
             }
         }
         // Reset the delay handler to enqueue a message to stop the service if
@@ -306,7 +307,7 @@ public class MusicService extends MediaBrowserServiceCompat implements
             LogHelper.i(TAG, "OnGetRoot: Browsing NOT ALLOWED for unknown caller. "
                     + "Returning empty browser root so all apps can use MediaController."
                     + clientPackageName);
-            return new MediaBrowserServiceCompat.BrowserRoot(MEDIA_ID_EMPTY_ROOT, null);
+            return new MediaBrowserService.BrowserRoot(MEDIA_ID_EMPTY_ROOT, null);
         }
         //noinspection StatementWithEmptyBody
         if (CarHelper.isValidCarPackage(clientPackageName)) {
@@ -386,7 +387,7 @@ public class MusicService extends MediaBrowserServiceCompat implements
     }
 
     @Override
-    public Object onPlaybackStateUpdated(PlaybackStateCompat newState) {
+    public Object onPlaybackStateUpdated(PlaybackState newState) {
         mSession.setPlaybackState(newState);
         return null;
     }
@@ -445,7 +446,7 @@ public class MusicService extends MediaBrowserServiceCompat implements
             mSessionExtras.remove(EXTRA_CONNECTED_CAST);
             mSession.setExtras(mSessionExtras);
             Playback playback = new LocalPlayback(MusicService.this, mMusicProvider);
-            mMediaRouter.setMediaSessionCompat(null);
+            mMediaRouter.setMediaSession(null);
             mPlaybackManager.switchToPlayback(playback, false);
         }
 
@@ -461,7 +462,7 @@ public class MusicService extends MediaBrowserServiceCompat implements
             mSession.setExtras(mSessionExtras);
             // Now we can switch to CastPlayback
             Playback playback = new CastPlayback(mMusicProvider, MusicService.this);
-            mMediaRouter.setMediaSessionCompat(mSession);
+            mMediaRouter.setMediaSession(mSession);
             mPlaybackManager.switchToPlayback(playback, true);
         }
 

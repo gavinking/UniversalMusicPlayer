@@ -35,9 +35,6 @@ import android.os {
 import android.support.design.widget {
     NavigationView
 }
-import android.support.v4.media.session {
-    PlaybackStateCompat
-}
 import android.support.v4.view {
     GravityCompat
 }
@@ -116,7 +113,7 @@ shared abstract class BaseActivity()
         if (exists mediaController = this.mediaController,
             mediaController.metadata exists,
             mediaController.playbackState exists) {
-            return mediaController.playbackState.state != PlaybackStateCompat.stateError;
+            return mediaController.playbackState.state != PlaybackState.stateError;
         }
         else {
             return false;

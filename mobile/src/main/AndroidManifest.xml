@@ -133,7 +133,7 @@
             android:exported="true"
             tools:ignore="ExportedService">
             <intent-filter>
-                <action android:name="android.media.browse.MediaBrowserService" />
+                <action android:name="android.service.media.MediaBrowserService" />
             </intent-filter>
         </service>
 
@@ -157,10 +157,10 @@
         </activity>
 
         <!-- A receiver that will receive media buttons and send as
-            intents to your MediaBrowserServiceCompat implementation.
+            intents to your MediaBrowserService implementation.
             Required on pre-Lollipop. More information at
             http://developer.android.com/reference/android/support/v4/media/session/MediaButtonReceiver.html -->
-        <receiver android:name="android.support.v4.media.session.MediaButtonReceiver" >
+        <receiver android:name="android.media.session.MediaButtonReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
             </intent-filter>

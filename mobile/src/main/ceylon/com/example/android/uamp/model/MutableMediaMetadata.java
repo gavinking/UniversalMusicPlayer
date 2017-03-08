@@ -16,7 +16,7 @@
 //
 //package com.example.android.uamp.model;
 //
-//import android.support.v4.media.MediaMetadataCompat;
+//import android.media.MediaMetadata;
 //import android.text.TextUtils;
 //
 ///**
@@ -25,10 +25,10 @@
 // */
 //public class MutableMediaMetadata {
 //
-//    public MediaMetadataCompat metadata;
+//    public MediaMetadata metadata;
 //    public final String trackId;
 //
-//    public MutableMediaMetadata(String trackId, MediaMetadataCompat metadata) {
+//    public MutableMediaMetadata(String trackId, MediaMetadata metadata) {
 //        this.metadata = metadata;
 //        this.trackId = trackId;
 //    }

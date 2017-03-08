@@ -20,10 +20,10 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.media.MediaBrowserCompat;
-import android.support.v4.media.MediaMetadataCompat;
-import android.support.v4.media.session.MediaControllerCompat;
-import android.support.v4.media.session.PlaybackStateCompat;
+import android.media.browse.MediaBrowser;
+import android.media.MediaMetadata;
+import android.media.session.MediaController;
+import android.media.session.PlaybackState;
 
 import com.example.android.uamp.MusicService;
 import com.example.android.uamp.R;
@@ -36,7 +36,7 @@ import com.example.android.uamp.utils.LogHelper;
 public class TvPlaybackActivity extends FragmentActivity {
     private static final String TAG = LogHelper.makeLogTag(TvPlaybackActivity.class);
 
-    private MediaBrowserCompat mMediaBrowser;
+    private MediaBrowser mMediaBrowser;
     private TvPlaybackFragment mPlaybackFragment;
 
     @Override
@@ -44,7 +44,7 @@ public class TvPlaybackActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         LogHelper.d(TAG, "Activity onCreate");
 
-        mMediaBrowser = new MediaBrowserCompat(this,
+        mMediaBrowser = new MediaBrowser(this,
                 new ComponentName(this, MusicService.class),
                 mConnectionCallback, null);
 
@@ -65,32 +65,32 @@ public class TvPlaybackActivity extends FragmentActivity {
     protected void onStop() {
         super.onStop();
         LogHelper.d(TAG, "Activity onStop");
-        if (getSupportMediaController() != null) {
-            getSupportMediaController().unregisterCallback(mMediaControllerCallback);
+        if (getMediaController() != null) {
+            getMediaController().unregisterCallback(mMediaControllerCallback);
         }
         mMediaBrowser.disconnect();
 
     }
 
-    private final MediaBrowserCompat.ConnectionCallback mConnectionCallback =
-            new MediaBrowserCompat.ConnectionCallback() {
+    private final MediaBrowser.ConnectionCallback mConnectionCallback =
+            new MediaBrowser.ConnectionCallback() {
                 @Override
                 public void onConnected() {
                     LogHelper.d(TAG, "onConnected");
-                    try {
-                        MediaControllerCompat mediaController = new MediaControllerCompat(
+//                    try {
+                        MediaController mediaController = new MediaController(
                                 TvPlaybackActivity.this, mMediaBrowser.getSessionToken());
-                        setSupportMediaController(mediaController);
+                        setMediaController(mediaController);
                         mediaController.registerCallback(mMediaControllerCallback);
 
-                        MediaMetadataCompat metadata = mediaController.getMetadata();
+                        MediaMetadata metadata = mediaController.getMetadata();
                         if (metadata != null) {
                             mPlaybackFragment.updateMetadata(metadata);
                             mPlaybackFragment.updatePlaybackState(mediaController.getPlaybackState());
                         }
-                    } catch (RemoteException e) {
-                        LogHelper.e(TAG, e, "could not connect media controller");
-                    }
+//                    } catch (RemoteException e) {
+//                        LogHelper.e(TAG, e, "could not connect media controller");
+//                    }
                 }
 
                 @Override
@@ -101,7 +101,7 @@ public class TvPlaybackActivity extends FragmentActivity {
                 @Override
                 public void onConnectionSuspended() {
                     LogHelper.d(TAG, "onConnectionSuspended");
-                    getSupportMediaController().unregisterCallback(mMediaControllerCallback);
+                    getMediaController().unregisterCallback(mMediaControllerCallback);
                     setSupportMediaController(null);
                 }
             };
@@ -110,19 +110,19 @@ public class TvPlaybackActivity extends FragmentActivity {
      * Receive callbacks from the MediaController. Here we update our state such as which queue
      * is being shown, the current title and description and the PlaybackState.
      */
-    private final MediaControllerCompat.Callback mMediaControllerCallback =
-            new MediaControllerCompat.Callback() {
+    private final MediaController.Callback mMediaControllerCallback =
+            new MediaController.Callback() {
         @Override
-        public void onPlaybackStateChanged(@NonNull PlaybackStateCompat state) {
+        public void onPlaybackStateChanged(@NonNull PlaybackState state) {
             LogHelper.d(TAG, "onPlaybackStateChanged, state=", state);
-            if (mPlaybackFragment == null || state.getState() == PlaybackStateCompat.STATE_BUFFERING) {
+            if (mPlaybackFragment == null || state.getState() == PlaybackState.STATE_BUFFERING) {
                 return;
             }
             mPlaybackFragment.updatePlaybackState(state);
         }
 
         @Override
-        public void onMetadataChanged(MediaMetadataCompat metadata) {
+        public void onMetadataChanged(MediaMetadata metadata) {
             LogHelper.d(TAG, "onMetadataChanged, title=", metadata.getDescription().getTitle());
             if (mPlaybackFragment == null) {
                 return;
