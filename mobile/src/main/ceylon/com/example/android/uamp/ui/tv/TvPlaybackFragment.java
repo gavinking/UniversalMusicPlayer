@@ -171,7 +171,7 @@
 //    }
 //
 //    protected void updatePlayListRow(List<MediaSession.QueueItem> playlistQueue) {
-//        if (QueueHelper.equals(mPlaylistQueue, playlistQueue)) {
+//        if (QueueHelper.equalQueues(mPlaylistQueue, playlistQueue)) {
 //            // if the playlist queue hasn't changed, we don't need to update it
 //            return;
 //        }

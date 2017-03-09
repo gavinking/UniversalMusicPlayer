@@ -20,8 +20,6 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
 
-import com.example.android.uamp.MusicService;
-
 public class CarHelper {
     private static final String TAG = LogHelper.makeLogTag(CarHelper.class);
 
@@ -97,8 +95,7 @@ public class CarHelper {
      *
      * A preferable way of detecting if your app is running in the context of an Android Auto
      * compatible car is by registering a BroadcastReceiver for the action
-     * {@link CarHelper#ACTION_MEDIA_STATUS}. See a sample implementation in
-     * {@link MusicService#onCreate()}.
+     * {@link CarHelper#ACTION_MEDIA_STATUS}.
      *
      * @param c Context to detect UI Mode.
      * @return true when device is running in car mode, false otherwise.

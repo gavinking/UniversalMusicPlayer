@@ -15,7 +15,8 @@ import com.example.android.uamp {
     MusicService
 }
 import android.content {
-    ComponentName
+    ComponentName,
+    Context
 }
 import android.media.browse {
     MediaBrowser
@@ -26,14 +27,16 @@ import android.media.session {
     MediaController
 }
 import com.example.android.uamp.utils {
-    isOnline,
-    ResourceHelper,
+     ResourceHelper,
     LogHelper
 }
 import android.os {
     Bundle,
     Build,
     RemoteException
+}
+import android.net {
+    ConnectivityManager
 }
 
 shared abstract class BaseActivity()
@@ -45,9 +48,14 @@ shared abstract class BaseActivity()
     shared actual late MediaBrowser mediaBrowser;
     late variable PlaybackControlsFragment controlsFragment;
 
+    shared Boolean online {
+        assert (is ConnectivityManager connMgr = getSystemService(Context.connectivityService));
+        return if (exists networkInfo = connMgr.activeNetworkInfo) then networkInfo.connected else false;
+    }
+
     void showPlaybackControls() {
         LogHelper.d(tag, "showPlaybackControls");
-        if (isOnline(this)) {
+        if (online) {
             fragmentManager.beginTransaction()
                 .setCustomAnimations(
                 R.Animator.slide_in_from_bottom,

@@ -133,7 +133,7 @@ shared class MusicService
                         => mPlaybackManager.updatePlaybackState(getString(R.String.error_no_metadata));
                 shared actual void onCurrentQueueIndexUpdated(Integer queueIndex)
                         => mPlaybackManager.handlePlayRequest();
-                shared actual void onQueueUpdated(String title, List<MediaSession.QueueItem> newQueue) {
+                shared actual void onQueueUpdated(String title, List<MediaSession.QueueItem>? newQueue) {
                     mSession.setQueue(newQueue);
                     mSession.setQueueTitle(title);
                 }

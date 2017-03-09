@@ -62,13 +62,13 @@ shared class QueueManager(
     }
 
     shared Boolean setCurrentQueueItemByQueueId(Integer queueId) {
-        value index = QueueHelper.getMusicIndexOnQueue(mPlayingQueue, queueId);
+        value index = QueueHelper.getMusicIndexOnQueueByQueueId(mPlayingQueue, queueId);
         setCurrentQueueIndex(index);
         return index>=0;
     }
 
     shared Boolean setCurrentQueueItemByMediaId(String mediaId) {
-        value index = QueueHelper.getMusicIndexOnQueue(mPlayingQueue, mediaId);
+        value index = QueueHelper.getMusicIndexOnQueueByMediaId(mPlayingQueue, mediaId);
         setCurrentQueueIndex(index);
         return index>=0;
     }
@@ -92,7 +92,7 @@ shared class QueueManager(
         value queue = QueueHelper.getPlayingQueueFromSearch(query, extras, musicProvider);
         setCurrentQueue(resources.getString(R.String.search_queue_title), queue);
         updateMetadata();
-        return queue exists && !queue.empty;
+        return if (exists queue) then !queue.empty else false;
     }
 
     shared void setRandomQueue() {
@@ -122,12 +122,12 @@ shared class QueueManager(
 
     shared Integer currentQueueSize => mPlayingQueue?.size() else 0;
 
-    void setCurrentQueue(String title, List<MediaSession.QueueItem> newQueue, String? initialMediaId = null) {
+    void setCurrentQueue(String title, List<MediaSession.QueueItem>? newQueue, String? initialMediaId = null) {
         mPlayingQueue = newQueue;
         value index
                 = if (exists initialMediaId)
-        then QueueHelper.getMusicIndexOnQueue(mPlayingQueue, initialMediaId)
-        else 0;
+                then QueueHelper.getMusicIndexOnQueueByMediaId(mPlayingQueue, initialMediaId)
+                else 0;
         mCurrentIndex = largest(index, 0);
         listener.onQueueUpdated(title, newQueue);
     }
@@ -165,5 +165,5 @@ shared interface MetadataUpdateListener {
     shared formal void onMetadataChanged(MediaMetadata metadata) ;
     shared formal void onMetadataRetrieveError() ;
     shared formal void onCurrentQueueIndexUpdated(Integer queueIndex) ;
-    shared formal void onQueueUpdated(String title, List<MediaSession.QueueItem> newQueue) ;
+    shared formal void onQueueUpdated(String title, List<MediaSession.QueueItem>? newQueue) ;
 }
