@@ -19,7 +19,6 @@ import com.example.android.uamp.model {
     MusicProvider
 }
 import com.example.android.uamp.utils {
-    LogHelper,
     MediaIDHelper,
     WearHelper
 }
@@ -32,7 +31,7 @@ shared class PlaybackManager(
         variable Playback currentPlayback)
         extends MediaSession.Callback() {
 
-    value tag = LogHelper.makeLogTag(`PlaybackManager`);
+//    value tag = LogHelper.makeLogTag(`PlaybackManager`);
 
     value customActionThumbsUp = "com.example.android.uamp.THUMBS_UP";
 
@@ -56,7 +55,7 @@ shared class PlaybackManager(
                     = musicProvider.isFavorite(musicId)
                     then R.Drawable.ic_star_on
                     else R.Drawable.ic_star_off;
-            LogHelper.d(tag, "updatePlaybackState, setting Favorite custom action of music ", musicId, " current favorite=", musicProvider.isFavorite(musicId));
+//            LogHelper.d(tag, "updatePlaybackState, setting Favorite custom action of music ", musicId, " current favorite=", musicProvider.isFavorite(musicId));
             value customActionExtras = Bundle();
             WearHelper.setShowCustomActionOnWear(customActionExtras, true);
             stateBuilder.addCustomAction(PlaybackState.CustomAction.Builder(customActionThumbsUp,
@@ -66,7 +65,7 @@ shared class PlaybackManager(
     }
 
     shared void updatePlaybackState(String? error) {
-        LogHelper.d(tag, "updatePlaybackState, playback state=``currentPlayback.state``");
+//        LogHelper.d(tag, "updatePlaybackState, playback state=``currentPlayback.state``");
         value position
                 = currentPlayback.connected
                 then currentPlayback.currentStreamPosition
@@ -95,7 +94,7 @@ shared class PlaybackManager(
     }
 
     shared void handlePlayRequest() {
-        LogHelper.d(tag, "handlePlayRequest: mState=``currentPlayback.state``");
+//        LogHelper.d(tag, "handlePlayRequest: mState=``currentPlayback.state``");
         if (exists currentMusic = queueManager.currentMusic) {
             serviceCallback.onPlaybackStart();
             currentPlayback.play(currentMusic);
@@ -103,7 +102,7 @@ shared class PlaybackManager(
     }
 
     shared void handlePauseRequest() {
-        LogHelper.d(tag, "handlePauseRequest: mState=``currentPlayback.state``");
+//        LogHelper.d(tag, "handlePauseRequest: mState=``currentPlayback.state``");
         if (currentPlayback.playing) {
             currentPlayback.pause();
             serviceCallback.onPlaybackStop();
@@ -111,14 +110,14 @@ shared class PlaybackManager(
     }
 
     shared void handleStopRequest(String? withError) {
-        LogHelper.d(tag, "handleStopRequest: mState=``currentPlayback.state`` error=", withError);
+//        LogHelper.d(tag, "handleStopRequest: mState=``currentPlayback.state`` error=", withError);
         currentPlayback.stop(true);
         serviceCallback.onPlaybackStop();
         updatePlaybackState(withError);
     }
 
     shared actual void onPlay() {
-        LogHelper.d(tag, "play");
+//        LogHelper.d(tag, "play");
         if (!queueManager.currentMusic exists) {
             queueManager.setRandomQueue();
         }
@@ -126,34 +125,34 @@ shared class PlaybackManager(
     }
 
     shared actual void onSkipToQueueItem(Integer queueId) {
-        LogHelper.d(tag, "OnSkipToQueueItem: ``queueId``");
+//        LogHelper.d(tag, "OnSkipToQueueItem: ``queueId``");
         queueManager.setCurrentQueueItemByQueueId(queueId);
         queueManager.updateMetadata();
     }
 
     shared actual void onSeekTo(Integer position) {
-        LogHelper.d(tag, "onSeekTo:", position);
+//        LogHelper.d(tag, "onSeekTo:", position);
         currentPlayback.seekTo(position);
     }
 
     shared actual void onPlayFromMediaId(String mediaId, Bundle extras) {
-        LogHelper.d(tag, "playFromMediaId mediaId:", mediaId, "  extras=", extras);
+//        LogHelper.d(tag, "playFromMediaId mediaId:", mediaId, "  extras=", extras);
         queueManager.setQueueFromMusic(mediaId);
         handlePlayRequest();
     }
 
     shared actual void onPause() {
-        LogHelper.d(tag, "pause. current state=``currentPlayback.state``");
+//        LogHelper.d(tag, "pause. current state=``currentPlayback.state``");
         handlePauseRequest();
     }
 
     shared actual void onStop() {
-        LogHelper.d(tag, "stop. current state=``currentPlayback.state``");
+//        LogHelper.d(tag, "stop. current state=``currentPlayback.state``");
         handleStopRequest(null);
     }
 
     shared actual void onSkipToNext() {
-        LogHelper.d(tag, "skipToNext");
+//        LogHelper.d(tag, "skipToNext");
         if (queueManager.skipQueuePosition(1)) {
             handlePlayRequest();
         } else {
@@ -173,7 +172,7 @@ shared class PlaybackManager(
 
     shared actual void onCustomAction(String action, Bundle extras) {
         if (customActionThumbsUp.equals(action)) {
-            LogHelper.i(tag, "onCustomAction: favorite for current track");
+//            LogHelper.i(tag, "onCustomAction: favorite for current track");
             if (exists currentMusic = queueManager.currentMusic,
                 exists mediaId = currentMusic.description.mediaId) {
                 value musicId = MediaIDHelper.extractMusicIDFromMediaID(mediaId);
@@ -181,12 +180,12 @@ shared class PlaybackManager(
             }
             updatePlaybackState(null);
         } else {
-            LogHelper.e(tag, "Unsupported action: ", action);
+//            LogHelper.e(tag, "Unsupported action: ", action);
         }
     }
 
     shared actual void onPlayFromSearch(String query, Bundle extras) {
-        LogHelper.d(tag, "playFromSearch  query=", query, " extras=", extras);
+//        LogHelper.d(tag, "playFromSearch  query=", query, " extras=", extras);
         currentPlayback.state = PlaybackState.stateConnecting;
         value successSearch = queueManager.setQueueFromSearch(query, extras);
         if (successSearch) {
@@ -211,7 +210,7 @@ shared class PlaybackManager(
         shared actual void onError(String error)
                 => updatePlaybackState(error);
         shared actual void setCurrentMediaId(String mediaId) {
-            LogHelper.d(tag, "setCurrentMediaId", mediaId);
+//            LogHelper.d(tag, "setCurrentMediaId", mediaId);
             queueManager.setQueueFromMusic(mediaId);
         }
     }
@@ -245,7 +244,7 @@ shared class PlaybackManager(
         else if (oldState == PlaybackState.stateNone) {
         }
         else {
-            LogHelper.d(tag, "Default called. Old state is ", oldState);
+//            LogHelper.d(tag, "Default called. Old state is ", oldState);
         }
     }
 

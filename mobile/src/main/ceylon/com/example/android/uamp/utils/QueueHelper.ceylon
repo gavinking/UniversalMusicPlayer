@@ -40,7 +40,7 @@ import java.util {
 
 shared class QueueHelper {
 
-    static value tag = LogHelper.makeLogTag(`QueueHelper`);
+//    static value tag = LogHelper.makeLogTag(`QueueHelper`);
 
     static value randomQueueSize = 10;
 
@@ -63,13 +63,13 @@ shared class QueueHelper {
     shared static List<MediaSession.QueueItem>? getPlayingQueue(String mediaId, MusicProvider musicProvider) {
         value hierarchy = [ for (str in MediaIDHelper.getHierarchy(mediaId)) str.string ];
         if (hierarchy.size != 2) {
-            LogHelper.e(tag, "Could not build a playing queue for this mediaId: ", mediaId);
+//            LogHelper.e(tag, "Could not build a playing queue for this mediaId: ", mediaId);
             return null;
         }
 
         assert (exists categoryType = hierarchy[0],
                 exists categoryValue = hierarchy[1]);
-        LogHelper.d(tag, "Creating playing queue for ", categoryType, ",  ", categoryValue);
+//        LogHelper.d(tag, "Creating playing queue for ", categoryType, ",  ", categoryValue);
 
         Iterable<MediaMetadata>? tracks;
         if (categoryType == mediaIdMusicsByGenre) {
@@ -84,7 +84,7 @@ shared class QueueHelper {
             return convertToQueue(tracks, categoryType, categoryValue);
         }
         else {
-            LogHelper.e(tag, "Unrecognized category type: ", categoryType, " for media ", mediaId);
+//            LogHelper.e(tag, "Unrecognized category type: ", categoryType, " for media ", mediaId);
             return null;
         }
     }
@@ -98,15 +98,15 @@ shared class QueueHelper {
             }
             result.add(metadata);
         }
-        LogHelper.d(tag, "getRandomQueue: result.size=", result.size());
+//        LogHelper.d(tag, "getRandomQueue: result.size=", result.size());
         return convertToQueue(result, mediaIdMusicsBySearch, "random");
     }
 
     shared static List<MediaSession.QueueItem> getPlayingQueueFromSearch(
             String query, Bundle queryParams, MusicProvider musicProvider) {
-        LogHelper.d(tag, "Creating playing queue for musics from search: ", query, " params=", queryParams);
-        VoiceSearchParams params = VoiceSearchParams(query, queryParams);
-        LogHelper.d(tag, "VoiceSearchParams: ", params);
+//        LogHelper.d(tag, "Creating playing queue for musics from search: ", query, " params=", queryParams);
+        value params = VoiceSearchParams(query, queryParams);
+//        LogHelper.d(tag, "VoiceSearchParams: ", params);
         if (params.isAny) {
             return getRandomQueue(musicProvider);
         }

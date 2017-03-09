@@ -10,13 +10,6 @@ import android.content.res {
 import android.os {
     Process
 }
-import android.util {
-    Base64
-}
-
-import com.example.android.uamp.utils {
-    LogHelper
-}
 
 import java.io {
     IOException
@@ -36,7 +29,7 @@ import org.xmlpull.v1 {
 
 shared class PackageValidator(Context ctx) {
 
-    value tag = LogHelper.makeLogTag(`PackageValidator`);
+//    value tag = LogHelper.makeLogTag(`PackageValidator`);
 
     function readValidCertificates(XmlResourceParser parser) {
         value validCertificates = HashMap<String,ArrayList<CallerInfo>>();
@@ -69,7 +62,7 @@ shared class PackageValidator(Context ctx) {
         return validCertificates;
     }
 
-    value mValidCertificates = readValidCertificates(ctx.resources.getXml(R.Xml.allowed_media_browser_callers));
+//    value mValidCertificates = readValidCertificates(ctx.resources.getXml(R.Xml.allowed_media_browser_callers));
 
     function getPackageInfo(Context context, String pkgName) {
         try {
@@ -88,30 +81,30 @@ shared class PackageValidator(Context ctx) {
             return true;
         }
 
-        if (exists packageInfo = getPackageInfo(context, callingPackage)) {
-            if (packageInfo.signatures.size == 1) {
-                value signature = Base64.encodeToString(packageInfo.signatures.get(0).toByteArray(), Base64.noWrap);
-                if (exists validCallers = mValidCertificates.get(signature)) {
-                    value expectedPackages = StringBuilder();
-                    for (info in validCallers) {
-                        if (callingPackage == info.packageName) {
-//                        LogHelper.v(tag, "Valid caller: ", info.name, "  package=", info.packageName, " release=", info.release);
-                            return true;
-                        }
-                        expectedPackages.append(info.packageName).appendCharacter(' ');
-                    }
-                    LogHelper.i(tag, "Caller has a valid certificate, but its package doesn't match any ", "expected package for the given certificate. Caller's package is ", callingPackage, ". Expected packages as defined in res/xml/allowed_media_browser_callers.xml are (", expectedPackages, "). This caller's certificate is: \n", signature);
-                } else {
-                    LogHelper.v(tag, "Signature for caller ", callingPackage, " is not valid: \n", signature);
-                    if (mValidCertificates.empty) {
-                        LogHelper.w(tag, "The list of valid certificates is empty. Either your file ", "res/xml/allowed_media_browser_callers.xml is empty or there was an error ", "while reading it. Check previous log messages.");
-                    }
-                }
-            }
-            else {
-                LogHelper.w(tag, "Caller does not have exactly one signature certificate!");
-            }
-        }
+//        if (exists packageInfo = getPackageInfo(context, callingPackage)) {
+//            if (packageInfo.signatures.size == 1) {
+//                value signature = Base64.encodeToString(packageInfo.signatures.get(0).toByteArray(), Base64.noWrap);
+//                if (exists validCallers = mValidCertificates.get(signature)) {
+//                    value expectedPackages = StringBuilder();
+//                    for (info in validCallers) {
+//                        if (callingPackage == info.packageName) {
+////                        LogHelper.v(tag, "Valid caller: ", info.name, "  package=", info.packageName, " release=", info.release);
+//                            return true;
+//                        }
+//                        expectedPackages.append(info.packageName).appendCharacter(' ');
+//                    }
+////                    LogHelper.i(tag, "Caller has a valid certificate, but its package doesn't match any ", "expected package for the given certificate. Caller's package is ", callingPackage, ". Expected packages as defined in res/xml/allowed_media_browser_callers.xml are (", expectedPackages, "). This caller's certificate is: \n", signature);
+//                } else {
+////                    LogHelper.v(tag, "Signature for caller ", callingPackage, " is not valid: \n", signature);
+//                    if (mValidCertificates.empty) {
+////                        LogHelper.w(tag, "The list of valid certificates is empty. Either your file ", "res/xml/allowed_media_browser_callers.xml is empty or there was an error ", "while reading it. Check previous log messages.");
+//                    }
+//                }
+//            }
+//            else {
+////                LogHelper.w(tag, "Caller does not have exactly one signature certificate!");
+//            }
+//        }
 
         return false;
 

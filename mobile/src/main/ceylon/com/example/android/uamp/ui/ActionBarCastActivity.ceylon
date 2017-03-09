@@ -44,9 +44,6 @@ import ceylon.language.meta.model {
 import com.example.android.uamp {
     R
 }
-import com.example.android.uamp.utils {
-    LogHelper
-}
 import com.google.android.gms.cast.framework {
     CastButtonFactory,
     CastContext,
@@ -61,7 +58,7 @@ import java.lang {
 shared abstract class ActionBarCastActivity()
         extends AppCompatActivity() {
 
-    value tag = LogHelper.makeLogTag(`ActionBarCastActivity`);
+//    value tag = LogHelper.makeLogTag(`ActionBarCastActivity`);
     value delayMillis = 1000;
 
     variable CastContext? castContext = null;
@@ -78,7 +75,7 @@ shared abstract class ActionBarCastActivity()
                 .postDelayed(() {
                     assert (exists item = routeMenuItem);
                     if (item.visible) {
-                        LogHelper.d(tag, "Cast Icon is visible");
+//                        LogHelper.d(tag, "Cast Icon is visible");
                         showFtu();
                     }
                 },
@@ -88,7 +85,7 @@ shared abstract class ActionBarCastActivity()
 
     shared actual default void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        LogHelper.d(tag, "Activity onCreate");
+//        LogHelper.d(tag, "Activity onCreate");
         castContext = CastContext.getSharedInstance(this);
     }
 

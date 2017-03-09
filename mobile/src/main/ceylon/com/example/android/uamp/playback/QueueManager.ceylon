@@ -20,8 +20,7 @@ import com.example.android.uamp.model {
 }
 import com.example.android.uamp.utils {
     QueueHelper,
-    MediaIDHelper,
-    LogHelper
+    MediaIDHelper
 }
 
 import java.util {
@@ -36,7 +35,7 @@ shared class QueueManager(
         Resources resources,
         MetadataUpdateListener listener) {
 
-    value tag = LogHelper.makeLogTag(`QueueManager`);
+//    value tag = LogHelper.makeLogTag(`QueueManager`);
 
     variable value mPlayingQueue
             = Collections.synchronizedList(ArrayList<MediaSession.QueueItem>());
@@ -55,7 +54,7 @@ shared class QueueManager(
     }
 
     void setCurrentQueueIndex(Integer index) {
-        if (index>=0, index<mPlayingQueue.size()) {
+        if (0 <= index < mPlayingQueue.size()) {
             mCurrentIndex = index;
             listener.onCurrentQueueIndexUpdated(mCurrentIndex);
         }
@@ -81,7 +80,7 @@ shared class QueueManager(
             index %=mPlayingQueue.size();
         }
         if (!QueueHelper.isIndexPlayable(index, mPlayingQueue)) {
-            LogHelper.e(tag, "Cannot increment queue index by ", amount, ". Current=", mCurrentIndex, " queue length=", mPlayingQueue.size());
+//            LogHelper.e(tag, "Cannot increment queue index by ", amount, ". Current=", mCurrentIndex, " queue length=", mPlayingQueue.size());
             return false;
         }
         mCurrentIndex = index;
@@ -102,7 +101,7 @@ shared class QueueManager(
     }
 
     shared void setQueueFromMusic(String mediaId) {
-        LogHelper.d(tag, "setQueueFromMusic", mediaId);
+//        LogHelper.d(tag, "setQueueFromMusic", mediaId);
         value canReuseQueue
                 = isSameBrowsingCategory(mediaId)
         then setCurrentQueueItemByMediaId(mediaId)

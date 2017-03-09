@@ -25,7 +25,6 @@ import com.example.android.uamp {
     R
 }
 import com.example.android.uamp.utils {
-    LogHelper,
     MediaIDHelper {
         mediaIdMusicsByGenre,
         mediaIdRoot,
@@ -70,7 +69,7 @@ shared String customMetadataTrackSource = "__SOURCE__";
 
 shared class RemoteJSONSource satisfies MusicProviderSource {
 
-    static value tag = LogHelper.makeLogTag(`RemoteJSONSource`);
+//    static value tag = LogHelper.makeLogTag(`RemoteJSONSource`);
 
     static value catalogUrl = "http://storage.googleapis.com/automotive-media/music.json";
     static value jsonMusic = "music";
@@ -96,7 +95,7 @@ shared class RemoteJSONSource satisfies MusicProviderSource {
         Integer trackNumber = json.getInt(jsonTrackNumber);
         Integer totalTrackCount = json.getInt(jsonTotalTrackCount);
         Integer duration = json.getInt(jsonDuration) * 1000;
-        LogHelper.d(tag, "Found music track: ", json);
+//        LogHelper.d(tag, "Found music track: ", json);
         if (!source.startsWith("http")) {
             source = basePath + source;
         }
@@ -132,7 +131,7 @@ shared class RemoteJSONSource satisfies MusicProviderSource {
             throw e;
         }
         catch (e) {
-            LogHelper.e(tag, "Failed to parse the json for media list", e);
+//            LogHelper.e(tag, "Failed to parse the json for media list", e);
             return null;
         }
     }
@@ -176,7 +175,7 @@ class State
 
 shared class MusicProvider {
 
-    static value tag = LogHelper.makeLogTag(`MusicProvider`);
+//    static value tag = LogHelper.makeLogTag(`MusicProvider`);
 
     MusicProviderSource mSource;
 
@@ -267,7 +266,7 @@ shared class MusicProvider {
             => mFavoriteTracks.contains(musicId);
 
     shared void retrieveMediaAsync(void onMusicCatalogReady(Boolean success)) {
-        LogHelper.d(tag, "retrieveMediaAsync called");
+//        LogHelper.d(tag, "retrieveMediaAsync called");
         if (mCurrentState == State.initialized) {
 //            if (exists callback) {
                 onMusicCatalogReady(true);
@@ -372,7 +371,7 @@ shared class MusicProvider {
                 mediaItems.add(createMediaItem(metadata));
             }
         } else {
-            LogHelper.w(tag, "Skipping unmatched mediaId: ", mediaId);
+//            LogHelper.w(tag, "Skipping unmatched mediaId: ", mediaId);
         }
         return mediaItems;
     }

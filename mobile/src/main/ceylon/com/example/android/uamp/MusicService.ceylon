@@ -50,7 +50,6 @@ import com.example.android.uamp.ui {
     NowPlayingActivity
 }
 import com.example.android.uamp.utils {
-    LogHelper,
     CarHelper,
     TvHelper,
     WearHelper,
@@ -85,7 +84,7 @@ shared class MusicService
 
     value stopDelay = 30000;
 
-    value tag = LogHelper.makeLogTag(`MusicService`);
+//    value tag = LogHelper.makeLogTag(`MusicService`);
 
     late MusicProvider mMusicProvider;
     late PackageValidator mPackageValidator;
@@ -120,7 +119,7 @@ shared class MusicService
             }
         };
 
-        LogHelper.d(tag, "onCreate");
+//        LogHelper.d(tag, "onCreate");
         mMusicProvider = MusicProvider();
         mMusicProvider.retrieveMediaAsync(noop);
         mPackageValidator = PackageValidator(this);
@@ -166,7 +165,7 @@ shared class MusicService
                     = object satisfies SessionManagerListener<CastSession> {
 
                 shared actual void onSessionEnded(CastSession session, Integer error) {
-                    LogHelper.d(tag, "onSessionEnded");
+//                    LogHelper.d(tag, "onSessionEnded");
                     mSessionExtras.remove(extraConnectedCast);
                     mSession.setExtras(mSessionExtras);
                     value playback = LocalPlayback(outer, mMusicProvider);
@@ -224,7 +223,7 @@ shared class MusicService
     }
 
     shared actual void onDestroy() {
-        LogHelper.d(tag, "onDestroy");
+//        LogHelper.d(tag, "onDestroy");
         unregisterCarConnectionReceiver();
         mPlaybackManager.handleStopRequest(null);
         mMediaNotificationManager.stopNotification();
@@ -236,7 +235,7 @@ shared class MusicService
     shared actual BrowserRoot onGetRoot(String clientPackageName, Integer clientUid, Bundle rootHints) {
 //        LogHelper.d(tag, "OnGetRoot: clientPackageName=" + clientPackageName, "; clientUid=" + clientUid + " ; rootHints=", rootHints);
         if (!mPackageValidator.isCallerAllowed(this, clientPackageName, clientUid)) {
-            LogHelper.i(tag, "OnGetRoot: Browsing NOT ALLOWED for unknown caller. " + "Returning empty browser root so all apps can use MediaController." + clientPackageName);
+//            LogHelper.i(tag, "OnGetRoot: Browsing NOT ALLOWED for unknown caller. " + "Returning empty browser root so all apps can use MediaController." + clientPackageName);
             return MediaBrowserService.BrowserRoot(MediaIDHelper.mediaIdEmptyRoot, null);
         }
 //        if (CarHelper.isValidCarPackage(clientPackageName)) {
@@ -248,8 +247,8 @@ shared class MusicService
 
     shared actual void onLoadChildren(String parentMediaId,
             MediaBrowserService.Result<List<MediaBrowser.MediaItem>> result) {
-        LogHelper.d(tag, "OnLoadChildren: parentMediaId=", parentMediaId);
-        if (MediaIDHelper.mediaIdEmptyRoot==parentMediaId) {
+//        LogHelper.d(tag, "OnLoadChildren: parentMediaId=", parentMediaId);
+        if (MediaIDHelper.mediaIdEmptyRoot == parentMediaId) {
             result.sendResult(ArrayList<MediaItem>());
         } else if (mMusicProvider.initialized) {
             result.sendResult(mMusicProvider.getChildren(parentMediaId, resources));
@@ -283,9 +282,9 @@ shared class MusicService
         value filter = IntentFilter(CarHelper.actionMediaStatus);
         mCarConnectionReceiver = object extends BroadcastReceiver() {
             shared actual void onReceive(Context context, Intent intent) {
-                String connectionEvent = intent.getStringExtra(CarHelper.mediaConnectionStatus);
+                value connectionEvent = intent.getStringExtra(CarHelper.mediaConnectionStatus);
                 mIsConnectedToCar = CarHelper.mediaConnected==connectionEvent;
-                LogHelper.i(tag, "Connection event to Android Auto: ", connectionEvent, " isConnectedToCar=", mIsConnectedToCar);
+//                LogHelper.i(tag, "Connection event to Android Auto: ", connectionEvent, " isConnectedToCar=", mIsConnectedToCar);
             }
         };
         registerReceiver(mCarConnectionReceiver, filter);

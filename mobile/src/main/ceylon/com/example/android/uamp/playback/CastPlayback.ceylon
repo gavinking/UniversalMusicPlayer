@@ -17,8 +17,7 @@ import com.example.android.uamp.model {
     MusicProvider
 }
 import com.example.android.uamp.utils {
-    MediaIDHelper,
-    LogHelper
+    MediaIDHelper
 }
 import com.google.android.gms.cast {
     MediaInfo,
@@ -48,7 +47,7 @@ shared class CastPlayback(MusicProvider musicProvider, Context context)
         satisfies Playback
         & RemoteMediaClient.Listener {
 
-    value tag = LogHelper.makeLogTag(`CastPlayback`);
+//    value tag = LogHelper.makeLogTag(`CastPlayback`);
 
     value mimeTypeAudioMpeg = "audio/mpeg";
     value itemId = "itemId";
@@ -112,7 +111,7 @@ shared class CastPlayback(MusicProvider musicProvider, Context context)
             callback?.onPlaybackStatusChanged(state);
         }
         catch (JSONException e) {
-            LogHelper.e(tag, "Exception loading media ", e, null);
+//            LogHelper.e(tag, "Exception loading media ", e, null);
             callback?.onError(e.message);
         }
     }
@@ -200,7 +199,7 @@ shared class CastPlayback(MusicProvider musicProvider, Context context)
     void updatePlaybackState() {
         value status = remoteMediaClient.playerState;
         value idleReason = remoteMediaClient.idleReason;
-        LogHelper.d(tag, "onRemoteMediaPlayerStatusUpdated ", status);
+//        LogHelper.d(tag, "onRemoteMediaPlayerStatusUpdated ", status);
         if (status == MediaStatus.playerStateIdle) {
             if (idleReason == MediaStatus.idleReasonFinished) {
                 callback?.onCompletion();
@@ -221,17 +220,17 @@ shared class CastPlayback(MusicProvider musicProvider, Context context)
             callback?.onPlaybackStatusChanged(state);
         }
         else {
-            LogHelper.d(tag, "State default : ", status);
+//            LogHelper.d(tag, "State default : ", status);
         }
     }
 
     shared actual void onMetadataUpdated() {
-        LogHelper.d(tag, "RemoteMediaClient.onMetadataUpdated");
+//        LogHelper.d(tag, "RemoteMediaClient.onMetadataUpdated");
         setMetadataFromRemote();
     }
 
     shared actual void onStatusUpdated() {
-        LogHelper.d(tag, "RemoteMediaClient.onStatusUpdated");
+//        LogHelper.d(tag, "RemoteMediaClient.onStatusUpdated");
         updatePlaybackState();
     }
 

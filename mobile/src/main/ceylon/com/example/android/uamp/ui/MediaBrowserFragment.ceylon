@@ -42,7 +42,6 @@ import com.example.android.uamp {
     R
 }
 import com.example.android.uamp.utils {
-    LogHelper,
     MediaIDHelper,
     NetworkHelper
 }
@@ -62,7 +61,7 @@ class BrowseAdapter(Activity context)
 
 shared class MediaBrowserFragment() extends Fragment() {
 
-    value tag = LogHelper.makeLogTag(`MediaBrowserFragment`);
+//    value tag = LogHelper.makeLogTag(`MediaBrowserFragment`);
     value argMediaId = "media_id";
 
     variable String? currentMediaId = null;
@@ -98,7 +97,7 @@ shared class MediaBrowserFragment() extends Fragment() {
         value showError = this.showError(forceError);
         errorView.visibility
                 = showError then View.visible else View.gone;
-        LogHelper.d(tag, "checkForUserVisibleErrors. forceError=", forceError, " showError=", showError, " isOnline=", NetworkHelper.isOnline(activity));
+//        LogHelper.d(tag, "checkForUserVisibleErrors. forceError=", forceError, " showError=", showError, " isOnline=", NetworkHelper.isOnline(activity));
     }
 
     object connectivityChangeReceiver extends BroadcastReceiver() {
@@ -121,13 +120,13 @@ shared class MediaBrowserFragment() extends Fragment() {
         shared actual void onMetadataChanged(MediaMetadata? metadata) {
             super.onMetadataChanged(metadata);
             if (exists metadata) {
-                LogHelper.d(tag, "Received metadata change to media ", metadata.description.mediaId);
+//                LogHelper.d(tag, "Received metadata change to media ", metadata.description.mediaId);
                 browserAdapter.notifyDataSetChanged();
             }
         }
         shared actual void onPlaybackStateChanged(PlaybackState state) {
             super.onPlaybackStateChanged(state);
-            LogHelper.d(tag, "Received state change: ", state);
+//            LogHelper.d(tag, "Received state change: ", state);
             checkForUserVisibleErrors(false);
             browserAdapter.notifyDataSetChanged();
         }
@@ -141,7 +140,7 @@ shared class MediaBrowserFragment() extends Fragment() {
     }
 
     shared actual View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        LogHelper.d(tag, "fragment.onCreateView");
+//        LogHelper.d(tag, "fragment.onCreateView");
         value rootView = inflater.inflate(R.Layout.fragment_list, container, false);
         errorView = rootView.findViewById(R.Id.playback_error);
         assert (is TextView error = errorView.findViewById(R.Id.error_message));
@@ -162,7 +161,7 @@ shared class MediaBrowserFragment() extends Fragment() {
     shared actual void onStart() {
         super.onStart();
         if (exists mediaBrowser = mediaFragmentListener?.mediaBrowser) {
-            LogHelper.d(tag, "fragment.onStart, mediaId=", currentMediaId, "  onConnected=", mediaBrowser.connected);
+//            LogHelper.d(tag, "fragment.onStart, mediaId=", currentMediaId, "  onConnected=", mediaBrowser.connected);
             if (mediaBrowser.connected) {
                 onConnected();
             }
@@ -210,7 +209,7 @@ shared class MediaBrowserFragment() extends Fragment() {
             object extends MediaBrowser.SubscriptionCallback() {
                 shared actual void onChildrenLoaded(String parentId, List<MediaBrowser.MediaItem> children) {
                     try {
-                        LogHelper.d(tag, "fragment onChildrenLoaded, parentId=", parentId, "  count=", children.size());
+//                        LogHelper.d(tag, "fragment onChildrenLoaded, parentId=", parentId, "  count=", children.size());
                         checkForUserVisibleErrors(children.empty);
                         browserAdapter.clear();
                         for (item in children) {
@@ -219,11 +218,11 @@ shared class MediaBrowserFragment() extends Fragment() {
                         browserAdapter.notifyDataSetChanged();
                     }
                     catch (Throwable t) {
-                        LogHelper.e(tag, "Error on childrenloaded", t);
+//                        LogHelper.e(tag, "Error on childrenloaded", t);
                     }
                 }
                 shared actual void onError(String id) {
-                    LogHelper.e(tag, "browse fragment subscription onError, id=" + id);
+//                    LogHelper.e(tag, "browse fragment subscription onError, id=" + id);
                     Toast.makeText(activity, R.String.error_loading_media, Toast.lengthLong).show();
                     checkForUserVisibleErrors(true);
                 }

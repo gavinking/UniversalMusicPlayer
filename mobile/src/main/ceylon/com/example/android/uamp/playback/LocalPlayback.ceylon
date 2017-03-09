@@ -1,6 +1,5 @@
 import com.example.android.uamp.utils {
-    MediaIDHelper,
-    LogHelper
+    MediaIDHelper
 }
 import com.example.android.uamp {
     MusicService
@@ -62,7 +61,7 @@ shared class LocalPlayback(Context context, MusicProvider musicProvider)
                 & OnPreparedListener
                 & OnSeekCompleteListener {
 
-    value tag = LogHelper.makeLogTag(`LocalPlayback`);
+//    value tag = LogHelper.makeLogTag(`LocalPlayback`);
 
     variable Boolean playOnFocusGain = false;
     variable Callback? callback = null;
@@ -88,7 +87,7 @@ shared class LocalPlayback(Context context, MusicProvider musicProvider)
     object audioNoisyReceiver extends BroadcastReceiver() {
         shared actual void onReceive(Context context, Intent intent) {
             if (AudioManager.actionAudioBecomingNoisy==intent.action) {
-                LogHelper.d(tag, "Headphones disconnected.");
+//                LogHelper.d(tag, "Headphones disconnected.");
                 if (playing) {
                     Intent i = Intent(context, `MusicService`);
                     i.setAction(MusicService.actionCmd);
@@ -178,7 +177,7 @@ shared class LocalPlayback(Context context, MusicProvider musicProvider)
     }
 
     shared actual void seekTo(Integer position) {
-        LogHelper.d(tag, "seekTo called with ", position);
+//        LogHelper.d(tag, "seekTo called with ", position);
         if (exists player = mediaPlayer) {
             if (player.playing) {
                 state = PlaybackState.stateBuffering;
@@ -194,7 +193,7 @@ shared class LocalPlayback(Context context, MusicProvider musicProvider)
     shared actual void setCallback(Callback callback) => this.callback = callback;
 
     void tryToGetAudioFocus() {
-        LogHelper.d(tag, "tryToGetAudioFocus");
+//        LogHelper.d(tag, "tryToGetAudioFocus");
         value result
                 = audioManager.requestAudioFocus(this,
                     AudioManager.streamMusic,
@@ -206,7 +205,7 @@ shared class LocalPlayback(Context context, MusicProvider musicProvider)
     }
 
     void giveUpAudioFocus() {
-        LogHelper.d(tag, "giveUpAudioFocus");
+//        LogHelper.d(tag, "giveUpAudioFocus");
         if (audioManager.abandonAudioFocus(this)
                 == AudioManager.audiofocusRequestGranted) {
             audioFocus = AudioFocus.noFocusNoDuck;
@@ -214,7 +213,7 @@ shared class LocalPlayback(Context context, MusicProvider musicProvider)
     }
 
     void configMediaPlayerState() {
-        LogHelper.d(tag, "configMediaPlayerState. mAudioFocus=", audioFocus);
+//        LogHelper.d(tag, "configMediaPlayerState. mAudioFocus=", audioFocus);
         switch (audioFocus)
         case (AudioFocus.noFocusNoDuck) {
             if (state == PlaybackState.statePlaying) {
@@ -226,7 +225,7 @@ shared class LocalPlayback(Context context, MusicProvider musicProvider)
             mediaPlayer?.setVolume(volume, volume);
             if (playOnFocusGain) {
                 if (exists player = mediaPlayer, !player.playing) {
-                    LogHelper.d(tag, "configMediaPlayerState startMediaPlayer. seeking to ", currentPosition);
+//                    LogHelper.d(tag, "configMediaPlayerState startMediaPlayer. seeking to ", currentPosition);
                     if (currentPosition == player.currentPosition) {
                         player.start();
                         state = PlaybackState.statePlaying;
@@ -242,7 +241,7 @@ shared class LocalPlayback(Context context, MusicProvider musicProvider)
     }
 
     shared actual void onAudioFocusChange(Integer focusChange) {
-        LogHelper.d(tag, "onAudioFocusChange. focusChange=", focusChange);
+//        LogHelper.d(tag, "onAudioFocusChange. focusChange=", focusChange);
         if (focusChange == AudioManager.audiofocusGain) {
             audioFocus = AudioFocus.focused;
         } else if (focusChange == AudioManager.audiofocusLoss
@@ -254,13 +253,13 @@ shared class LocalPlayback(Context context, MusicProvider musicProvider)
                 playOnFocusGain = true;
             }
         } else {
-            LogHelper.e(tag, "onAudioFocusChange: Ignoring unsupported focusChange: ", focusChange);
+//            LogHelper.e(tag, "onAudioFocusChange: Ignoring unsupported focusChange: ", focusChange);
         }
         configMediaPlayerState();
     }
 
     shared actual void onSeekComplete(MediaPlayer mp) {
-        LogHelper.d(tag, "onSeekComplete from MediaPlayer:", mp.currentPosition);
+//        LogHelper.d(tag, "onSeekComplete from MediaPlayer:", mp.currentPosition);
         currentPosition = mp.currentPosition;
         if (state == PlaybackState.stateBuffering) {
             registerAudioNoisyReceiver();
@@ -271,23 +270,23 @@ shared class LocalPlayback(Context context, MusicProvider musicProvider)
     }
 
     shared actual void onCompletion(MediaPlayer player) {
-        LogHelper.d(tag, "onCompletion from MediaPlayer");
+//        LogHelper.d(tag, "onCompletion from MediaPlayer");
         callback?.onCompletion();
     }
 
     shared actual void onPrepared(MediaPlayer player) {
-        LogHelper.d(tag, "onPrepared from MediaPlayer");
+//        LogHelper.d(tag, "onPrepared from MediaPlayer");
         configMediaPlayerState();
     }
 
     shared actual Boolean onError(MediaPlayer mp, Integer what, Integer extra) {
-        LogHelper.e(tag, "Media player error: what=``what```, extra=``extra``");
+//        LogHelper.e(tag, "Media player error: what=``what```, extra=``extra``");
         callback?.onError("MediaPlayer error ``what``` (``extra```)");
         return true;
     }
 
     MediaPlayer createMediaPlayerIfNeeded() {
-        LogHelper.d(tag, "createMediaPlayerIfNeeded. needed? ", !mediaPlayer exists);
+//        LogHelper.d(tag, "createMediaPlayerIfNeeded. needed? ", !mediaPlayer exists);
         if (exists player = mediaPlayer) {
             player.reset();
             return player;
@@ -304,7 +303,7 @@ shared class LocalPlayback(Context context, MusicProvider musicProvider)
     }
 
     void relaxResources(Boolean releaseMediaPlayer) {
-        LogHelper.d(tag, "relaxResources. releaseMediaPlayer=", releaseMediaPlayer);
+//        LogHelper.d(tag, "relaxResources. releaseMediaPlayer=", releaseMediaPlayer);
         if (releaseMediaPlayer, exists player = mediaPlayer) {
             player.reset();
             player.release();

@@ -9,8 +9,7 @@ import android.util {
 }
 
 import com.example.android.uamp.utils {
-    BitmapHelper,
-    LogHelper
+    BitmapHelper
 }
 
 import java.io {
@@ -31,7 +30,7 @@ shared class AlbumArtCache {
     static Integer bigBitmapIndex = 0;
     static Integer iconBitmapIndex = 1;
 
-    value tag = LogHelper.makeLogTag(`AlbumArtCache`);
+//    value tag = LogHelper.makeLogTag(`AlbumArtCache`);
 
     value max = min { maxAlbumArtCacheSize, runtime.maxIntegerValue, Runtime.runtime.maxMemory() / 4 };
     object mCache extends LruCache<String,ObjectArray<Bitmap>>(max) {
@@ -55,11 +54,11 @@ shared class AlbumArtCache {
         void onFetched(String? artUrl, Bitmap? bigImage, Bitmap? iconImage);
 
         if (exists bitmap = mCache.get(artUrl)) {
-            LogHelper.d(tag, "getOrFetch: album art is in cache, using it", artUrl);
+//            LogHelper.d(tag, "getOrFetch: album art is in cache, using it", artUrl);
             onFetched(artUrl, bitmap.get(bigBitmapIndex), bitmap.get(iconBitmapIndex));
         }
         else {
-            LogHelper.d(tag, "getOrFetch: starting asynctask to fetch ", artUrl);
+//            LogHelper.d(tag, "getOrFetch: starting asynctask to fetch ", artUrl);
 
             object extends AsyncTask<Anything,Anything,ObjectArray<Bitmap>>() {
 

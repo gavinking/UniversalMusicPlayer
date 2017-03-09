@@ -1,22 +1,18 @@
+import android {
+    AndroidR=R
+}
 import android.app {
     ActivityManager
+}
+import android.content {
+    ComponentName,
+    Context
 }
 import android.graphics {
     BitmapFactory
 }
 import android.media {
     MediaMetadata
-}
-import android {
-    AndroidR=R
-}
-import com.example.android.uamp {
-    R,
-    MusicService
-}
-import android.content {
-    ComponentName,
-    Context
 }
 import android.media.browse {
     MediaBrowser
@@ -26,24 +22,28 @@ import android.media.session {
     MediaSession,
     MediaController
 }
-import com.example.android.uamp.utils {
-     ResourceHelper,
-    LogHelper
+import android.net {
+    ConnectivityManager
 }
 import android.os {
     Bundle,
     Build,
     RemoteException
 }
-import android.net {
-    ConnectivityManager
+
+import com.example.android.uamp {
+    R,
+    MusicService
+}
+import com.example.android.uamp.utils {
+    ResourceHelper
 }
 
 shared abstract class BaseActivity()
         extends ActionBarCastActivity()
         satisfies MediaBrowserProvider {
 
-    value tag = LogHelper.makeLogTag(`BaseActivity`);
+//    value tag = LogHelper.makeLogTag(`BaseActivity`);
 
     shared actual late MediaBrowser mediaBrowser;
     late variable PlaybackControlsFragment controlsFragment;
@@ -54,7 +54,7 @@ shared abstract class BaseActivity()
     }
 
     void showPlaybackControls() {
-        LogHelper.d(tag, "showPlaybackControls");
+//        LogHelper.d(tag, "showPlaybackControls");
         if (online) {
             fragmentManager.beginTransaction()
                 .setCustomAnimations(
@@ -68,7 +68,7 @@ shared abstract class BaseActivity()
     }
 
     void hidePlaybackControls() {
-        LogHelper.d(tag, "hidePlaybackControls");
+//        LogHelper.d(tag, "hidePlaybackControls");
         fragmentManager.beginTransaction()
             .hide(controlsFragment)
             .commit();
@@ -91,7 +91,7 @@ shared abstract class BaseActivity()
             if (shouldShowControls()) {
                 showPlaybackControls();
             } else {
-                LogHelper.d(tag, "mediaControllerCallback.onPlaybackStateChanged: hiding controls because state is ", state.state);
+//                LogHelper.d(tag, "mediaControllerCallback.onPlaybackStateChanged: hiding controls because state is ", state.state);
                 hidePlaybackControls();
             }
         }
@@ -99,7 +99,7 @@ shared abstract class BaseActivity()
             if (shouldShowControls()) {
                 showPlaybackControls();
             } else {
-                LogHelper.d(tag, "mediaControllerCallback.onMetadataChanged: hiding controls because metadata is null");
+//                LogHelper.d(tag, "mediaControllerCallback.onMetadataChanged: hiding controls because metadata is null");
                 hidePlaybackControls();
             }
         }
@@ -113,7 +113,7 @@ shared abstract class BaseActivity()
         if (shouldShowControls()) {
             showPlaybackControls();
         } else {
-            LogHelper.d(tag, "connectionCallback.onConnected: hiding controls because metadata is null");
+//            LogHelper.d(tag, "connectionCallback.onConnected: hiding controls because metadata is null");
             hidePlaybackControls();
         }
         controlsFragment.onConnected();
@@ -122,7 +122,7 @@ shared abstract class BaseActivity()
 
     shared actual default void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        LogHelper.d(tag, "Activity onCreate");
+//        LogHelper.d(tag, "Activity onCreate");
         if (Build.VERSION.sdkInt >= 21) {
             value taskDesc
                     = ActivityManager.TaskDescription(title.string,
@@ -134,7 +134,7 @@ shared abstract class BaseActivity()
             ComponentName(this, `MusicService`),
             object extends MediaBrowser.ConnectionCallback() {
                 shared actual void onConnected() {
-                    LogHelper.d(tag, "onConnected");
+//                    LogHelper.d(tag, "onConnected");
                     try {
                         connectToSession(mediaBrowser.sessionToken);
                     }
@@ -149,7 +149,7 @@ shared abstract class BaseActivity()
 
     shared actual void onStart() {
         super.onStart();
-        LogHelper.d(tag, "Activity onStart");
+//        LogHelper.d(tag, "Activity onStart");
         "Mising fragment with id 'controls'. Cannot continue."
         assert (is PlaybackControlsFragment fragment
                 = fragmentManager.findFragmentById(R.Id.fragment_playback_controls));
@@ -160,7 +160,7 @@ shared abstract class BaseActivity()
 
     shared actual void onStop() {
         super.onStop();
-        LogHelper.d(tag, "Activity onStop");
+//        LogHelper.d(tag, "Activity onStop");
         mediaController?.unregisterCallback(MediaControllerCallback());
         mediaBrowser.disconnect();
     }

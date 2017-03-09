@@ -47,9 +47,6 @@ import com.example.android.uamp {
     MusicService,
     R
 }
-import com.example.android.uamp.utils {
-    LogHelper
-}
 
 import java.util.concurrent {
     Executors,
@@ -60,7 +57,7 @@ import java.util.concurrent {
 shared class FullScreenPlayerActivity()
         extends ActionBarCastActivity() {
 
-    value tag = LogHelper.makeLogTag(`FullScreenPlayerActivity`);
+//    value tag = LogHelper.makeLogTag(`FullScreenPlayerActivity`);
 
     value progressUpdateInternal = 1000;
     value progressUpdateInitialInterval = 100;
@@ -158,7 +155,7 @@ shared class FullScreenPlayerActivity()
             stopSeekbarUpdate();
         }
         else {
-            LogHelper.d(tag, "Unhandled state ", state.state);
+//            LogHelper.d(tag, "Unhandled state ", state.state);
         }
         mSkipNext.setVisibility(state.actions.and(PlaybackState.actionSkipToNext) == 0
                                 then invisible else visible);
@@ -186,7 +183,7 @@ shared class FullScreenPlayerActivity()
 
     void updateMediaDescription(MediaDescription? description) {
         if (exists description) {
-            LogHelper.d(tag, "updateMediaDescription called ");
+//            LogHelper.d(tag, "updateMediaDescription called ");
             mLine1.setText(description.title);
             mLine2.setText(description.subtitle);
             fetchImageAsync(description);
@@ -195,16 +192,16 @@ shared class FullScreenPlayerActivity()
 
     void updateDuration(MediaMetadata? metadata) {
         if (exists metadata) {
-            LogHelper.d(tag, "updateDuration called ");
+//            LogHelper.d(tag, "updateDuration called ");
             value duration = metadata.getLong(MediaMetadata.metadataKeyDuration);
             mSeekbar.setMax(duration);
             mEnd.setText(DateUtils.formatElapsedTime(duration / 1000));
         }
     }
 
-    object mCallback extends MediaController.Callback() {
+    object callback extends MediaController.Callback() {
         shared actual void onPlaybackStateChanged(PlaybackState state) {
-            LogHelper.d(tag, "onPlaybackstate changed", state);
+//            LogHelper.d(tag, "onPlaybackstate changed", state);
             updatePlaybackState(state);
         }
         shared actual void onMetadataChanged(MediaMetadata? metadata) {
@@ -215,26 +212,24 @@ shared class FullScreenPlayerActivity()
         }
     }
 
-    void connectToSession(MediaSession.Token? token) {
+    void connectToSession(MediaSession.Token token) {
         value mediaController = MediaController(this, token);
-        if (!mediaController.metadata exists) {
-            finish();
-        }
-        else {
+        if (exists metadata = mediaController.metadata) {
             this.mediaController = mediaController;
-            mediaController.registerCallback(mCallback);
+            mediaController.registerCallback(callback);
             value state = mediaController.playbackState;
             updatePlaybackState(state);
-            if (exists metadata = mediaController.metadata) {
-                updateMediaDescription(metadata.description);
-                updateDuration(metadata);
-            }
+            updateMediaDescription(metadata.description);
+            updateDuration(metadata);
             updateProgress();
             if (state exists,
                 state.state == PlaybackState.statePlaying
                 || state.state == PlaybackState.stateBuffering) {
                 scheduleSeekbarUpdate();
             }
+        }
+        else {
+            finish();
         }
     }
 
@@ -287,7 +282,7 @@ shared class FullScreenPlayerActivity()
                     scheduleSeekbarUpdate();
                 }
                 else {
-                    LogHelper.d(tag, "onClick with state ", state.state);
+//                    LogHelper.d(tag, "onClick with state ", state.state);
                 }
             }
         });
@@ -312,7 +307,7 @@ shared class FullScreenPlayerActivity()
                     ComponentName(this, `MusicService`),
                     object extends MediaBrowser.ConnectionCallback() {
                         shared actual void onConnected() {
-                            LogHelper.d(tag, "onConnected");
+//                            LogHelper.d(tag, "onConnected");
                             try {
                                 connectToSession(mMediaBrowser.sessionToken);
                             }
@@ -340,7 +335,7 @@ shared class FullScreenPlayerActivity()
     shared actual void onStop() {
         super.onStop();
         mMediaBrowser.disconnect();
-        mediaController?.unregisterCallback(mCallback);
+        mediaController?.unregisterCallback(callback);
     }
 
     shared actual void onDestroy() {

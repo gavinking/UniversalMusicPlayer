@@ -34,9 +34,6 @@ import com.example.android.uamp {
     MusicService,
     R
 }
-import com.example.android.uamp.utils {
-    LogHelper
-}
 
 import java.util {
     Objects
@@ -44,7 +41,7 @@ import java.util {
 
 shared class PlaybackControlsFragment() extends Fragment() {
 
-    value tag = LogHelper.makeLogTag(`PlaybackControlsFragment`);
+//    value tag = LogHelper.makeLogTag(`PlaybackControlsFragment`);
 
     late ImageButton mPlayPause;
     late TextView mTitle;
@@ -56,12 +53,12 @@ shared class PlaybackControlsFragment() extends Fragment() {
 
     object mCallback extends MediaController.Callback() {
         shared actual void onPlaybackStateChanged(PlaybackState state) {
-            LogHelper.d(tag, "Received playback state change to state ", state.state);
+//            LogHelper.d(tag, "Received playback state change to state ", state.state);
             super.onPlaybackStateChanged(state);
         }
         shared actual void onMetadataChanged(MediaMetadata? metadata) {
             if (exists metadata) {
-                LogHelper.d(tag, "Received metadata state change to mediaId=", metadata.description.mediaId, " song=", metadata.description.title);
+//                LogHelper.d(tag, "Received metadata state change to mediaId=", metadata.description.mediaId, " song=", metadata.description.title);
                 super.onMetadataChanged(metadata);
             }
         }
@@ -119,7 +116,7 @@ shared class PlaybackControlsFragment() extends Fragment() {
 
     shared actual void onStart() {
         super.onStart();
-        LogHelper.d(tag, "fragment.onStart");
+//        LogHelper.d(tag, "fragment.onStart");
         if (exists controller = activity.mediaController) {
             onConnected();
         }
@@ -127,7 +124,7 @@ shared class PlaybackControlsFragment() extends Fragment() {
 
     shared actual void onStop() {
         super.onStop();
-        LogHelper.d(tag, "fragment.onStop");
+//        LogHelper.d(tag, "fragment.onStop");
         if (exists controller = activity.mediaController) {
             controller.unregisterCallback(mCallback);
         }
@@ -143,9 +140,9 @@ shared class PlaybackControlsFragment() extends Fragment() {
     }
 
     void onMetadataChanged(MediaMetadata? metadata) {
-        LogHelper.d(tag, "onMetadataChanged ", metadata);
+//        LogHelper.d(tag, "onMetadataChanged ", metadata);
         if (!activity exists) {
-            LogHelper.w(tag, "onMetadataChanged called when getActivity null," + "this should not happen if the callback was properly unregistered. Ignoring.");
+//            LogHelper.w(tag, "onMetadataChanged called when getActivity null," + "this should not happen if the callback was properly unregistered. Ignoring.");
             return;
         }
         if (!exists metadata) {
@@ -164,7 +161,7 @@ shared class PlaybackControlsFragment() extends Fragment() {
             else {
                 AlbumArtCache.instance.fetch(artUrl, (artUrl, bitmap, icon) {
                     if (exists icon) {
-                        LogHelper.d(tag, "album art icon of w=", icon.width, " h=", icon.height);
+//                        LogHelper.d(tag, "album art icon of w=", icon.width, " h=", icon.height);
                         if (added) {
                             mAlbumArt.setImageBitmap(icon);
                         }
@@ -185,9 +182,9 @@ shared class PlaybackControlsFragment() extends Fragment() {
     }
 
     void onPlaybackStateChanged(PlaybackState? state) {
-        LogHelper.d(tag, "onPlaybackStateChanged ", state);
+//        LogHelper.d(tag, "onPlaybackStateChanged ", state);
         if (!activity exists) {
-            LogHelper.w(tag, "onPlaybackStateChanged called when getActivity null," + "this should not happen if the callback was properly unregistered. Ignoring.");
+//            LogHelper.w(tag, "onPlaybackStateChanged called when getActivity null," + "this should not happen if the callback was properly unregistered. Ignoring.");
             return ;
         }
         if (!exists state) {
@@ -199,7 +196,7 @@ shared class PlaybackControlsFragment() extends Fragment() {
             enablePlay = true;
         }
         else if (state.state == PlaybackState.stateError) {
-            LogHelper.e(tag, "error playbackstate: ", state.errorMessage);
+//            LogHelper.e(tag, "error playbackstate: ", state.errorMessage);
             Toast.makeText(activity, state.errorMessage, Toast.lengthLong).show();
             enablePlay = false;
         }

@@ -18,9 +18,6 @@ import android.provider {
 import com.example.android.uamp {
     R
 }
-import com.example.android.uamp.utils {
-    LogHelper
-}
 
 import java.util {
     Objects
@@ -38,7 +35,7 @@ shared class MusicPlayerActivity
 
     variable Bundle? mVoiceSearchParams = null;
 
-    value tag = LogHelper.makeLogTag(`MusicPlayerActivity`);
+//    value tag = LogHelper.makeLogTag(`MusicPlayerActivity`);
 
     value browseFragment {
         assert (is MediaBrowserFragment? fragment
@@ -50,7 +47,7 @@ shared class MusicPlayerActivity
 
     shared actual void onCreate(Bundle? savedInstanceState) {
         super.onCreate(savedInstanceState);
-        LogHelper.d(tag, "Activity onCreate");
+//        LogHelper.d(tag, "Activity onCreate");
         setContentView(R.Layout.activity_player);
         initializeToolbar();
         initializeFromParams(savedInstanceState, intent);
@@ -67,26 +64,26 @@ shared class MusicPlayerActivity
     }
 
     shared actual void onMediaItemSelected(MediaBrowser.MediaItem item) {
-        LogHelper.d(tag, "onMediaItemSelected, mediaId=" + item.mediaId);
+//        LogHelper.d(tag, "onMediaItemSelected, mediaId=" + item.mediaId);
         if (item.playable) {
             mediaController.transportControls
                 .playFromMediaId(item.mediaId, null);
         } else if (item.browsable) {
             navigateToBrowser(item.mediaId);
         } else {
-            LogHelper.w(tag, "Ignoring MediaItem that is neither browsable nor playable: ", "mediaId=", item.mediaId);
+//            LogHelper.w(tag, "Ignoring MediaItem that is neither browsable nor playable: ", "mediaId=", item.mediaId);
         }
     }
 
     shared actual void setToolbarTitle(String? title) {
-        LogHelper.d(tag, "Setting toolbar title to ", title);
+//        LogHelper.d(tag, "Setting toolbar title to ", title);
         if (exists titleString = getString(R.String.app_name)) {
             setTitle(titleString);
         }
     }
 
     shared actual void onNewIntent(Intent intent) {
-        LogHelper.d(tag, "onNewIntent, intent=``intent``");
+//        LogHelper.d(tag, "onNewIntent, intent=``intent``");
         initializeFromParams(null, intent);
         startFullScreenActivityIfNeeded(intent);
     }
@@ -108,8 +105,8 @@ shared class MusicPlayerActivity
         if (exists action = intent.action,
             action == MediaStore.intentActionMediaPlayFromSearch) {
             mVoiceSearchParams = intent.extras;
-            LogHelper.d(tag, "Starting from voice search query=",
-                mVoiceSearchParams?.getString(SearchManager.query));
+//            LogHelper.d(tag, "Starting from voice search query=",
+//                mVoiceSearchParams?.getString(SearchManager.query));
             mediaId = null;
         } else if (exists savedInstanceState) {
             mediaId = savedInstanceState.getString(savedMediaId);

@@ -31,7 +31,6 @@ import com.example.android.uamp.ui {
     MusicPlayerActivity
 }
 import com.example.android.uamp.utils {
-    LogHelper,
     ResourceHelper
 }
 
@@ -54,7 +53,7 @@ shared class MediaNotificationManager(MusicService service) {
     value actionNext = "com.example.android.uamp.next";
     value actionStopCasting = "com.example.android.uamp.stop_cast";
 
-    value tag = LogHelper.makeLogTag(`MediaNotificationManager`);
+//    value tag = LogHelper.makeLogTag(`MediaNotificationManager`);
 
     value notificationColor = ResourceHelper.getThemeColor(service, R.Attr.colorPrimary, Color.dkgray);
     value notificationManager = service.getSystemService(`NotificationManager`);
@@ -86,7 +85,7 @@ shared class MediaNotificationManager(MusicService service) {
     variable Boolean started = false;
 
     void addPlayPauseAction(Notification.Builder builder) {
-        LogHelper.d(tag, "updatePlayPauseAction");
+//        LogHelper.d(tag, "updatePlayPauseAction");
 
         String label;
         Integer icon;
@@ -120,24 +119,24 @@ shared class MediaNotificationManager(MusicService service) {
 
 //        LogHelper.d(tag, "updateNotificationPlaybackState. mPlaybackState=" + mPlaybackState);
         if (!exists playback) {
-            LogHelper.d(tag, "updateNotificationPlaybackState. cancelling notification!");
+//            LogHelper.d(tag, "updateNotificationPlaybackState. cancelling notification!");
             service.stopForeground(true);
             return;
         }
         if (!started) {
-            LogHelper.d(tag, "updateNotificationPlaybackState. cancelling notification!");
+//            LogHelper.d(tag, "updateNotificationPlaybackState. cancelling notification!");
             service.stopForeground(true);
             return;
         }
 
         if (playback.state == PlaybackState.statePlaying, playback.position>=0) {
-            LogHelper.d(tag, "updateNotificationPlaybackState. updating playback position to ",
-                (System.currentTimeMillis() - playback.position) / 1000, " seconds");
+//            LogHelper.d(tag, "updateNotificationPlaybackState. updating playback position to ",
+//                (System.currentTimeMillis() - playback.position) / 1000, " seconds");
             builder.setWhen(System.currentTimeMillis() - playback.position)
                 .setShowWhen(true)
                 .setUsesChronometer(true);
         } else {
-            LogHelper.d(tag, "updateNotificationPlaybackState. hiding playback position");
+//            LogHelper.d(tag, "updateNotificationPlaybackState. hiding playback position");
             builder.setWhen(0).setShowWhen(false).setUsesChronometer(false);
         }
         builder.setOngoing(playback.state == PlaybackState.statePlaying);
@@ -148,7 +147,7 @@ shared class MediaNotificationManager(MusicService service) {
             if (exists artUrl,
                 exists uri = metadata?.description?.iconUri,
                 uri.string==artUrl) {
-                LogHelper.d(tag, "fetchBitmapFromURLAsync: set bitmap to ", artUrl);
+//                LogHelper.d(tag, "fetchBitmapFromURLAsync: set bitmap to ", artUrl);
                 builder.setLargeIcon(bitmap);
                 notificationManager.notify(notificationId, builder.build());
             }
@@ -222,7 +221,7 @@ shared class MediaNotificationManager(MusicService service) {
         shared actual void onReceive(Context context, Intent intent) {
             value action = intent.action;
 
-            LogHelper.d(tag, "Received intent with action " + action);
+//            LogHelper.d(tag, "Received intent with action " + action);
 
             if (action == actionPause) {
                 transportControls?.pause();
@@ -238,7 +237,7 @@ shared class MediaNotificationManager(MusicService service) {
                 i.putExtra(MusicService.cmdName, MusicService.cmdStopCasting);
                 service.startService(i);
             } else {
-                LogHelper.w(tag, "Unknown intent ignored. Action=", action);
+//                LogHelper.w(tag, "Unknown intent ignored. Action=", action);
             }
         }
     }
@@ -296,7 +295,7 @@ shared class MediaNotificationManager(MusicService service) {
 
         shared actual void onPlaybackStateChanged(PlaybackState state) {
             playbackState = state;
-            LogHelper.d(tag, "Received new playback state", state);
+//            LogHelper.d(tag, "Received new playback state", state);
             if (state.state == PlaybackState.stateStopped
              || state.state == PlaybackState.stateNone) {
                 stopNotification();
@@ -307,14 +306,14 @@ shared class MediaNotificationManager(MusicService service) {
 
         shared actual void onMetadataChanged(MediaMetadata metadata) {
             outer.metadata = metadata;
-            LogHelper.d(tag, "Received new metadata ", metadata);
+//            LogHelper.d(tag, "Received new metadata ", metadata);
             if (exists notification = createNotification()) {
                 notificationManager.notify(notificationId, notification);
             }
         }
 
         shared actual void onSessionDestroyed() {
-            LogHelper.d(tag, "Session was destroyed, resetting to the new session token");
+//            LogHelper.d(tag, "Session was destroyed, resetting to the new session token");
             try {
                 updateSessionToken(service);
             }
