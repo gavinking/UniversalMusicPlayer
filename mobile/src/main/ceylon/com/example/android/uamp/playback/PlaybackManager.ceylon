@@ -7,7 +7,9 @@ import android.media.session {
 }
 import android.os {
     Bundle,
-    SystemClock
+    SystemClock {
+        elapsedRealtime
+    }
 }
 
 import com.example.android.uamp {
@@ -34,7 +36,7 @@ shared class PlaybackManager(
 
     value customActionThumbsUp = "com.example.android.uamp.THUMBS_UP";
 
-    Integer availableActions
+    value availableActions
             => PlaybackState.actionPlayPause
             .or(PlaybackState.actionPlayFromMediaId)
             .or(PlaybackState.actionPlayFromSearch)
@@ -73,12 +75,15 @@ shared class PlaybackManager(
                 = PlaybackState.Builder()
                 .setActions(availableActions);
         setCustomAction(stateBuilder);
-        variable value state = currentPlayback.state;
+        Integer state;
         if (exists error) {
             stateBuilder.setErrorMessage(error);
             state = PlaybackState.stateError;
         }
-        stateBuilder.setState(state, position, 1.0, SystemClock.elapsedRealtime());
+        else {
+            state = currentPlayback.state;
+        }
+        stateBuilder.setState(state, position, 1.0, elapsedRealtime());
         if (exists currentMusic = queueManager.currentMusic) {
             stateBuilder.setActiveQueueItemId(currentMusic.queueId);
         }

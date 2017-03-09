@@ -161,7 +161,8 @@ shared class MusicService
         if (!TvHelper.isTvUiMode(this)) {
             value manager = CastContext.getSharedInstance(this).sessionManager;
             mCastSessionManager = manager;
-            mCastSessionManagerListener = object satisfies SessionManagerListener<CastSession> {
+            mCastSessionManagerListener
+                    = object satisfies SessionManagerListener<CastSession> {
 
                 shared actual void onSessionEnded(CastSession session, Integer error) {
                     LogHelper.d(tag, "onSessionEnded");

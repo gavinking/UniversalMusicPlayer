@@ -197,18 +197,18 @@ shared class LocalPlayback(Context context, MusicProvider musicProvider)
         LogHelper.d(tag, "tryToGetAudioFocus");
         value result
                 = audioManager.requestAudioFocus(this,
-            AudioManager.streamMusic,
-            AudioManager.audiofocusGain);
+                    AudioManager.streamMusic,
+                    AudioManager.audiofocusGain);
         audioFocus
                 = result == AudioManager.audiofocusRequestGranted
-        then AudioFocus.focused
-        else AudioFocus.noFocusNoDuck;
+                then AudioFocus.focused
+                else AudioFocus.noFocusNoDuck;
     }
 
     void giveUpAudioFocus() {
         LogHelper.d(tag, "giveUpAudioFocus");
         if (audioManager.abandonAudioFocus(this)
-        == AudioManager.audiofocusRequestGranted) {
+                == AudioManager.audiofocusRequestGranted) {
             audioFocus = AudioFocus.noFocusNoDuck;
         }
     }
