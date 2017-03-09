@@ -120,49 +120,50 @@ shared class FullScreenPlayerActivity()
         }
     }
 
-    void updatePlaybackState(PlaybackState? state) {
-        if (exists state) {
-            mLastPlaybackState = state;
-            if (exists extras = mediaController?.extras) {
-                value castName = extras.getString(MusicService.extraConnectedCast);
-                value line3Text = resources.getString(R.String.casting_to_device, castName) else "";
-                mLine3.setText(line3Text);
-            }
-
-            if (state.state == PlaybackState.statePlaying) {
-                mLoading.visibility = invisible;
-                mPlayPause.visibility = visible;
-                mPlayPause.setImageDrawable(mPauseDrawable);
-                mControllers.visibility = visible;
-                scheduleSeekbarUpdate();
-            }
-            else if (state.state == PlaybackState.statePaused) {
-                mControllers.visibility = visible;
-                mLoading.visibility = invisible;
-                mPlayPause.visibility = visible;
-                mPlayPause.setImageDrawable(mPlayDrawable);
-                stopSeekbarUpdate();
-            }
-            else if (state.state == PlaybackState.stateNone) {
-                mLoading.visibility = invisible;
-                mPlayPause.visibility = visible;
-                mPlayPause.setImageDrawable(mPlayDrawable);
-                stopSeekbarUpdate();
-            }
-            else if (state.state == PlaybackState.stateBuffering) {
-                mPlayPause.visibility = invisible;
-                mLoading.visibility = visible;
-                mLine3.setText(R.String.loading);
-                stopSeekbarUpdate();
-            }
-            else {
-                LogHelper.d(tag, "Unhandled state ", state.state);
-            }
-            mSkipNext.setVisibility(state.actions.and(PlaybackState.actionSkipToNext) == 0
-                                    then invisible else visible);
-            mSkipPrev.setVisibility(state.actions.and(PlaybackState.actionSkipToPrevious) == 0
-                                    then invisible else visible);
+    void updatePlaybackState(PlaybackState state) {
+        mLastPlaybackState = state;
+        if (exists extras = mediaController?.extras) {
+            value line3Text
+                    = if (exists castName= extras.getString(MusicService.extraConnectedCast))
+                    then resources.getString(R.String.casting_to_device, castName)
+                    else "";
+            mLine3.setText(line3Text);
         }
+
+        if (state.state == PlaybackState.statePlaying) {
+            mLoading.visibility = invisible;
+            mPlayPause.visibility = visible;
+            mPlayPause.setImageDrawable(mPauseDrawable);
+            mControllers.visibility = visible;
+            scheduleSeekbarUpdate();
+        }
+        else if (state.state == PlaybackState.statePaused) {
+            mControllers.visibility = visible;
+            mLoading.visibility = invisible;
+            mPlayPause.visibility = visible;
+            mPlayPause.setImageDrawable(mPlayDrawable);
+            stopSeekbarUpdate();
+        }
+        else if (state.state == PlaybackState.stateNone ||
+                 state.state == PlaybackState.stateStopped) {
+            mLoading.visibility = invisible;
+            mPlayPause.visibility = visible;
+            mPlayPause.setImageDrawable(mPlayDrawable);
+            stopSeekbarUpdate();
+        }
+        else if (state.state == PlaybackState.stateBuffering) {
+            mPlayPause.visibility = invisible;
+            mLoading.visibility = visible;
+            mLine3.setText(R.String.loading);
+            stopSeekbarUpdate();
+        }
+        else {
+            LogHelper.d(tag, "Unhandled state ", state.state);
+        }
+        mSkipNext.setVisibility(state.actions.and(PlaybackState.actionSkipToNext) == 0
+                                then invisible else visible);
+        mSkipPrev.setVisibility(state.actions.and(PlaybackState.actionSkipToPrevious) == 0
+                                then invisible else visible);
     }
 
     void fetchImageAsync(MediaDescription description) {

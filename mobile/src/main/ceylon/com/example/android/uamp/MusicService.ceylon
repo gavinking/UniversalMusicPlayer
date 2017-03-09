@@ -94,6 +94,7 @@ shared class MusicService
     late MediaSession mSession;
     late Bundle mSessionExtras;
     late MediaRouter mMediaRouter;
+
     late SessionManager? mCastSessionManager;
     late SessionManagerListener<CastSession>? mCastSessionManagerListener;
 
@@ -227,9 +228,7 @@ shared class MusicService
         unregisterCarConnectionReceiver();
         mPlaybackManager.handleStopRequest(null);
         mMediaNotificationManager.stopNotification();
-        if (exists mCastSessionManager) {
-            mCastSessionManager.removeSessionManagerListener(mCastSessionManagerListener, `CastSession`);
-        }
+        mCastSessionManager?.removeSessionManagerListener(mCastSessionManagerListener, `CastSession`);
         mDelayedStopHandler.removeCallbacksAndMessages(null);
         mSession.release();
     }
