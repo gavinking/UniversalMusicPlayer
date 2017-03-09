@@ -92,7 +92,7 @@ shared class QueueManager(
         value queue = QueueHelper.getPlayingQueueFromSearch(query, extras, musicProvider);
         setCurrentQueue(resources.getString(R.String.search_queue_title), queue);
         updateMetadata();
-        return if (exists queue) then !queue.empty else false;
+        return !queue.empty;
     }
 
     shared void setRandomQueue() {
@@ -118,7 +118,7 @@ shared class QueueManager(
 
     shared MediaSession.QueueItem? currentMusic
             => QueueHelper.isIndexPlayable(mCurrentIndex, mPlayingQueue)
-    then mPlayingQueue.get(mCurrentIndex);
+            then mPlayingQueue.get(mCurrentIndex);
 
     shared Integer currentQueueSize => mPlayingQueue?.size() else 0;
 

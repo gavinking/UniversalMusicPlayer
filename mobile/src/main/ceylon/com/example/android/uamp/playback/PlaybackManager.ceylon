@@ -78,7 +78,7 @@ shared class PlaybackManager(
             stateBuilder.setErrorMessage(error);
             state = PlaybackState.stateError;
         }
-        stateBuilder.setState(state, position, 1.0f, SystemClock.elapsedRealtime());
+        stateBuilder.setState(state, position, 1.0, SystemClock.elapsedRealtime());
         if (exists currentMusic = queueManager.currentMusic) {
             stateBuilder.setActiveQueueItemId(currentMusic.queueId);
         }

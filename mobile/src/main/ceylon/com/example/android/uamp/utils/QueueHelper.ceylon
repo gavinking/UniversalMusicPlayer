@@ -156,13 +156,10 @@ shared class QueueHelper {
     }
 
     shared static Boolean isIndexPlayable(Integer index, List<MediaSession.QueueItem> queue)
-            => queue exists && index>=0 && index<queue.size();
+            => index>=0 && index<queue.size();
 
     shared static Boolean equalQueues(List<MediaSession.QueueItem> list1, List<MediaSession.QueueItem> list2) {
-        if (!list1 exists || !list2 exists) {
-            return false;
-        }
-        if (list1.size() !=list2.size()) {
+        if (list1.size() != list2.size()) {
             return false;
         }
         variable Integer i = 0;

@@ -116,8 +116,8 @@ shared class LocalPlayback(Context context, MusicProvider musicProvider)
 
     shared actual Integer currentStreamPosition
             => if (exists player = mediaPlayer)
-    then player.currentPosition
-    else currentPosition;
+            then player.currentPosition
+            else currentPosition;
 
     assign currentStreamPosition
             => this.currentPosition = currentStreamPosition;
