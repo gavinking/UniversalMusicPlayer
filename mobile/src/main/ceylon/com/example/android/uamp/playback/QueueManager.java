@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.android.uamp.playback;
+//package com.example.android.uamp.playback;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;

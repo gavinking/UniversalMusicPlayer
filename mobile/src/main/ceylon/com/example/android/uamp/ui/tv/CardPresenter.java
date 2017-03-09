@@ -54,7 +54,7 @@ public class CardPresenter extends Presenter {
         final CardViewHolder cardViewHolder = (CardViewHolder) viewHolder;
 
         // Determine description and playing state of item based on instance type
-        cardViewHolder.setState(MediaItemViewHolder.STATE_NONE);
+        cardViewHolder.setState(MediaItemViewHolder.getStateNone());
         if (item instanceof MediaBrowser.MediaItem) {
             MediaBrowser.MediaItem mediaItem = (MediaBrowser.MediaItem) item;
             LogHelper.d(TAG, "onBindViewHolder MediaItem: ", mediaItem.toString());
@@ -79,7 +79,7 @@ public class CardPresenter extends Presenter {
     public void onUnbindViewHolder(Presenter.ViewHolder viewHolder) {
         LogHelper.d(TAG, "onUnbindViewHolder");
         final CardViewHolder cardViewHolder = (CardViewHolder) viewHolder;
-        cardViewHolder.setState(MediaItemViewHolder.STATE_NONE);
+        cardViewHolder.setState(MediaItemViewHolder.getStateNone());
         cardViewHolder.setBadgeImage(null);
     }
 

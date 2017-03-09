@@ -48,7 +48,7 @@ public class CardViewHolder extends Presenter.ViewHolder {
     public CardViewHolder(View view) {
         super(view);
         mCardView = (ImageCardView) view;
-        mItemState = MediaItemViewHolder.STATE_NONE;
+        mItemState = MediaItemViewHolder.getStateNone();
     }
 
     public void setState(int state) {
@@ -60,7 +60,7 @@ public class CardViewHolder extends Presenter.ViewHolder {
     }
 
     public void attachView() {
-        if (mItemState == MediaItemViewHolder.STATE_PLAYING) {
+        if (mItemState == MediaItemViewHolder.getStatePlaying()) {
             AnimationDrawable badgeDrawable = (AnimationDrawable) mCardView.getBadgeImage();
             if (badgeDrawable != null) {
                 badgeDrawable.start();
@@ -69,7 +69,7 @@ public class CardViewHolder extends Presenter.ViewHolder {
     }
 
     public void detachView() {
-        if (mItemState == MediaItemViewHolder.STATE_PLAYING) {
+        if (mItemState == MediaItemViewHolder.getStatePlaying()) {
             AnimationDrawable badgeDrawable = (AnimationDrawable) mCardView.getBadgeImage();
             if (badgeDrawable != null) {
                 badgeDrawable.stop();
