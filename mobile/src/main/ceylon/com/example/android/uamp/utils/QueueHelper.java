@@ -85,21 +85,21 @@ public class QueueHelper {
 
         LogHelper.d(TAG, "VoiceSearchParams: ", params);
 
-        if (params.isAny) {
+        if (params.getIsAny()) {
             // If isAny is true, we will play anything. This is app-dependent, and can be,
             // for example, favorite playlists, "I'm feeling lucky", most recent, etc.
             return getRandomQueue(musicProvider);
         }
 
         Iterable<MediaMetadata> result = null;
-        if (params.isAlbumFocus) {
-            result = musicProvider.searchMusicByAlbum(params.album);
-        } else if (params.isGenreFocus) {
-            result = musicProvider.getMusicsByGenre(params.genre);
-        } else if (params.isArtistFocus) {
-            result = musicProvider.searchMusicByArtist(params.artist);
-        } else if (params.isSongFocus) {
-            result = musicProvider.searchMusicBySongTitle(params.song);
+        if (params.getIsAlbumFocus()) {
+            result = musicProvider.searchMusicByAlbum(params.getAlbum());
+        } else if (params.getIsGenreFocus()) {
+            result = musicProvider.getMusicsByGenre(params.getGenre());
+        } else if (params.getIsArtistFocus()) {
+            result = musicProvider.searchMusicByArtist(params.getArtist());
+        } else if (params.getIsSongFocus()) {
+            result = musicProvider.searchMusicBySongTitle(params.getSong());
         }
 
         // If there was no results using media focus parameter, we do an unstructured query.
@@ -107,7 +107,7 @@ public class QueueHelper {
         // to Google, for example, but is not. For example, a user searching for Madonna on
         // a PodCast application wouldn't get results if we only looked at the
         // Artist (podcast author). Then, we can instead do an unstructured search.
-        if (params.isUnstructured || result == null || !result.iterator().hasNext()) {
+        if (params.getIsUnstructured() || result == null || !result.iterator().hasNext()) {
             // To keep it simple for this example, we do unstructured searches on the
             // song title only. A real world application could search on other fields as well.
             result = musicProvider.searchMusicBySongTitle(query);

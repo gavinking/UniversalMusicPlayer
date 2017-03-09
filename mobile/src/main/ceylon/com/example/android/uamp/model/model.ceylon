@@ -174,10 +174,6 @@ class State
     }
 }
 
-shared interface Callback {
-    shared formal void onMusicCatalogReady(Boolean success);
-}
-
 shared class MusicProvider {
 
     static value tag = LogHelper.makeLogTag(`MusicProvider`);
@@ -270,12 +266,12 @@ shared class MusicProvider {
     shared Boolean isFavorite(String musicId)
             => mFavoriteTracks.contains(musicId);
 
-    shared void retrieveMediaAsync(Callback? callback) {
+    shared void retrieveMediaAsync(void onMusicCatalogReady(Boolean success)) {
         LogHelper.d(tag, "retrieveMediaAsync called");
         if (mCurrentState == State.initialized) {
-            if (exists callback) {
-                callback.onMusicCatalogReady(true);
-            }
+//            if (exists callback) {
+                onMusicCatalogReady(true);
+//            }
             return;
         }
         object extends AsyncTask<Anything,Anything,State>() {
@@ -284,9 +280,9 @@ shared class MusicProvider {
                 return mCurrentState;
             }
             shared actual void onPostExecute(State current) {
-                if (exists callback) {
-                    callback.onMusicCatalogReady(current == State.initialized);
-                }
+//                if (exists callback) {
+                    onMusicCatalogReady(current == State.initialized);
+//                }
             }
 
         }.execute();

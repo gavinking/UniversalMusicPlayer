@@ -68,9 +68,9 @@ shared class MediaBrowserFragment() extends Fragment() {
     variable String? currentMediaId = null;
     variable MediaFragmentListener? mediaFragmentListener = null;
 
-    late BrowseAdapter browserAdapter;
-    late View errorView;
-    late TextView errorMessage;
+    late variable BrowseAdapter browserAdapter;
+    late variable View errorView;
+    late variable TextView errorMessage;
 
     function showError(Boolean forceError) {
         if (!NetworkHelper.isOnline(activity)) {
@@ -95,7 +95,7 @@ shared class MediaBrowserFragment() extends Fragment() {
     }
 
     void checkForUserVisibleErrors(Boolean forceError) {
-        Boolean showError = this.showError(forceError);
+        value showError = this.showError(forceError);
         errorView.visibility
                 = showError then View.visible else View.gone;
         LogHelper.d(tag, "checkForUserVisibleErrors. forceError=", forceError, " showError=", showError, " isOnline=", NetworkHelper.isOnline(activity));
