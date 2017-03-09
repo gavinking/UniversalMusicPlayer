@@ -11,9 +11,9 @@ import android.content.res {
 import android.os {
     Bundle
 }
-import com.example.android.uamp.ui.tv {
-    TvPlaybackActivity
-}
+//import com.example.android.uamp.ui.tv {
+//    TvPlaybackActivity
+//}
 import com.example.android.uamp.utils {
     LogHelper
 }
@@ -29,7 +29,9 @@ shared class NowPlayingActivity() extends Activity() {
         Intent newIntent;
         if (uiModeManager.currentModeType == Configuration.uiModeTypeTelevision) {
             LogHelper.d(tag, "Running on a TV Device");
-            newIntent = Intent(this, `TvPlaybackActivity`);
+//            newIntent = Intent(this, `TvPlaybackActivity`);
+            "No TV"
+            assert (false);
         } else {
             LogHelper.d(tag, "Running on a non-TV Device");
             newIntent = Intent(this, `MusicPlayerActivity`);

@@ -246,7 +246,7 @@ shared class MusicProvider {
             => mMusicListById.containsKey(musicId)
             then mMusicListById.get(musicId).metadata;
 
-    shared void updateMusicArt(String musicId, Bitmap albumArt, Bitmap icon) {
+    shared void updateMusicArt(String musicId, Bitmap? albumArt, Bitmap? icon) {
         value metadata = MediaMetadata.Builder(getMusic(musicId))
             .putBitmap(MediaMetadata.metadataKeyAlbumArt, albumArt)
             .putBitmap(MediaMetadata.metadataKeyDisplayIcon, icon)

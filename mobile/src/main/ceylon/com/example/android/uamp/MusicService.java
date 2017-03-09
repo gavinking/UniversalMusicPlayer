@@ -227,11 +227,7 @@ public class MusicService extends MediaBrowserService implements
 
         mPlaybackManager.updatePlaybackState(null);
 
-        try {
-            mMediaNotificationManager = new MediaNotificationManager(this);
-        } catch (RemoteException e) {
-            throw new IllegalStateException("Could not create a MediaNotificationManager", e);
-        }
+        mMediaNotificationManager = new MediaNotificationManager(this);
 
         if (!TvHelper.isTvUiMode(this)) {
             mCastSessionManager = CastContext.getSharedInstance(this).getSessionManager();

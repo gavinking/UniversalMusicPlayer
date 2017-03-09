@@ -4,9 +4,6 @@ import android.app {
 import android.content {
     Intent
 }
-import android.graphics {
-    Bitmap
-}
 import android.media {
     MediaMetadata
 }
@@ -159,18 +156,17 @@ shared class PlaybackControlsFragment() extends Fragment() {
         value artUrl = metadata.description.iconUri?.string;
         if (!Objects.equals(artUrl, mArtUrl)) {
             mArtUrl = artUrl;
-            value cache = AlbumArtCache.instance;
-            if (exists art = metadata.description.iconBitmap else cache.getIconImage(mArtUrl)) {
+            if (exists art
+                    = metadata.description.iconBitmap
+                    else AlbumArtCache.instance.getIconImage(mArtUrl)) {
                 mAlbumArt.setImageBitmap(art);
             }
             else {
-                cache.fetch(artUrl, object extends AlbumArtCache.FetchListener() {
-                    shared actual void onFetched(String? artUrl, Bitmap? bitmap, Bitmap? icon) {
-                        if (exists icon) {
-                            LogHelper.d(tag, "album art icon of w=", icon.width, " h=", icon.height);
-                            if (added) {
-                                mAlbumArt.setImageBitmap(icon);
-                            }
+                AlbumArtCache.instance.fetch(artUrl, (artUrl, bitmap, icon) {
+                    if (exists icon) {
+                        LogHelper.d(tag, "album art icon of w=", icon.width, " h=", icon.height);
+                        if (added) {
+                            mAlbumArt.setImageBitmap(icon);
                         }
                     }
                 });

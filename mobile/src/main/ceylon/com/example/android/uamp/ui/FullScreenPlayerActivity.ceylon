@@ -2,9 +2,6 @@ import android.content {
     ComponentName,
     Intent
 }
-import android.graphics {
-    Bitmap
-}
 import android.graphics.drawable {
     Drawable
 }
@@ -172,20 +169,16 @@ shared class FullScreenPlayerActivity()
         if (exists uri = description.iconUri) {
             value artUrl = uri.string;
             mCurrentArtUrl = artUrl;
-            value cache = AlbumArtCache.instance;
             if (exists art
-                    = cache.getBigImage(artUrl)
+                    = AlbumArtCache.instance.getBigImage(artUrl)
                     else description.iconBitmap) {
                 mBackgroundImage.setImageBitmap(art);
             } else {
-                cache.fetch(artUrl,
-                    object extends AlbumArtCache.FetchListener() {
-                        shared actual void onFetched(String artUrl, Bitmap bitmap, Bitmap icon) {
-                            if (artUrl == mCurrentArtUrl) {
-                                mBackgroundImage.setImageBitmap(bitmap);
-                            }
-                        }
-                    });
+                AlbumArtCache.instance.fetch(artUrl, (artUrl, bitmap, icon) {
+                    if (exists artUrl, artUrl == mCurrentArtUrl) {
+                        mBackgroundImage.setImageBitmap(bitmap);
+                    }
+                });
             }
         }
     }

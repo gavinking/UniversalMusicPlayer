@@ -1,35 +1,34 @@
-import android.graphics {
-    Bitmap
+import android.content.res {
+    Resources
+}
+import android.media {
+    MediaMetadata
+}
+import android.media.session {
+    MediaSession
+}
+import android.os {
+    Bundle
+}
+
+import com.example.android.uamp {
+    R,
+    AlbumArtCache
+}
+import com.example.android.uamp.model {
+    MusicProvider
 }
 import com.example.android.uamp.utils {
     QueueHelper,
     MediaIDHelper,
     LogHelper
 }
-import android.media.session {
-    MediaSession
-}
-import com.example.android.uamp.model {
-    MusicProvider
-}
-import com.example.android.uamp {
-    R,
-    AlbumArtCache
-}
-import android.content.res {
-    Resources
-}
+
 import java.util {
     Arrays,
     List,
     ArrayList,
     Collections
-}
-import android.os {
-    Bundle
-}
-import android.media {
-    MediaMetadata
 }
 
 shared class QueueManager(
@@ -142,16 +141,14 @@ shared class QueueManager(
             listener.onMetadataChanged(metadata);
             if (!metadata.description.iconBitmap exists, metadata.description.iconUri exists) {
                 value albumUri = metadata.description.iconUri?.string;
-                AlbumArtCache.instance.fetch(albumUri, object extends AlbumArtCache.FetchListener() {
-                    shared actual void onFetched(String artUrl, Bitmap bitmap, Bitmap icon) {
-                        musicProvider.updateMusicArt(musicId, bitmap, icon);
-                        if (exists currentMusic = outer.currentMusic) {
-                            assert (exists mediaId = currentMusic.description.mediaId);
-                            value currentPlayingId = MediaIDHelper.extractMusicIDFromMediaID(mediaId);
-                            if (musicId == currentPlayingId) {
-                                assert (exists music = musicProvider.getMusic(currentPlayingId));
-                                listener.onMetadataChanged(music);
-                            }
+                AlbumArtCache.instance.fetch(albumUri, (artUrl, bitmap, icon) {
+                    musicProvider.updateMusicArt(musicId, bitmap, icon);
+                    if (exists currentMusic = this.currentMusic) {
+                        assert (exists mediaId = currentMusic.description.mediaId);
+                        value currentPlayingId = MediaIDHelper.extractMusicIDFromMediaID(mediaId);
+                        if (musicId == currentPlayingId) {
+                            assert (exists music = musicProvider.getMusic(currentPlayingId));
+                            listener.onMetadataChanged(music);
                         }
                     }
                 });
