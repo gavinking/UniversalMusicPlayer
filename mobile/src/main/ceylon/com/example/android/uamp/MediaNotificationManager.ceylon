@@ -283,7 +283,7 @@ shared class MediaNotificationManager(MusicService service) {
         }
     }
 
-    shared void updateSessionToken(MusicService musicService) {
+    void updateSessionToken(MusicService musicService) {
         value freshToken = musicService.sessionToken;
         if (!Objects.equals(sessionToken, freshToken)) {
             controller?.unregisterCallback(mediaControllerCallback);
