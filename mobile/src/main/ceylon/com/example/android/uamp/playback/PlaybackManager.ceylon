@@ -219,17 +219,19 @@ shared class PlaybackManager(
     currentPlayback.setCallback(callback);
 
     shared void switchToPlayback(Playback playback, Boolean resumePlaying) {
-        value oldState = playback.state;
-        value pos = playback.currentStreamPosition;
-        value currentMediaId = playback.currentMediaId;
-        playback.stop(false);
+        value oldState = currentPlayback.state;
+        value pos = currentPlayback.currentStreamPosition;
+        value currentMediaId = currentPlayback.currentMediaId;
+        currentPlayback.stop(false);
         playback.setCallback(callback);
         playback.currentStreamPosition = pos<0 then 0 else pos;
         playback.currentMediaId = currentMediaId;
         playback.start();
-        this.currentPlayback = playback;
+        currentPlayback = playback;
 
-        if (oldState == PlaybackState.stateBuffering) {
+        if (oldState == PlaybackState.stateBuffering
+         || oldState == PlaybackState.stateConnecting
+         || oldState == PlaybackState.statePaused) {
             playback.pause();
         }
         else if (oldState == PlaybackState.statePlaying) {
@@ -241,11 +243,6 @@ shared class PlaybackManager(
             } else {
                 playback.stop(true);
             }
-        }
-        else if (oldState == PlaybackState.stateNone) {
-        }
-        else {
-//            LogHelper.d(tag, "Default called. Old state is ", oldState);
         }
     }
 

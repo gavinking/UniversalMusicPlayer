@@ -6,12 +6,7 @@ import android.content {
 }
 import android.media {
     AudioManager,
-    MediaPlayer {
-        OnCompletionListener,
-        OnErrorListener,
-        OnPreparedListener,
-        OnSeekCompleteListener
-    }
+    MediaPlayer
 }
 import android.media.session {
     PlaybackState,
@@ -53,12 +48,7 @@ class AudioFocus {
 }
 
 shared class LocalPlayback(Context context, MusicProvider musicProvider)
-        satisfies Playback
-                & AudioManager.OnAudioFocusChangeListener
-                & OnCompletionListener
-                & OnErrorListener
-                & OnPreparedListener
-                & OnSeekCompleteListener {
+        satisfies Playback {
 
 //    value tag = LogHelper.makeLogTag(`LocalPlayback`);
 
@@ -81,7 +71,7 @@ shared class LocalPlayback(Context context, MusicProvider musicProvider)
 
     shared actual Boolean playing
             => playOnFocusGain
-    || (mediaPlayer?.playing else false);
+            || (mediaPlayer?.playing else false);
 
     object audioNoisyReceiver extends BroadcastReceiver() {
         shared actual void onReceive(Context context, Intent intent) {
@@ -195,9 +185,8 @@ shared class LocalPlayback(Context context, MusicProvider musicProvider)
     void tryToGetAudioFocus() {
 //        LogHelper.d(tag, "tryToGetAudioFocus");
         value result
-                = audioManager.requestAudioFocus(this,
-                    AudioManager.streamMusic,
-                    AudioManager.audiofocusGain);
+                = audioManager.requestAudioFocus(onAudioFocusChange,
+                    AudioManager.streamMusic, AudioManager.audiofocusGain);
         audioFocus
                 = result == AudioManager.audiofocusRequestGranted
                 then AudioFocus.focused
@@ -206,7 +195,7 @@ shared class LocalPlayback(Context context, MusicProvider musicProvider)
 
     void giveUpAudioFocus() {
 //        LogHelper.d(tag, "giveUpAudioFocus");
-        if (audioManager.abandonAudioFocus(this)
+        if (audioManager.abandonAudioFocus(onAudioFocusChange)
                 == AudioManager.audiofocusRequestGranted) {
             audioFocus = AudioFocus.noFocusNoDuck;
         }
@@ -240,7 +229,7 @@ shared class LocalPlayback(Context context, MusicProvider musicProvider)
         callback?.onPlaybackStatusChanged(state);
     }
 
-    shared actual void onAudioFocusChange(Integer focusChange) {
+    void onAudioFocusChange(Integer focusChange) {
 //        LogHelper.d(tag, "onAudioFocusChange. focusChange=", focusChange);
         if (focusChange == AudioManager.audiofocusGain) {
             audioFocus = AudioFocus.focused;
@@ -258,33 +247,6 @@ shared class LocalPlayback(Context context, MusicProvider musicProvider)
         configMediaPlayerState();
     }
 
-    shared actual void onSeekComplete(MediaPlayer mp) {
-//        LogHelper.d(tag, "onSeekComplete from MediaPlayer:", mp.currentPosition);
-        currentPosition = mp.currentPosition;
-        if (state == PlaybackState.stateBuffering) {
-            registerAudioNoisyReceiver();
-            mediaPlayer?.start();
-            state = PlaybackState.statePlaying;
-        }
-        callback?.onPlaybackStatusChanged(state);
-    }
-
-    shared actual void onCompletion(MediaPlayer player) {
-//        LogHelper.d(tag, "onCompletion from MediaPlayer");
-        callback?.onCompletion();
-    }
-
-    shared actual void onPrepared(MediaPlayer player) {
-//        LogHelper.d(tag, "onPrepared from MediaPlayer");
-        configMediaPlayerState();
-    }
-
-    shared actual Boolean onError(MediaPlayer mp, Integer what, Integer extra) {
-//        LogHelper.e(tag, "Media player error: what=``what```, extra=``extra``");
-        callback?.onError("MediaPlayer error ``what``` (``extra```)");
-        return true;
-    }
-
     MediaPlayer createMediaPlayerIfNeeded() {
 //        LogHelper.d(tag, "createMediaPlayerIfNeeded. needed? ", !mediaPlayer exists);
         if (exists player = mediaPlayer) {
@@ -292,12 +254,23 @@ shared class LocalPlayback(Context context, MusicProvider musicProvider)
             return player;
         } else {
             value player = MediaPlayer();
-            player.setWakeMode(context.applicationContext, PowerManager.partialWakeLock);
-            player.setOnPreparedListener(this);
-            player.setOnCompletionListener(this);
-            player.setOnErrorListener(this);
-            player.setOnSeekCompleteListener(this);
             mediaPlayer = player;
+            player.setWakeMode(context.applicationContext, PowerManager.partialWakeLock);
+            player.setOnPreparedListener((player) => configMediaPlayerState());
+            player.setOnCompletionListener((player) => callback?.onCompletion());
+            player.setOnErrorListener((player, what, extra) {
+                callback?.onError("MediaPlayer error ``what``` (``extra```)");
+                return true;
+            });
+            player.setOnSeekCompleteListener((player) {
+                currentPosition = player.currentPosition;
+                if (state == PlaybackState.stateBuffering) {
+                    registerAudioNoisyReceiver();
+                    mediaPlayer?.start();
+                    state = PlaybackState.statePlaying;
+                }
+                callback?.onPlaybackStatusChanged(state);
+            });
             return player;
         }
     }

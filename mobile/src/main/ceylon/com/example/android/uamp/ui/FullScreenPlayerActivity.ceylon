@@ -273,11 +273,13 @@ shared class FullScreenPlayerActivity()
         mPlayPause.setOnClickListener((v) {
             if (exists state = mediaController.playbackState) {
                 value controls = mediaController.transportControls;
-                if (state.state == PlaybackState.statePlaying) {
+                if (state.state == PlaybackState.statePlaying ||
+                    state.state == PlaybackState.stateBuffering) {
                     controls.pause();
                     stopSeekbarUpdate();
                 }
-                else if (state.state == PlaybackState.statePaused) {
+                else if (state.state == PlaybackState.statePaused ||
+                         state.state == PlaybackState.stateStopped) {
                     controls.play();
                     scheduleSeekbarUpdate();
                 }

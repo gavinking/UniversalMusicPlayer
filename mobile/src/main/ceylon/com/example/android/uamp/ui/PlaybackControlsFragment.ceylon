@@ -191,7 +191,8 @@ shared class PlaybackControlsFragment() extends Fragment() {
         }
 
         Boolean enablePlay;
-        if (state.state == PlaybackState.statePaused) {
+        if (state.state == PlaybackState.statePaused ||
+            state.state == PlaybackState.stateStopped) {
             enablePlay = true;
         }
         else if (state.state == PlaybackState.stateError) {

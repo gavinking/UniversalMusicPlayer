@@ -78,7 +78,10 @@ shared abstract class BaseActivity()
         if (exists mediaController = this.mediaController,
             mediaController.metadata exists,
             mediaController.playbackState exists) {
-            return mediaController.playbackState.state != PlaybackState.stateError;
+            value state = mediaController.playbackState.state;
+            return state != PlaybackState.stateError
+                && state != PlaybackState.stateNone
+                && state != PlaybackState.stateStopped;
         }
         else {
             return false;
