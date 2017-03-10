@@ -103,8 +103,7 @@ shared class QueueManager(
 //        LogHelper.d(tag, "setQueueFromMusic", mediaId);
         value canReuseQueue
                 = isSameBrowsingCategory(mediaId)
-        then setCurrentQueueItemByMediaId(mediaId)
-        else false;
+                && setCurrentQueueItemByMediaId(mediaId);
         if (!canReuseQueue) {
             value queueTitle
                     = resources.getString(R.String.browse_musics_by_genre_subtitle,
