@@ -38,6 +38,7 @@ shared class RemoteJSONSource satisfies MusicProviderSource {
     shared new () {}
 
     function buildFromJSON(JSONObject json, String basePath) {
+
         value title = json.getString(jsonTitle);
         value album = json.getString(jsonAlbum);
         value artist = json.getString(jsonArtist);
@@ -54,6 +55,7 @@ shared class RemoteJSONSource satisfies MusicProviderSource {
         if (!iconUrl.startsWith("http")) {
             iconUrl = basePath + iconUrl;
         }
+
         return MediaMetadata.Builder()
             .putString(MediaMetadata.metadataKeyMediaId, source.hash.string)
             .putString(customMetadataTrackSource, source)
@@ -91,7 +93,7 @@ shared class RemoteJSONSource satisfies MusicProviderSource {
     shared actual Iterator<MediaMetadata> iterator() {
 //        try {
         value slashPos = catalogUrl.lastIndexOf("/");
-        value path = catalogUrl.substring(0, slashPos + 1);
+        value path = catalogUrl.substring(0, slashPos+1);
         value tracks = ArrayList<MediaMetadata>();
         if (exists jsonObj = fetchJSONFromUrl(catalogUrl),
             exists jsonTracks = jsonObj.getJSONArray(jsonMusic)) {

@@ -5,22 +5,16 @@ import android.text {
     TextUtils
 }
 
-shared class MutableMediaMetadata {
-
-    shared variable MediaMetadata metadata;
+shared class MutableMediaMetadata(trackId, metadata) {
 
     shared String trackId;
-
-    shared new (String trackId, MediaMetadata metadata) {
-        this.metadata = metadata;
-        this.trackId = trackId;
-    }
+    shared variable MediaMetadata metadata;
 
     equals(Object that)
             => if (is MutableMediaMetadata that)
-    then this===that
-    || TextUtils.equals(trackId, that.trackId)
-    else false;
+            then this===that
+              || TextUtils.equals(trackId, that.trackId)
+            else false;
 
     hash => trackId.hash;
 

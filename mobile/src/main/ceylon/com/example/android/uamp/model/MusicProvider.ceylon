@@ -36,8 +36,7 @@ import java.lang {
 import java.util {
     List,
     ArrayList,
-    Collections,
-    Iterator
+    Collections
 }
 import java.util.concurrent {
     ConcurrentHashMap
@@ -45,9 +44,7 @@ import java.util.concurrent {
 
 shared String customMetadataTrackSource = "__SOURCE__";
 
-shared interface MusicProviderSource {
-    shared formal Iterator<MediaMetadata> iterator() ;
-}
+shared interface MusicProviderSource satisfies JIterable<MediaMetadata> {}
 
 class State
         of nonInitialized
@@ -104,7 +101,7 @@ shared class MusicProvider(MusicProviderSource source = RemoteJSONSource()) {
         }
         value result = ArrayList<MediaMetadata>();
         for (track in musicListById.values()) {
-            if (query.lowercased in track.metadata.getString(metadataField).string) {
+            if (query.lowercased in track.metadata.getString(metadataField)) {
                 result.add(track.metadata);
             }
         }
@@ -122,13 +119,14 @@ shared class MusicProvider(MusicProviderSource source = RemoteJSONSource()) {
 
     shared MediaMetadata? getMusic(String musicId)
             => musicListById.containsKey(musicId)
-    then musicListById.get(musicId).metadata;
+            then musicListById.get(musicId).metadata;
 
     shared void updateMusicArt(String musicId, Bitmap? albumArt, Bitmap? icon) {
-        value metadata = MediaMetadata.Builder(getMusic(musicId))
-            .putBitmap(MediaMetadata.metadataKeyAlbumArt, albumArt)
-            .putBitmap(MediaMetadata.metadataKeyDisplayIcon, icon)
-            .build();
+        value metadata
+                = MediaMetadata.Builder(getMusic(musicId))
+                .putBitmap(MediaMetadata.metadataKeyAlbumArt, albumArt)
+                .putBitmap(MediaMetadata.metadataKeyDisplayIcon, icon)
+                .build();
         "Unexpected error: Inconsistent data structures in MusicProvider"
         assert (exists mutableMetadata = musicListById.get(musicId));
         mutableMetadata.metadata = metadata;
@@ -146,7 +144,7 @@ shared class MusicProvider(MusicProviderSource source = RemoteJSONSource()) {
             => mCurrentState == State.initialized;
 
     shared Boolean isFavorite(String musicId)
-            => favoriteTracks.contains(musicId);
+            => musicId in favoriteTracks;
 
     shared void retrieveMediaAsync(void onMusicCatalogReady(Boolean success)) {
 //        LogHelper.d(tag, "retrieveMediaAsync called");
@@ -191,9 +189,7 @@ shared class MusicProvider(MusicProviderSource source = RemoteJSONSource()) {
         try {
             if (mCurrentState == State.nonInitialized) {
                 mCurrentState = State.initializing;
-                value tracks = source.iterator();
-                while (tracks.hasNext()) {
-                    value item = tracks.next();
+                for (item in source) {
                     value musicId = item.getString(MediaMetadata.metadataKeyMediaId);
                     musicListById.put(musicId, MutableMediaMetadata(musicId, item));
                 }
