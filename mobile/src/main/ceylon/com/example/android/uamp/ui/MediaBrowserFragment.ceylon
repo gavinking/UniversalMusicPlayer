@@ -117,14 +117,12 @@ shared class MediaBrowserFragment() extends Fragment() {
 
     object mediaControllerCallback extends MediaController.Callback() {
         shared actual void onMetadataChanged(MediaMetadata? metadata) {
-            super.onMetadataChanged(metadata);
             if (exists metadata) {
 //                LogHelper.d(tag, "Received metadata change to media ", metadata.description.mediaId);
                 browserAdapter.notifyDataSetChanged();
             }
         }
         shared actual void onPlaybackStateChanged(PlaybackState state) {
-            super.onPlaybackStateChanged(state);
 //            LogHelper.d(tag, "Received state change: ", state);
             checkForUserVisibleErrors(false);
             browserAdapter.notifyDataSetChanged();
