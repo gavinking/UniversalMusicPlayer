@@ -225,9 +225,7 @@ shared class MediaBrowserFragment() extends Fragment() {
                 }
             });
 
-        if (exists controller = activity.mediaController) {
-            controller.registerCallback(mediaControllerCallback);
-        }
+        activity.mediaController?.registerCallback(mediaControllerCallback);
     }
 
     void updateTitle() {
