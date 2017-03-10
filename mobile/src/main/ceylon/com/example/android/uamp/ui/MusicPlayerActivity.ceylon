@@ -118,7 +118,8 @@ shared class MusicPlayerActivity
 
     void navigateToBrowser(String? mediaId) {
 //        LogHelper.d(tag, "navigateToBrowser, mediaId=``mediaId``");
-        if (!browseFragment exists || !MediaIDHelper.equalIds(browseFragment?.mediaId, mediaId)) {
+        if (!browseFragment exists
+         || !MediaIDHelper.equalIds(browseFragment?.mediaId, mediaId)) {
             value fragment = MediaBrowserFragment();
             fragment.mediaId = mediaId;
             value transaction = fragmentManager.beginTransaction();
