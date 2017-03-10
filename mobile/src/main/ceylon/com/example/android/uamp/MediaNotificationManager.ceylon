@@ -41,6 +41,9 @@ import java.lang {
 import java.util {
     Objects
 }
+import android.graphics.drawable {
+    Icon
+}
 
 shared class MediaNotificationManager(MusicService service) {
 
@@ -84,6 +87,10 @@ shared class MediaNotificationManager(MusicService service) {
 
     variable Boolean started = false;
 
+    function createAction(Integer icon, String label, PendingIntent intent)
+            => Notification.Action.Builder(Icon.createWithResource("", icon), label, intent)
+            .build();
+
     void addPlayPauseAction(Notification.Builder builder) {
 //        LogHelper.d(tag, "updatePlayPauseAction");
 
@@ -101,7 +108,7 @@ shared class MediaNotificationManager(MusicService service) {
             intent = playIntent;
         }
 
-        builder.addAction(Notification.Action(icon, label, intent));
+        builder.addAction(createAction(icon, label, intent));
     }
 
     function createContentIntent(MediaDescription? description) {
@@ -162,14 +169,14 @@ shared class MediaNotificationManager(MusicService service) {
             value notificationBuilder = Notification.Builder(service);
             variable Integer playPauseButtonPosition = 0;
             if (playbackState.actions.and(PlaybackState.actionSkipToPrevious) != 0) {
-                notificationBuilder.addAction(R.Drawable.ic_skip_previous_white_24dp,
-                    service.getString(R.String.label_previous), previousIntent);
+                notificationBuilder.addAction(createAction(R.Drawable.ic_skip_previous_white_24dp,
+                    service.getString(R.String.label_previous), previousIntent));
                 playPauseButtonPosition = 1;
             }
             addPlayPauseAction(notificationBuilder);
             if (playbackState.actions.and(PlaybackState.actionSkipToNext) != 0) {
-                notificationBuilder.addAction(R.Drawable.ic_skip_next_white_24dp,
-                    service.getString(R.String.label_next), nextIntent);
+                notificationBuilder.addAction(createAction(R.Drawable.ic_skip_next_white_24dp,
+                    service.getString(R.String.label_next), nextIntent));
             }
 
             value description = metadata.description;
@@ -203,8 +210,8 @@ shared class MediaNotificationManager(MusicService service) {
             if (exists castName = controller?.extras?.getString(MusicService.extraConnectedCast)) {
                 String castInfo = service.resources.getString(R.String.casting_to_device, castName);
                 notificationBuilder.setSubText(castInfo);
-                notificationBuilder.addAction(R.Drawable.ic_close_black_24dp,
-                    service.getString(R.String.stop_casting), stopCastIntent);
+                notificationBuilder.addAction(createAction(R.Drawable.ic_close_black_24dp,
+                    service.getString(R.String.stop_casting), stopCastIntent));
             }
             setNotificationPlaybackState(notificationBuilder);
             if (exists fetchArtUrl) {
