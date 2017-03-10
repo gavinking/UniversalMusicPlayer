@@ -205,14 +205,15 @@ shared class PlaybackManager(
                 handleStopRequest(null);
             }
         }
-        shared actual void onPlaybackStatusChanged(Integer state)
+
+        onPlaybackStatusChanged(Integer state)
                 => updatePlaybackState(null);
-        shared actual void onError(String error)
+
+        onError(String error)
                 => updatePlaybackState(error);
-        shared actual void setCurrentMediaId(String mediaId) {
-//            LogHelper.d(tag, "setCurrentMediaId", mediaId);
-            queueManager.setQueueFromMusic(mediaId);
-        }
+
+        setCurrentMediaId(String mediaId)
+                => queueManager.setQueueFromMusic(mediaId);
     }
 
     currentPlayback.setCallback(callback);

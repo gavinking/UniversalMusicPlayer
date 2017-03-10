@@ -127,11 +127,11 @@ shared class MusicService
         value queueManager
                 = QueueManager(mMusicProvider, resources,
             object satisfies MetadataUpdateListener {
-                shared actual void onMetadataChanged(MediaMetadata metadata)
+                onMetadataChanged(MediaMetadata metadata)
                         => mSession.setMetadata(metadata);
-                shared actual void onMetadataRetrieveError()
+                onMetadataRetrieveError()
                         => mPlaybackManager.updatePlaybackState(getString(R.String.error_no_metadata));
-                shared actual void onCurrentQueueIndexUpdated(Integer queueIndex)
+                onCurrentQueueIndexUpdated(Integer queueIndex)
                         => mPlaybackManager.handlePlayRequest();
                 shared actual void onQueueUpdated(String title, List<MediaSession.QueueItem>? newQueue) {
                     mSession.setQueue(newQueue);
