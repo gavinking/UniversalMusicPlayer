@@ -13,9 +13,6 @@ import android.os {
 import android.support.v4.app {
     FragmentActivity
 }
-import android.text {
-    TextUtils
-}
 
 import com.example.android.uamp {
     VoiceSearchParams
@@ -156,7 +153,7 @@ shared class QueueHelper {
     }
 
     shared static Boolean isIndexPlayable(Integer index, List<MediaSession.QueueItem> queue)
-            => index>=0 && index<queue.size();
+            => 0 <= index < queue.size();
 
     shared static Boolean equalQueues(List<MediaSession.QueueItem> list1, List<MediaSession.QueueItem> list2) {
         if (list1.size() != list2.size()) {
@@ -164,10 +161,11 @@ shared class QueueHelper {
         }
         variable Integer i = 0;
         while (i<list1.size()) {
-            if (list1.get(i).queueId != list2.get(i).queueId) {
-                return false;
-            }
-            if (!TextUtils.equals(list1.get(i).description.mediaId, list2.get(i).description.mediaId)) {
+            value item1 = list1.get(i);
+            value item2 = list2.get(i);
+            if (item1.queueId != item2.queueId
+                || !MediaIDHelper.equalIds(item1.description.mediaId,
+                                     item2.description.mediaId)) {
                 return false;
             }
             i++;
@@ -183,7 +181,7 @@ shared class QueueHelper {
             value itemMusicId = MediaIDHelper.extractMusicIDFromMediaID(queueItem.description.mediaId);
             if (queueItem.queueId == currentPlayingQueueId,
                 exists currentPlayingMediaId = controller.metadata.description.mediaId,
-                TextUtils.equals(currentPlayingMediaId, itemMusicId)) {
+                MediaIDHelper.equalIds(currentPlayingMediaId, itemMusicId)) {
                 return true;
             }
         }

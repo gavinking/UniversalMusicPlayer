@@ -23,9 +23,6 @@ import android.net.wifi {
 import android.os {
     PowerManager
 }
-import android.text {
-    TextUtils
-}
 
 import com.example.android.uamp {
     MusicService
@@ -134,7 +131,7 @@ shared class LocalPlayback(Context context, MusicProvider musicProvider)
         tryToGetAudioFocus();
         registerAudioNoisyReceiver();
         value mediaId = item.description.mediaId;
-        value mediaHasChanged = !TextUtils.equals(mediaId, currentMediaId);
+        value mediaHasChanged = !MediaIDHelper.equalIds(mediaId, currentMediaId);
         if (mediaHasChanged) {
             currentPosition = 0;
             currentMediaId = mediaId;

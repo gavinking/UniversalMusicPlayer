@@ -167,7 +167,7 @@
 //        "Invalid mediaId ``mediaId``"
 //        assert (exists musicId = MediaIDHelper.extractMusicIDFromMediaID(mediaId),
 //                exists track = musicProvider.getMusic(musicId));
-//        if (!TextUtils.equals(mediaId, currentMediaId)) {
+//        if (!MediaIDHelper.equalIds(mediaId, currentMediaId)) {
 //            currentMediaId = mediaId;
 //            currentPosition = 0;
 //        }
@@ -183,7 +183,7 @@
 //            if (exists mediaInfo = remoteMediaClient.mediaInfo,
 //                exists customData = mediaInfo.customData, customData.has(itemId)) {
 //                value remoteMediaId = customData.getString(itemId);
-//                if (!TextUtils.equals(currentMediaId, remoteMediaId)) {
+//                if (!MediaIDHelper.equalIds(currentMediaId, remoteMediaId)) {
 //                    currentMediaId = remoteMediaId;
 //                    callback?.setCurrentMediaId(remoteMediaId);
 //                    updateLastKnownStreamPosition();

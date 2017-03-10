@@ -24,9 +24,6 @@ import android.net {
 import android.os {
     Bundle
 }
-import android.text {
-    TextUtils
-}
 import android.view {
     LayoutInflater,
     View,
@@ -236,7 +233,7 @@ shared class MediaBrowserFragment() extends Fragment() {
     }
 
     void updateTitle() {
-        if (TextUtils.equals(MediaIDHelper.mediaIdRoot, currentMediaId)) {
+        if (MediaIDHelper.equalIds(MediaIDHelper.mediaIdRoot, currentMediaId)) {
             mediaFragmentListener?.setToolbarTitle(null);
         }
         else {

@@ -7,8 +7,9 @@ import android.media.browse {
 import android.support.v4.app {
     FragmentActivity
 }
-import android.text {
-    TextUtils
+
+import java.util {
+    Objects
 }
 
 shared class MediaIDHelper {
@@ -20,6 +21,8 @@ shared class MediaIDHelper {
 
     static value categorySeparator = '/';
     static value leafSeparator = '|';
+
+    shared static Boolean equalIds(String? x, String ? y) => Objects.equals(x, y);
 
     static Boolean isValidCategory(String category)
             => category.indexOf(categorySeparator.string) < 0
@@ -82,7 +85,7 @@ shared class MediaIDHelper {
             exists metadata = context.mediaController?.metadata) {
             value itemMusicId = extractMusicIDFromMediaID(mediaItem.description.mediaId);
             if (exists currentPlayingMediaId = metadata.description.mediaId,
-                TextUtils.equals(currentPlayingMediaId, itemMusicId)) {
+                MediaIDHelper.equalIds(currentPlayingMediaId, itemMusicId)) {
                 return true;
             }
         }

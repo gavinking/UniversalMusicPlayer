@@ -1,8 +1,9 @@
 import android.media {
     MediaMetadata
 }
-import android.text {
-    TextUtils
+
+import com.example.android.uamp.utils {
+    MediaIDHelper
 }
 
 shared class MutableMediaMetadata(trackId, metadata) {
@@ -13,7 +14,7 @@ shared class MutableMediaMetadata(trackId, metadata) {
     equals(Object that)
             => if (is MutableMediaMetadata that)
             then this===that
-              || TextUtils.equals(trackId, that.trackId)
+              || MediaIDHelper.equalIds(trackId, that.trackId)
             else false;
 
     hash => trackId.hash;

@@ -9,6 +9,12 @@ import android.text {
     TextUtils
 }
 
+import com.example.android.uamp.utils {
+    MediaIDHelper {
+        equalIds
+    }
+}
+
 shared class VoiceSearchParams(query, Bundle? extras) {
 
     shared String query;
@@ -37,22 +43,22 @@ shared class VoiceSearchParams(query, Bundle? extras) {
                 genreKey = "android.intent.extra.genre";
             }
             String mediaFocus = extras.getString(MediaStore.extraMediaFocus);
-            if (TextUtils.equals(mediaFocus, MediaStore.Audio.Genres.entryContentType)) {
+            if (equalIds(mediaFocus, MediaStore.Audio.Genres.entryContentType)) {
                 isGenreFocus = true;
                 genre = extras.getString(genreKey);
                 if (TextUtils.isEmpty(genre)) {
                     genre = query;
                 }
-            } else if (TextUtils.equals(mediaFocus, MediaStore.Audio.Artists.entryContentType)) {
+            } else if (equalIds(mediaFocus, MediaStore.Audio.Artists.entryContentType)) {
                 isArtistFocus = true;
                 genre = extras.getString(genreKey);
                 artist = extras.getString(MediaStore.extraMediaArtist);
-            } else if (TextUtils.equals(mediaFocus, MediaStore.Audio.Albums.entryContentType)) {
+            } else if (equalIds(mediaFocus, MediaStore.Audio.Albums.entryContentType)) {
                 isAlbumFocus = true;
                 album = extras.getString(MediaStore.extraMediaAlbum);
                 genre = extras.getString(genreKey);
                 artist = extras.getString(MediaStore.extraMediaArtist);
-            } else if (TextUtils.equals(mediaFocus, MediaStore.Audio.Media.entryContentType)) {
+            } else if (equalIds(mediaFocus, MediaStore.Audio.Media.entryContentType)) {
                 isSongFocus = true;
                 song = extras.getString(MediaStore.extraMediaTitle);
                 album = extras.getString(MediaStore.extraMediaAlbum);
