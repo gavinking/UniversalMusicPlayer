@@ -1,18 +1,8 @@
-import com.example.android.uamp.utils {
-    MediaIDHelper
-}
-import com.example.android.uamp {
-    MusicService
-}
-import android.os {
-    PowerManager
-}
-import android.net.wifi {
-    WifiManager
-}
-import com.example.android.uamp.model {
-    customMetadataTrackSource,
-    MusicProvider
+import android.content {
+    Intent,
+    IntentFilter,
+    BroadcastReceiver,
+    Context
 }
 import android.media {
     AudioManager,
@@ -23,21 +13,33 @@ import android.media {
         OnSeekCompleteListener
     }
 }
-import java.util {
-    Objects
-}
-import java.io {
-    IOException
-}
 import android.media.session {
     PlaybackState,
     MediaSession
 }
-import android.content {
-    Intent,
-    IntentFilter,
-    BroadcastReceiver,
-    Context
+import android.net.wifi {
+    WifiManager
+}
+import android.os {
+    PowerManager
+}
+import android.text {
+    TextUtils
+}
+
+import com.example.android.uamp {
+    MusicService
+}
+import com.example.android.uamp.model {
+    customMetadataTrackSource,
+    MusicProvider
+}
+import com.example.android.uamp.utils {
+    MediaIDHelper
+}
+
+import java.io {
+    IOException
 }
 
 class AudioFocus {
@@ -132,7 +134,7 @@ shared class LocalPlayback(Context context, MusicProvider musicProvider)
         tryToGetAudioFocus();
         registerAudioNoisyReceiver();
         value mediaId = item.description.mediaId;
-        value mediaHasChanged = !Objects.equals(mediaId, currentMediaId);
+        value mediaHasChanged = !TextUtils.equals(mediaId, currentMediaId);
         if (mediaHasChanged) {
             currentPosition = 0;
             currentMediaId = mediaId;
@@ -144,8 +146,9 @@ shared class LocalPlayback(Context context, MusicProvider musicProvider)
         } else {
             state = PlaybackState.stateStopped;
             relaxResources(false);
-            assert (exists id = item.description.mediaId);
-            value track = musicProvider.getMusic(MediaIDHelper.extractMusicIDFromMediaID(id));
+            assert (exists id = item.description.mediaId,
+                    exists musicId = MediaIDHelper.extractMusicIDFromMediaID(id));
+            value track = musicProvider.getMusic(musicId);
             value source = track?.getString(customMetadataTrackSource)?.replace(" ", "%20");
             try {
                 value player = createMediaPlayerIfNeeded();

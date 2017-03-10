@@ -39,7 +39,7 @@ import com.example.android.uamp.model {
     MusicProvider
 }
 import com.example.android.uamp.playback {
-    CastPlayback,
+//    CastPlayback,
     LocalPlayback,
     PlaybackManager,
     PlaybackServiceCallback,
@@ -51,7 +51,7 @@ import com.example.android.uamp.ui {
 }
 import com.example.android.uamp.utils {
     CarHelper,
-    TvHelper,
+//    TvHelper,
     WearHelper,
     MediaIDHelper
 }
@@ -158,46 +158,46 @@ shared class MusicService
         mPlaybackManager.updatePlaybackState(null);
 
         mMediaNotificationManager = MediaNotificationManager(this);
-        if (!TvHelper.isTvUiMode(this)) {
-            value manager = CastContext.getSharedInstance(this).sessionManager;
-            mCastSessionManager = manager;
-            mCastSessionManagerListener
-                    = object satisfies SessionManagerListener<CastSession> {
-
-                shared actual void onSessionEnded(CastSession session, Integer error) {
-//                    LogHelper.d(tag, "onSessionEnded");
-                    mSessionExtras.remove(extraConnectedCast);
-                    mSession.setExtras(mSessionExtras);
-                    value playback = LocalPlayback(outer, mMusicProvider);
-                    mMediaRouter.setMediaSession(null);
-                    mPlaybackManager.switchToPlayback(playback, false);
-                }
-
-                shared actual void onSessionStarted(CastSession session, String sessionId) {
-                    mSessionExtras.putString(extraConnectedCast, session.castDevice.friendlyName);
-                    mSession.setExtras(mSessionExtras);
-                    value playback = CastPlayback(mMusicProvider,outer);
-                    mMediaRouter.setMediaSession(mSession);
-                    mPlaybackManager.switchToPlayback(playback, true);
-                }
-
-                shared actual void onSessionEnding(CastSession session)
-                        => mPlaybackManager.playback.updateLastKnownStreamPosition();
-
-                shared actual void onSessionResumed(CastSession session, Boolean wasSuspended) {}
-                shared actual void onSessionStarting(CastSession session) {}
-                shared actual void onSessionStartFailed(CastSession session, Integer error) {}
-                shared actual void onSessionResuming(CastSession session, String sessionId) {}
-                shared actual void onSessionResumeFailed(CastSession session, Integer error) {}
-                shared actual void onSessionSuspended(CastSession session, Integer reason) {}
-
-            };
-            manager.addSessionManagerListener(mCastSessionManagerListener, `CastSession`);
-        }
-        else {
+//        if (!TvHelper.isTvUiMode(this)) {
+//            value manager = CastContext.getSharedInstance(this).sessionManager;
+//            mCastSessionManager = manager;
+//            mCastSessionManagerListener
+//                    = object satisfies SessionManagerListener<CastSession> {
+//
+//                shared actual void onSessionEnded(CastSession session, Integer error) {
+////                    LogHelper.d(tag, "onSessionEnded");
+//                    mSessionExtras.remove(extraConnectedCast);
+//                    mSession.setExtras(mSessionExtras);
+//                    value playback = LocalPlayback(outer, mMusicProvider);
+//                    mMediaRouter.setMediaSession(null);
+//                    mPlaybackManager.switchToPlayback(playback, false);
+//                }
+//
+//                shared actual void onSessionStarted(CastSession session, String sessionId) {
+//                    mSessionExtras.putString(extraConnectedCast, session.castDevice.friendlyName);
+//                    mSession.setExtras(mSessionExtras);
+//                    value playback = CastPlayback(mMusicProvider,outer);
+//                    mMediaRouter.setMediaSession(mSession);
+//                    mPlaybackManager.switchToPlayback(playback, true);
+//                }
+//
+//                shared actual void onSessionEnding(CastSession session)
+//                        => mPlaybackManager.playback.updateLastKnownStreamPosition();
+//
+//                shared actual void onSessionResumed(CastSession session, Boolean wasSuspended) {}
+//                shared actual void onSessionStarting(CastSession session) {}
+//                shared actual void onSessionStartFailed(CastSession session, Integer error) {}
+//                shared actual void onSessionResuming(CastSession session, String sessionId) {}
+//                shared actual void onSessionResumeFailed(CastSession session, Integer error) {}
+//                shared actual void onSessionSuspended(CastSession session, Integer reason) {}
+//
+//            };
+//            manager.addSessionManagerListener(mCastSessionManagerListener, `CastSession`);
+//        }
+//        else {
             mCastSessionManager = null;
             mCastSessionManagerListener = null;
-        }
+//        }
 
         mMediaRouter = MediaRouter.getInstance(applicationContext);
         registerCarConnectionReceiver();

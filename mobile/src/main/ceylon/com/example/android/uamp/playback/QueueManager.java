@@ -16,24 +16,24 @@
 
 //package com.example.android.uamp.playback;
 
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.media.MediaMetadata;
-import android.media.session.MediaSession;
-
-import com.example.android.uamp.AlbumArtCache;
-import com.example.android.uamp.R;
-import com.example.android.uamp.model.MusicProvider;
-import com.example.android.uamp.utils.LogHelper;
-import com.example.android.uamp.utils.MediaIDHelper;
-import com.example.android.uamp.utils.QueueHelper;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+//import android.content.res.Resources;
+//import android.graphics.Bitmap;
+//import android.os.Bundle;
+//import android.support.annotation.NonNull;
+//import android.media.MediaMetadata;
+//import android.media.session.MediaSession;
+//
+//import com.example.android.uamp.AlbumArtCache;
+//import com.example.android.uamp.R;
+//import com.example.android.uamp.model.MusicProvider;
+//import com.example.android.uamp.utils.LogHelper;
+//import com.example.android.uamp.utils.MediaIDHelper;
+//import com.example.android.uamp.utils.QueueHelper;
+//
+//import java.util.ArrayList;
+//import java.util.Arrays;
+//import java.util.Collections;
+//import java.util.List;
 //
 ///**
 // * Simple data provider for queues. Keeps track of a current queue and a current index in the

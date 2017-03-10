@@ -14,13 +14,12 @@ import android.os {
 import android.provider {
     MediaStore
 }
+import android.text {
+    TextUtils
+}
 
 import com.example.android.uamp {
     R
-}
-
-import java.util {
-    Objects
 }
 
 shared class MusicPlayerActivity
@@ -119,7 +118,7 @@ shared class MusicPlayerActivity
 
     void navigateToBrowser(String? mediaId) {
 //        LogHelper.d(tag, "navigateToBrowser, mediaId=``mediaId``");
-        if (!browseFragment exists || !Objects.equals(browseFragment?.mediaId, mediaId)) {
+        if (!browseFragment exists || !TextUtils.equals(browseFragment?.mediaId, mediaId)) {
             value fragment = MediaBrowserFragment();
             fragment.mediaId = mediaId;
             value transaction = fragmentManager.beginTransaction();

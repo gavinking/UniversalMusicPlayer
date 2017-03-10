@@ -4,63 +4,44 @@ import android.content {
 import android.content.pm {
     PackageManager
 }
-import android.content.res {
-    XmlResourceParser
-}
 import android.os {
     Process
-}
-
-import java.io {
-    IOException
-}
-import java.lang {
-    JString=String
-}
-import java.util {
-    ArrayList,
-    HashMap
-}
-
-import org.xmlpull.v1 {
-    XmlPullParserException,
-    XmlPullParser
 }
 
 shared class PackageValidator(Context ctx) {
 
 //    value tag = LogHelper.makeLogTag(`PackageValidator`);
 
-    function readValidCertificates(XmlResourceParser parser) {
-        value validCertificates = HashMap<String,ArrayList<CallerInfo>>();
-        try {
-            variable Integer eventType = parser.next();
-            while (eventType != XmlResourceParser.endDocument) {
-                if (eventType == XmlResourceParser.startTag, parser.name.equals("signing_certificate")) {
-                    XmlPullParser pullParser = parser;
-                    value name = pullParser.getAttributeValue(null, "name");
-                    value packageName = pullParser.getAttributeValue(null, "package");
-                    value isRelease = parser.getAttributeBooleanValue(null, "release", false);
-                    value certificate = JString(parser.nextText()).replaceAll("\\s|\\n", "");
-                    value info = CallerInfo(name, packageName, isRelease);
-                    if (exists infos = validCertificates.get(certificate)) {
-                        infos.add(info);
-                    }
-                    else {
-                        value newInfos = ArrayList<CallerInfo>();
-                        newInfos.add(info);
-                        validCertificates.put(certificate, newInfos);
-                    }
-//                    LogHelper.v(tag, "Adding allowed caller: ", info.name, " package=", info.packageName, " release=", info.release, " certificate=", certificate);
-                }
-                eventType = parser.next();
-            }
-        }
-        catch (XmlPullParserException|IOException e) {
-//            LogHelper.e(tag, e, "Could not read allowed callers from XML.");
-        }
-        return validCertificates;
-    }
+//    function readValidCertificates(XmlResourceParser parser) {
+//        value validCertificates = HashMap<String,ArrayList<CallerInfo>>();
+//        try {
+//            variable Integer eventType = parser.next();
+//            while (eventType != XmlResourceParser.endDocument) {
+//                if (eventType == XmlResourceParser.startTag, parser.name.equals("signing_certificate")) {
+//                    XmlPullParser pullParser = parser;
+//                    value name = pullParser.getAttributeValue(null, "name");
+//                    value packageName = pullParser.getAttributeValue(null, "package");
+//                    value isRelease = parser.getAttributeBooleanValue(null, "release", false);
+//                    value certificate = JString(parser.nextText()).replaceAll("\\s|\\n", "");
+//                    value info = CallerInfo(name, packageName, isRelease);
+//                    if (exists infos = validCertificates.get(certificate)) {
+//                        infos.add(info);
+//                    }
+//                    else {
+//                        value newInfos = ArrayList<CallerInfo>();
+//                        newInfos.add(info);
+//                        validCertificates.put(certificate, newInfos);
+//                    }
+////                    LogHelper.v(tag, "Adding allowed caller: ", info.name, " package=", info.packageName, " release=", info.release, " certificate=", certificate);
+//                }
+//                eventType = parser.next();
+//            }
+//        }
+//        catch (XmlPullParserException|IOException e) {
+////            LogHelper.e(tag, e, "Could not read allowed callers from XML.");
+//        }
+//        return validCertificates;
+//    }
 
 //    value mValidCertificates = readValidCertificates(ctx.resources.getXml(R.Xml.allowed_media_browser_callers));
 

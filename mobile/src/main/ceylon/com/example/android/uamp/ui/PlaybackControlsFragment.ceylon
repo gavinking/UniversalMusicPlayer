@@ -17,6 +17,9 @@ import android.os {
 import android.support.v4.content {
     ContextCompat
 }
+import android.text {
+    TextUtils
+}
 import android.view {
     LayoutInflater,
     View,
@@ -33,10 +36,6 @@ import com.example.android.uamp {
     AlbumArtCache,
     MusicService,
     R
-}
-
-import java.util {
-    Objects
 }
 
 shared class PlaybackControlsFragment() extends Fragment() {
@@ -151,7 +150,7 @@ shared class PlaybackControlsFragment() extends Fragment() {
         mTitle.setText(metadata.description.title);
         mSubtitle.setText(metadata.description.subtitle);
         value artUrl = metadata.description.iconUri?.string;
-        if (!Objects.equals(artUrl, mArtUrl)) {
+        if (!TextUtils.equals(artUrl, mArtUrl)) {
             mArtUrl = artUrl;
             if (exists art
                     = metadata.description.iconBitmap

@@ -36,7 +36,7 @@ import com.example.android.uamp {
     MusicService
 }
 import com.example.android.uamp.utils {
-    ResourceHelper
+    themeColor
 }
 
 shared abstract class BaseActivity()
@@ -127,7 +127,7 @@ shared abstract class BaseActivity()
             value taskDesc
                     = ActivityManager.TaskDescription(title.string,
                 BitmapFactory.decodeResource(resources, R.Drawable.ic_launcher_white),
-                ResourceHelper.getThemeColor(this, R.Attr.colorPrimary, AndroidR.Color.darker_gray));
+                themeColor(this, R.Attr.colorPrimary, AndroidR.Color.darker_gray));
             setTaskDescription(taskDesc);
         }
         mediaBrowser = MediaBrowser(this,

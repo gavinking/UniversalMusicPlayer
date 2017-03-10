@@ -134,9 +134,9 @@ shared class QueueHelper {
     }
 
     shared static Integer getMusicIndexOnQueueByMediaId(Iterable<MediaSession.QueueItem> queue, String mediaId) {
-        variable Integer index = 0;
-        for (MediaSession.QueueItem item in queue) {
-            if (mediaId.equals(item.description.mediaId)) {
+        variable value index = 0;
+        for (item in queue) {
+            if (mediaId == item.description.mediaId) {
                 return index;
             }
             index++;
@@ -145,8 +145,8 @@ shared class QueueHelper {
     }
 
     shared static Integer getMusicIndexOnQueueByQueueId(Iterable<MediaSession.QueueItem> queue, Integer queueId) {
-        variable Integer index = 0;
-        for (MediaSession.QueueItem item in queue) {
+        variable value index = 0;
+        for (item in queue) {
             if (queueId == item.queueId) {
                 return index;
             }

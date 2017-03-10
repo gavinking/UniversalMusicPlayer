@@ -31,7 +31,7 @@ import com.example.android.uamp.ui {
     MusicPlayerActivity
 }
 import com.example.android.uamp.utils {
-    ResourceHelper
+    themeColor
 }
 
 import java.lang {
@@ -55,7 +55,7 @@ shared class MediaNotificationManager(MusicService service) {
 
 //    value tag = LogHelper.makeLogTag(`MediaNotificationManager`);
 
-    value notificationColor = ResourceHelper.getThemeColor(service, R.Attr.colorPrimary, Color.dkgray);
+    value notificationColor = themeColor(service, R.Attr.colorPrimary, Color.dkgray);
     value notificationManager = service.getSystemService(`NotificationManager`);
     notificationManager.cancelAll();
 

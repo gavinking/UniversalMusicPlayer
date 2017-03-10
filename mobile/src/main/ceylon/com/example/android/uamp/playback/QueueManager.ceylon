@@ -24,7 +24,6 @@ import com.example.android.uamp.utils {
 }
 
 import java.util {
-    Arrays,
     List,
     ArrayList,
     Collections
@@ -42,11 +41,11 @@ shared class QueueManager(
     variable value mCurrentIndex = 0;
 
     shared Boolean isSameBrowsingCategory(String mediaId) {
-        value newBrowseHierarchy = MediaIDHelper.getHierarchy(mediaId);
-        if (exists current = currentMusic) {
-            assert (exists id = current.description.mediaId);
+        if (exists current = currentMusic,
+            exists id = current.description.mediaId) {
+            value newBrowseHierarchy = MediaIDHelper.getHierarchy(mediaId);
             value currentBrowseHierarchy = MediaIDHelper.getHierarchy(id);
-            return Arrays.equals(newBrowseHierarchy, currentBrowseHierarchy);
+            return newBrowseHierarchy == currentBrowseHierarchy;
         }
         else {
             return false;
@@ -132,23 +131,22 @@ shared class QueueManager(
     }
 
     shared void updateMetadata() {
-        if (exists currentMusic = this.currentMusic) {
-            assert (exists mediaId = currentMusic.description.mediaId);
-            value musicId = MediaIDHelper.extractMusicIDFromMediaID(mediaId);
-            "Invalid musicId ``musicId``"
-            assert (exists metadata = musicProvider.getMusic(musicId));
+        if (exists currentMusic = this.currentMusic,
+            exists mediaId = currentMusic.description.mediaId,
+            exists musicId = MediaIDHelper.extractMusicIDFromMediaID(mediaId),
+            exists metadata = musicProvider.getMusic(musicId)) {
+
             listener.onMetadataChanged(metadata);
             if (!metadata.description.iconBitmap exists, metadata.description.iconUri exists) {
                 value albumUri = metadata.description.iconUri?.string;
                 AlbumArtCache.instance.fetch(albumUri, (artUrl, bitmap, icon) {
                     musicProvider.updateMusicArt(musicId, bitmap, icon);
-                    if (exists currentMusic = this.currentMusic) {
-                        assert (exists mediaId = currentMusic.description.mediaId);
-                        value currentPlayingId = MediaIDHelper.extractMusicIDFromMediaID(mediaId);
-                        if (musicId == currentPlayingId) {
-                            assert (exists music = musicProvider.getMusic(currentPlayingId));
-                            listener.onMetadataChanged(music);
-                        }
+                    if (exists currentMusic = this.currentMusic,
+                        exists mediaId = currentMusic.description.mediaId,
+                        exists currentPlayingId = MediaIDHelper.extractMusicIDFromMediaID(mediaId),
+                        musicId == currentPlayingId,
+                        exists music = musicProvider.getMusic(currentPlayingId)) {
+                        listener.onMetadataChanged(music);
                     }
                 });
             }

@@ -49,8 +49,8 @@ shared class PlaybackManager(
 
     void setCustomAction(PlaybackState.Builder stateBuilder) {
         if (exists currentMusic = queueManager.currentMusic,
-            exists mediaId = currentMusic.description.mediaId) {
-            value musicId = MediaIDHelper.extractMusicIDFromMediaID(mediaId);
+            exists mediaId = currentMusic.description.mediaId,
+            exists musicId = MediaIDHelper.extractMusicIDFromMediaID(mediaId)) {
             value favoriteIcon
                     = musicProvider.isFavorite(musicId)
                     then R.Drawable.ic_star_on
@@ -174,8 +174,8 @@ shared class PlaybackManager(
         if (customActionThumbsUp == action) {
 //            LogHelper.i(tag, "onCustomAction: favorite for current track");
             if (exists currentMusic = queueManager.currentMusic,
-                exists mediaId = currentMusic.description.mediaId) {
-                value musicId = MediaIDHelper.extractMusicIDFromMediaID(mediaId);
+                exists mediaId = currentMusic.description.mediaId,
+                exists musicId = MediaIDHelper.extractMusicIDFromMediaID(mediaId)) {
                 musicProvider.setFavorite(musicId, !musicProvider.isFavorite(musicId));
             }
             updatePlaybackState(null);

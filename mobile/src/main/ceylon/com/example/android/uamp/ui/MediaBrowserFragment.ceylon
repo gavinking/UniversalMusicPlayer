@@ -24,6 +24,9 @@ import android.net {
 import android.os {
     Bundle
 }
+import android.text {
+    TextUtils
+}
 import android.view {
     LayoutInflater,
     View,
@@ -43,13 +46,12 @@ import com.example.android.uamp {
 }
 import com.example.android.uamp.utils {
     MediaIDHelper,
-    NetworkHelper
+    networkOnline
 }
 
 import java.util {
     ArrayList,
-    List,
-    Objects
+    List
 }
 
 class BrowseAdapter(Activity context)
@@ -72,7 +74,7 @@ shared class MediaBrowserFragment() extends Fragment() {
     late variable TextView errorMessage;
 
     function showError(Boolean forceError) {
-        if (!NetworkHelper.isOnline(activity)) {
+        if (!networkOnline(activity)) {
             errorMessage.setText(R.String.error_no_connection);
             return true;
         }
@@ -104,7 +106,7 @@ shared class MediaBrowserFragment() extends Fragment() {
         variable value oldOnline = false;
         shared actual void onReceive(Context context, Intent intent) {
             if (currentMediaId exists) {
-                value isOnline = NetworkHelper.isOnline(context);
+                value isOnline = networkOnline(context);
                 if (isOnline != oldOnline) {
                     oldOnline = isOnline;
                     checkForUserVisibleErrors(false);
@@ -234,7 +236,7 @@ shared class MediaBrowserFragment() extends Fragment() {
     }
 
     void updateTitle() {
-        if (Objects.equals(MediaIDHelper.mediaIdRoot,currentMediaId)) {
+        if (TextUtils.equals(MediaIDHelper.mediaIdRoot, currentMediaId)) {
             mediaFragmentListener?.setToolbarTitle(null);
         }
         else {

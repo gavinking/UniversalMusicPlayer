@@ -4,21 +4,18 @@ import android.content.res {
 import android.graphics {
     Bitmap
 }
+import android.media {
+    MediaMetadata,
+    MediaDescription
+}
+import android.media.browse {
+    MediaBrowser
+}
 import android.net {
     Uri
 }
 import android.os {
     AsyncTask
-}
-import android.media {
-    MediaDescription,
-    MediaMetadata
-}
-import android.media.browse {
-    MediaBrowser
-}
-import android.text {
-    TextUtils
 }
 
 import com.example.android.uamp {
@@ -32,135 +29,30 @@ import com.example.android.uamp.utils {
     }
 }
 
-import java.io {
-    BufferedReader,
-    InputStreamReader
-}
 import java.lang {
     JBoolean=Boolean,
     JIterable=Iterable
 }
-import java.net {
-    URL
-}
 import java.util {
+    List,
     ArrayList,
     Collections,
-    Iterator,
-    List,
-    Set
+    Iterator
 }
 import java.util.concurrent {
-    ConcurrentHashMap,
-    ConcurrentMap
+    ConcurrentHashMap
 }
 
-import org.json {
-    JSONObject,
-    JSONException
-}
-
+shared String customMetadataTrackSource = "__SOURCE__";
 
 shared interface MusicProviderSource {
     shared formal Iterator<MediaMetadata> iterator() ;
 }
 
-shared String customMetadataTrackSource = "__SOURCE__";
-
-shared class RemoteJSONSource satisfies MusicProviderSource {
-
-//    static value tag = LogHelper.makeLogTag(`RemoteJSONSource`);
-
-    static value catalogUrl = "http://storage.googleapis.com/automotive-media/music.json";
-    static value jsonMusic = "music";
-    static value jsonTitle = "title";
-    static value jsonAlbum = "album";
-    static value jsonArtist = "artist";
-    static value jsonGenre = "genre";
-    static value jsonSource = "source";
-    static value jsonImage = "image";
-    static value jsonTrackNumber = "trackNumber";
-    static value jsonTotalTrackCount = "totalTrackCount";
-    static value jsonDuration = "duration";
-
-    shared new () {}
-
-    function buildFromJSON(JSONObject json, String basePath) {
-        String title = json.getString(jsonTitle);
-        String album = json.getString(jsonAlbum);
-        String artist = json.getString(jsonArtist);
-        String genre = json.getString(jsonGenre);
-        variable String source = json.getString(jsonSource);
-        variable String iconUrl = json.getString(jsonImage);
-        Integer trackNumber = json.getInt(jsonTrackNumber);
-        Integer totalTrackCount = json.getInt(jsonTotalTrackCount);
-        Integer duration = json.getInt(jsonDuration) * 1000;
-//        LogHelper.d(tag, "Found music track: ", json);
-        if (!source.startsWith("http")) {
-            source = basePath + source;
-        }
-        if (!iconUrl.startsWith("http")) {
-            iconUrl = basePath + iconUrl;
-        }
-        return MediaMetadata.Builder()
-            .putString(MediaMetadata.metadataKeyMediaId, source.hash.string)
-            .putString(customMetadataTrackSource, source)
-            .putString(MediaMetadata.metadataKeyAlbum, album)
-            .putString(MediaMetadata.metadataKeyArtist, artist)
-            .putLong(MediaMetadata.metadataKeyDuration, duration)
-            .putString(MediaMetadata.metadataKeyGenre, genre)
-            .putString(MediaMetadata.metadataKeyAlbumArtUri, iconUrl)
-            .putString(MediaMetadata.metadataKeyTitle, title)
-            .putLong(MediaMetadata.metadataKeyTrackNumber, trackNumber)
-            .putLong(MediaMetadata.metadataKeyNumTracks, totalTrackCount)
-            .build();
-    }
-
-    function fetchJSONFromUrl(String urlString) {
-        try {
-            value urlConnection = URL(urlString).openConnection();
-            try (reader = BufferedReader(InputStreamReader(urlConnection.inputStream, "iso-8859-1"))) {
-                value sb = StringBuilder();
-                while (exists line = reader.readLine()) {
-                    sb.append(line);
-                }
-                return JSONObject(sb.string);
-            }
-        }
-        catch (JSONException e) {
-            throw e;
-        }
-        catch (e) {
-//            LogHelper.e(tag, "Failed to parse the json for media list", e);
-            return null;
-        }
-    }
-
-    shared actual Iterator<MediaMetadata> iterator() {
-//        try {
-        value slashPos = catalogUrl.lastIndexOf("/");
-        value path = catalogUrl.substring(0, slashPos + 1);
-        value tracks = ArrayList<MediaMetadata>();
-        if (exists jsonObj = fetchJSONFromUrl(catalogUrl),
-            exists jsonTracks = jsonObj.getJSONArray(jsonMusic)) {
-            for (j in 0:jsonTracks.length()) {
-                tracks.add(buildFromJSON(jsonTracks.getJSONObject(j), path));
-            }
-        }
-        return tracks.iterator();
-//        }
-//        catch (JSONException e) {
-//            LogHelper.e(tag, e, "Could not retrieve music list");
-//            throw Exception("Could not retrieve music list", e);
-//        }
-    }
-
-}
-
 class State
         of nonInitialized
-         | initializing
-         | initialized {
+        | initializing
+        | initialized {
     shared actual String string;
     shared new nonInitialized {
         string = "NON_INITIALIZED";
@@ -173,36 +65,27 @@ class State
     }
 }
 
-shared class MusicProvider {
+shared class MusicProvider(MusicProviderSource source = RemoteJSONSource()) {
 
 //    static value tag = LogHelper.makeLogTag(`MusicProvider`);
 
-    MusicProviderSource mSource;
-
-    ConcurrentMap<String,List<MediaMetadata>> mMusicListByGenre;
-    ConcurrentMap<String,MutableMediaMetadata> mMusicListById;
-    Set<String> mFavoriteTracks;
-
     variable State mCurrentState = State.nonInitialized;
 
-    shared new (MusicProviderSource source = RemoteJSONSource()) {
-        mSource = source;
-        mMusicListByGenre = ConcurrentHashMap<String,List<MediaMetadata>>();
-        mMusicListById = ConcurrentHashMap<String,MutableMediaMetadata>();
-        mFavoriteTracks = Collections.newSetFromMap(ConcurrentHashMap<String,JBoolean>());
-    }
+    value musicListByGenre = ConcurrentHashMap<String,List<MediaMetadata>>();
+    value musicListById = ConcurrentHashMap<String,MutableMediaMetadata>();
+    value favoriteTracks = Collections.newSetFromMap(ConcurrentHashMap<String,JBoolean>());
 
     shared JIterable<String> genres
             => if (mCurrentState != State.initialized)
             then Collections.emptyList<String>()
-            else mMusicListByGenre.keySet();
+            else musicListByGenre.keySet();
 
     shared JIterable<MediaMetadata> shuffledMusic {
         if (mCurrentState != State.initialized) {
             return Collections.emptyList<MediaMetadata>();
         }
-        value shuffled = ArrayList<MediaMetadata>(mMusicListById.size());
-        for (mutableMetadata in mMusicListById.values()) {
+        value shuffled = ArrayList<MediaMetadata>(musicListById.size());
+        for (mutableMetadata in musicListById.values()) {
             shuffled.add(mutableMetadata.metadata);
         }
         Collections.shuffle(shuffled);
@@ -211,16 +94,16 @@ shared class MusicProvider {
 
     shared JIterable<MediaMetadata> getMusicsByGenre(String genre)
             => if (mCurrentState != State.initialized
-                || !mMusicListByGenre.containsKey(genre))
-            then Collections.emptyList<MediaMetadata>()
-            else mMusicListByGenre.get(genre);
+    || !musicListByGenre.containsKey(genre))
+    then Collections.emptyList<MediaMetadata>()
+    else musicListByGenre.get(genre);
 
     function searchMusic(String metadataField, String query) {
         if (mCurrentState != State.initialized) {
             return Collections.emptyList<MediaMetadata>();
         }
         value result = ArrayList<MediaMetadata>();
-        for (track in mMusicListById.values()) {
+        for (track in musicListById.values()) {
             if (query.lowercased in track.metadata.getString(metadataField).string) {
                 result.add(track.metadata);
             }
@@ -238,8 +121,8 @@ shared class MusicProvider {
             => searchMusic(MediaMetadata.metadataKeyArtist, query);
 
     shared MediaMetadata? getMusic(String musicId)
-            => mMusicListById.containsKey(musicId)
-            then mMusicListById.get(musicId).metadata;
+            => musicListById.containsKey(musicId)
+    then musicListById.get(musicId).metadata;
 
     shared void updateMusicArt(String musicId, Bitmap? albumArt, Bitmap? icon) {
         value metadata = MediaMetadata.Builder(getMusic(musicId))
@@ -247,15 +130,15 @@ shared class MusicProvider {
             .putBitmap(MediaMetadata.metadataKeyDisplayIcon, icon)
             .build();
         "Unexpected error: Inconsistent data structures in MusicProvider"
-        assert (exists mutableMetadata = mMusicListById.get(musicId));
+        assert (exists mutableMetadata = musicListById.get(musicId));
         mutableMetadata.metadata = metadata;
     }
 
     shared void setFavorite(String musicId, Boolean favorite) {
         if (favorite) {
-            mFavoriteTracks.add(musicId);
+            favoriteTracks.add(musicId);
         } else {
-            mFavoriteTracks.remove(musicId);
+            favoriteTracks.remove(musicId);
         }
     }
 
@@ -263,13 +146,13 @@ shared class MusicProvider {
             => mCurrentState == State.initialized;
 
     shared Boolean isFavorite(String musicId)
-            => mFavoriteTracks.contains(musicId);
+            => favoriteTracks.contains(musicId);
 
     shared void retrieveMediaAsync(void onMusicCatalogReady(Boolean success)) {
 //        LogHelper.d(tag, "retrieveMediaAsync called");
         if (mCurrentState == State.initialized) {
 //            if (exists callback) {
-                onMusicCatalogReady(true);
+            onMusicCatalogReady(true);
 //            }
             return;
         }
@@ -280,7 +163,7 @@ shared class MusicProvider {
             }
             shared actual void onPostExecute(State current) {
 //                if (exists callback) {
-                    onMusicCatalogReady(current == State.initialized);
+                onMusicCatalogReady(current == State.initialized);
 //                }
             }
 
@@ -289,7 +172,7 @@ shared class MusicProvider {
 
     void buildListsByGenre() {
         value newMusicListByGenre = ConcurrentHashMap<String,List<MediaMetadata>>();
-        for (m in mMusicListById.values()) {
+        for (m in musicListById.values()) {
             value genre = m.metadata.getString(MediaMetadata.metadataKeyGenre);
             if (exists list = newMusicListByGenre[genre]) {
                 list.add(m.metadata);
@@ -300,19 +183,19 @@ shared class MusicProvider {
                 list.add(m.metadata);
             }
         }
-        mMusicListByGenre.clear();
-        mMusicListByGenre.putAll(newMusicListByGenre);
+        musicListByGenre.clear();
+        musicListByGenre.putAll(newMusicListByGenre);
     }
 
     void retrieveMedia() {
         try {
             if (mCurrentState == State.nonInitialized) {
                 mCurrentState = State.initializing;
-                value tracks = mSource.iterator();
+                value tracks = source.iterator();
                 while (tracks.hasNext()) {
                     value item = tracks.next();
                     value musicId = item.getString(MediaMetadata.metadataKeyMediaId);
-                    mMusicListById.put(musicId, MutableMediaMetadata(musicId, item));
+                    musicListById.put(musicId, MutableMediaMetadata(musicId, item));
                 }
                 buildListsByGenre();
                 mCurrentState = State.initialized;
@@ -366,8 +249,8 @@ shared class MusicProvider {
                 mediaItems.add(createBrowsableMediaItemForGenre(genre, resources));
             }
         } else if (mediaId.startsWith(mediaIdMusicsByGenre)) {
-            value genre = MediaIDHelper.getHierarchy(mediaId).get(1);
-            for (metadata in getMusicsByGenre(genre.string)) {
+            assert (exists genre = MediaIDHelper.getHierarchy(mediaId)[1]);
+            for (metadata in getMusicsByGenre(genre)) {
                 mediaItems.add(createMediaItem(metadata));
             }
         } else {
@@ -375,26 +258,5 @@ shared class MusicProvider {
         }
         return mediaItems;
     }
-
-}
-
-shared class MutableMediaMetadata {
-
-    shared variable MediaMetadata metadata;
-
-    shared String trackId;
-
-    shared new (String trackId, MediaMetadata metadata) {
-        this.metadata = metadata;
-        this.trackId = trackId;
-    }
-
-    equals(Object that)
-            => if (is MutableMediaMetadata that)
-            then this===that
-              || TextUtils.equals(trackId, that.trackId)
-            else false;
-
-    hash => trackId.hash;
 
 }
