@@ -89,7 +89,7 @@ shared class LocalPlayback(Context context, MusicProvider musicProvider)
             if (AudioManager.actionAudioBecomingNoisy==intent.action) {
 //                LogHelper.d(tag, "Headphones disconnected.");
                 if (playing) {
-                    Intent i = Intent(context, `MusicService`);
+                    value i = Intent(context, `MusicService`);
                     i.setAction(MusicService.actionCmd);
                     i.putExtra(MusicService.cmdName, MusicService.cmdPause);
                     context.startService(i);

@@ -171,7 +171,7 @@ shared class PlaybackManager(
     }
 
     shared actual void onCustomAction(String action, Bundle extras) {
-        if (customActionThumbsUp.equals(action)) {
+        if (customActionThumbsUp == action) {
 //            LogHelper.i(tag, "onCustomAction: favorite for current track");
             if (exists currentMusic = queueManager.currentMusic,
                 exists mediaId = currentMusic.description.mediaId) {
