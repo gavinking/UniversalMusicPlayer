@@ -36,7 +36,9 @@ import java.lang {
 import java.util {
     List,
     ArrayList,
-    Collections
+    Collections,
+    Map,
+    Set
 }
 import java.util.concurrent {
     ConcurrentHashMap
@@ -48,8 +50,8 @@ shared interface MusicProviderSource satisfies JIterable<MediaMetadata> {}
 
 class State
         of nonInitialized
-        | initializing
-        | initialized {
+         | initializing
+         | initialized {
     shared actual String string;
     shared new nonInitialized {
         string = "NON_INITIALIZED";
@@ -68,9 +70,9 @@ shared class MusicProvider(MusicProviderSource source = RemoteJSONSource()) {
 
     variable State mCurrentState = State.nonInitialized;
 
-    value musicListByGenre = ConcurrentHashMap<String,List<MediaMetadata>>();
-    value musicListById = ConcurrentHashMap<String,MutableMediaMetadata>();
-    value favoriteTracks = Collections.newSetFromMap(ConcurrentHashMap<String,JBoolean>());
+    Map<String,List<MediaMetadata>> musicListByGenre = ConcurrentHashMap<String,List<MediaMetadata>>();
+    Map<String,MutableMediaMetadata> musicListById = ConcurrentHashMap<String,MutableMediaMetadata>();
+    Set<String> favoriteTracks = Collections.newSetFromMap(ConcurrentHashMap<String,JBoolean>());
 
     shared JIterable<String> genres
             => if (mCurrentState != State.initialized)
