@@ -65,8 +65,9 @@ shared class MusicPlayerActivity
     shared actual void onMediaItemSelected(MediaBrowser.MediaItem item) {
 //        LogHelper.d(tag, "onMediaItemSelected, mediaId=" + item.mediaId);
         if (item.playable) {
-            mediaController.transportControls
-                .playFromMediaId(item.mediaId, null);
+            value controls = mediaController.transportControls;
+//            controls.stop();
+            controls.playFromMediaId(item.mediaId, null);
         } else if (item.browsable) {
             navigateToBrowser(item.mediaId);
         } else {

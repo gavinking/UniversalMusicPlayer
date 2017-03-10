@@ -208,7 +208,7 @@ shared class MediaNotificationManager(MusicService service) {
                 .setContentText(description.subtitle)
                 .setLargeIcon(art);
             if (exists castName = controller?.extras?.getString(MusicService.extraConnectedCast)) {
-                String castInfo = service.resources.getString(R.String.casting_to_device, castName);
+                value castInfo = service.resources.getString(R.String.casting_to_device, castName);
                 notificationBuilder.setSubText(castInfo);
                 notificationBuilder.addAction(createAction(R.Drawable.ic_close_black_24dp,
                     service.getString(R.String.stop_casting), stopCastIntent));

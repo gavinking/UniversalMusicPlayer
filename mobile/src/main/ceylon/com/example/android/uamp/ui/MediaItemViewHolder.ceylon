@@ -43,13 +43,15 @@ import com.example.android.uamp.utils {
     MediaIDHelper
 }
 
-shared class MediaItemViewHolder {
+shared class State {
+    shared new stateInvalid {}
+    shared new stateNone {}
+    shared new statePlayable {}
+    shared new statePaused {}
+    shared new statePlaying {}
+}
 
-    shared static small Integer stateInvalid = -1;
-    shared static small Integer stateNone = 0;
-    shared static small Integer statePlayable = 1;
-    shared static small Integer statePaused = 2;
-    shared static small Integer statePlaying = 3;
+shared class MediaItemViewHolder {
 
     static variable Boolean initialized = false;
 
@@ -64,22 +66,22 @@ shared class MediaItemViewHolder {
         }
     }
 
-    shared static Drawable? getDrawableByState(Context context, Integer state) {
+    shared static Drawable? getDrawableByState(Context context, State state) {
         initializeColorStateLists(context);
 
-        if (state == statePlayable) {
+        if (state == State.statePlayable) {
             value pauseDrawable = ContextCompat.getDrawable(context, R.Drawable.ic_play_arrow_black_36dp);
             DrawableCompat.setTintList(pauseDrawable, sColorStateNotPlaying);
             return pauseDrawable;
         }
-        else if (state == statePlaying) {
+        else if (state == State.statePlaying) {
             assert (is AnimationDrawable animation
                     = ContextCompat.getDrawable(context, R.Drawable.ic_equalizer_white_36dp));
             DrawableCompat.setTintList(animation, sColorStatePlaying);
             animation.start();
             return animation;
         }
-        else if (state == statePaused) {
+        else if (state == State.statePaused) {
             value playDrawable = ContextCompat.getDrawable(context, R.Drawable.ic_equalizer1_white_36dp);
             DrawableCompat.setTintList(playDrawable, sColorStatePlaying);
             return playDrawable;
@@ -89,23 +91,23 @@ shared class MediaItemViewHolder {
         }
     }
 
-    shared static small Integer getStateFromController(Context context) {
+    shared static State getStateFromController(Context context) {
         assert (is FragmentActivity context);
         value pbState = context.mediaController.playbackState;
-        return if (is Null pbState) then stateNone
-          else if (pbState.state == PlaybackState.stateError) then stateNone
-          else if (pbState.state == PlaybackState.statePlaying) then statePlaying
-          else statePaused;
+        return if (is Null pbState) then State.stateNone
+          else if (pbState.state == PlaybackState.stateError) then State.stateNone
+          else if (pbState.state == PlaybackState.statePlaying) then State.statePlaying
+          else State.statePaused;
     }
 
-    shared static small Integer getMediaItemState(Context context, MediaBrowser.MediaItem mediaItem) {
+    shared static State getMediaItemState(Context context, MediaBrowser.MediaItem mediaItem) {
         if (mediaItem.playable) {
             return MediaIDHelper.isMediaItemPlaying(context, mediaItem)
                 then getStateFromController(context)
-                else statePlayable;
+                else State.statePlayable;
         }
         else {
-            return stateNone;
+            return State.stateNone;
         }
     }
 
@@ -113,13 +115,13 @@ shared class MediaItemViewHolder {
         initializeColorStateLists(activity);
 
         MediaItemViewHolder holder;
-        Integer? cachedState;
+        State? cachedState;
         View convertView;
         if (exists givenView = view) {
             convertView = givenView;
             assert (is MediaItemViewHolder tag = convertView.tag);
             holder = tag;
-            assert (is Integer? state = convertView.getTag(R.Id.tag_mediaitem_state_cache));
+            assert (is State? state = convertView.getTag(R.Id.tag_mediaitem_state_cache));
             cachedState = state;
         } else {
             convertView = LayoutInflater.from(activity).inflate(R.Layout.media_list_item, parent, false);
@@ -131,7 +133,7 @@ shared class MediaItemViewHolder {
             assert (is TextView description = convertView.findViewById(R.Id.description));
             holder.mDescriptionView = description;
             convertView.tag = holder;
-            cachedState = stateInvalid;
+            cachedState = State.stateInvalid;
         }
 
         value description = item.description;
