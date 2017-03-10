@@ -94,9 +94,9 @@ shared class MusicProvider(MusicProviderSource source = RemoteJSONSource()) {
 
     shared JIterable<MediaMetadata> getMusicsByGenre(String genre)
             => if (mCurrentState != State.initialized
-    || !musicListByGenre.containsKey(genre))
-    then Collections.emptyList<MediaMetadata>()
-    else musicListByGenre.get(genre);
+                || !musicListByGenre.containsKey(genre))
+            then Collections.emptyList<MediaMetadata>()
+            else musicListByGenre.get(genre);
 
     function searchMusic(String metadataField, String query) {
         if (mCurrentState != State.initialized) {
