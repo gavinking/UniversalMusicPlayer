@@ -223,7 +223,7 @@ shared class PlaybackManager(
         value currentMediaId = playback.currentMediaId;
         playback.stop(false);
         playback.setCallback(callback);
-        playback.currentStreamPosition = if (pos<0) then 0 else pos;
+        playback.currentStreamPosition = pos<0 then 0 else pos;
         playback.currentMediaId = currentMediaId;
         playback.start();
         this.currentPlayback = playback;
