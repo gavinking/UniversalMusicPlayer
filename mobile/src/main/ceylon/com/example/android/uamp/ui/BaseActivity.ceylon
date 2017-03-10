@@ -46,7 +46,7 @@ shared abstract class BaseActivity()
 //    value tag = LogHelper.makeLogTag(`BaseActivity`);
 
     shared actual late MediaBrowser mediaBrowser;
-    late variable PlaybackControlsFragment controlsFragment;
+    shared variable PlaybackControlsFragment? controlsFragment = null;
 
     shared Boolean online {
         assert (is ConnectivityManager connMgr = getSystemService(Context.connectivityService));
@@ -119,7 +119,7 @@ shared abstract class BaseActivity()
 //            LogHelper.d(tag, "connectionCallback.onConnected: hiding controls because metadata is null");
             hidePlaybackControls();
         }
-        controlsFragment.onConnected();
+        controlsFragment?.onConnected();
         onMediaControllerConnected();
     }
 
