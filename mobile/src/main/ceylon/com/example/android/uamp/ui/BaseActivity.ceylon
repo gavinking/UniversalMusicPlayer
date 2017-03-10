@@ -88,7 +88,7 @@ shared abstract class BaseActivity()
         }
     }
 
-    class MediaControllerCallback()
+    object mediaControllerCallback
             extends MediaController.Callback() {
         shared actual void onPlaybackStateChanged(PlaybackState state) {
             if (shouldShowControls()) {
@@ -112,7 +112,7 @@ shared abstract class BaseActivity()
 
     void connectToSession(MediaSession.Token token) {
         mediaController = MediaController(this, token);
-        mediaController.registerCallback(MediaControllerCallback());
+        mediaController.registerCallback(mediaControllerCallback);
         if (shouldShowControls()) {
             showPlaybackControls();
         } else {
@@ -164,7 +164,7 @@ shared abstract class BaseActivity()
     shared actual void onStop() {
         super.onStop();
 //        LogHelper.d(tag, "Activity onStop");
-        mediaController?.unregisterCallback(MediaControllerCallback());
+        mediaController?.unregisterCallback(mediaControllerCallback);
         mediaBrowser.disconnect();
     }
 
