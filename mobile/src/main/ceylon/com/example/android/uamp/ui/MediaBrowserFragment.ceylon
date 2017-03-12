@@ -51,13 +51,6 @@ import java.util {
     List
 }
 
-class BrowseAdapter(Activity context)
-        extends ArrayAdapter<MediaBrowser.MediaItem>
-        (context, R.Layout.media_list_item, ArrayList<MediaBrowser.MediaItem>()) {
-    getView(Integer position, View convertView, ViewGroup parent)
-            => MediaItemViewHolder.setupListView(context, convertView, parent, getItem(position));
-}
-
 shared class MediaBrowserFragment() extends Fragment() {
 
 //    value tag = LogHelper.makeLogTag(`MediaBrowserFragment`);
@@ -66,7 +59,7 @@ shared class MediaBrowserFragment() extends Fragment() {
     variable String? currentMediaId = null;
     variable MediaFragmentListener? mediaFragmentListener = null;
 
-    late variable BrowseAdapter browserAdapter;
+    late variable ArrayAdapter<MediaBrowser.MediaItem> browserAdapter;
     late variable View errorView;
     late variable TextView errorMessage;
 
@@ -93,9 +86,10 @@ shared class MediaBrowserFragment() extends Fragment() {
     }
 
     void checkForUserVisibleErrors(Boolean forceError) {
-        value showError = this.showError(forceError);
         errorView.visibility
-                = showError then View.visible else View.gone;
+                = showError(forceError)
+                then View.visible
+                else View.gone;
 //        LogHelper.d(tag, "checkForUserVisibleErrors. forceError=", forceError, " showError=", showError, " isOnline=", NetworkHelper.isOnline(activity));
     }
 
@@ -138,11 +132,19 @@ shared class MediaBrowserFragment() extends Fragment() {
 
     shared actual View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 //        LogHelper.d(tag, "fragment.onCreateView");
+        browserAdapter = object extends ArrayAdapter<MediaBrowser.MediaItem>
+                (activity, R.Layout.media_list_item, ArrayList<MediaBrowser.MediaItem>()) {
+            getView(Integer position, View convertView, ViewGroup parent)
+                    => MediaItemViewHolder.setupListView(activity, convertView, parent, getItem(position));
+        };
+
         value rootView = inflater.inflate(R.Layout.fragment_list, container, false);
+
         errorView = rootView.findViewById(R.Id.playback_error);
+
         assert (is TextView error = errorView.findViewById(R.Id.error_message));
         errorMessage = error;
-        browserAdapter = BrowseAdapter(activity);
+
         assert (is ListView listView = rootView.findViewById(R.Id.list_view));
         listView.setAdapter(browserAdapter);
         listView.setOnItemClickListener(object satisfies AdapterView.OnItemClickListener {
@@ -152,31 +154,34 @@ shared class MediaBrowserFragment() extends Fragment() {
                 mediaFragmentListener?.onMediaItemSelected(item);
             }
         });
+
         return rootView;
     }
 
+    value mediaBrowser => mediaFragmentListener?.mediaBrowser;
+    value mediaController => activity?.mediaController;
+
     shared actual void onStart() {
         super.onStart();
-        if (exists mediaBrowser = mediaFragmentListener?.mediaBrowser) {
+        if (exists mediaBrowser = this.mediaBrowser) {
 //            LogHelper.d(tag, "fragment.onStart, mediaId=", currentMediaId, "  onConnected=", mediaBrowser.connected);
             if (mediaBrowser.connected) {
                 onConnected();
             }
         }
-        this.activity.registerReceiver(connectivityChangeReceiver,
+        activity?.registerReceiver(connectivityChangeReceiver,
             IntentFilter(ConnectivityManager.connectivityAction));
     }
 
     shared actual void onStop() {
         super.onStop();
-        if (exists mediaBrowser = mediaFragmentListener?.mediaBrowser,
-            mediaBrowser.connected, exists id=currentMediaId) {
+        if (exists mediaBrowser = this.mediaBrowser,
+            mediaBrowser.connected,
+            exists id = currentMediaId) {
             mediaBrowser.unsubscribe(id);
         }
-        if (exists controller = activity?.mediaController) {
-            controller.unregisterCallback(mediaControllerCallback);
-        }
-        this.activity.unregisterReceiver(connectivityChangeReceiver);
+        mediaController?.unregisterCallback(mediaControllerCallback);
+        activity?.unregisterReceiver(connectivityChangeReceiver);
     }
 
     shared actual void onDetach() {
@@ -197,12 +202,12 @@ shared class MediaBrowserFragment() extends Fragment() {
             return;
         }
 
-        this.currentMediaId = mediaId else mediaFragmentListener?.mediaBrowser?.root;
+        currentMediaId = mediaId else mediaBrowser?.root;
 
         updateTitle();
 
-        mediaFragmentListener?.mediaBrowser?.unsubscribe(currentMediaId);
-        mediaFragmentListener?.mediaBrowser?.subscribe(currentMediaId,
+        mediaBrowser?.unsubscribe(currentMediaId);
+        mediaBrowser?.subscribe(currentMediaId,
             object extends MediaBrowser.SubscriptionCallback() {
                 shared actual void onChildrenLoaded(String parentId, List<MediaBrowser.MediaItem> children) {
                     try {
@@ -225,7 +230,7 @@ shared class MediaBrowserFragment() extends Fragment() {
                 }
             });
 
-        activity.mediaController?.registerCallback(mediaControllerCallback);
+        mediaController?.registerCallback(mediaControllerCallback);
     }
 
     void updateTitle() {
@@ -233,8 +238,7 @@ shared class MediaBrowserFragment() extends Fragment() {
             mediaFragmentListener?.setToolbarTitle(null);
         }
         else {
-            mediaFragmentListener?.mediaBrowser
-                ?.getItem(currentMediaId, object extends MediaBrowser.ItemCallback() {
+            mediaBrowser?.getItem(currentMediaId, object extends MediaBrowser.ItemCallback() {
                 onItemLoaded(MediaBrowser.MediaItem item)
                         => mediaFragmentListener?.setToolbarTitle(item.description.title.string);
             });
