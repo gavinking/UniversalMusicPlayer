@@ -145,7 +145,7 @@ shared class MediaBrowserFragment() extends Fragment() {
         browserAdapter = BrowseAdapter(activity);
         assert (is ListView listView = rootView.findViewById(R.Id.list_view));
         listView.setAdapter(browserAdapter);
-        listView.setOnItemClickListener(object satisfies OnItemClickBase {
+        listView.setOnItemClickListener(object satisfies AdapterView.OnItemClickListener {
             shared actual void onItemClick(AdapterView<out Adapter>? parent, View? view, Integer position, Integer id) {
                 checkForUserVisibleErrors(false);
                 value item = browserAdapter.getItem(position);
