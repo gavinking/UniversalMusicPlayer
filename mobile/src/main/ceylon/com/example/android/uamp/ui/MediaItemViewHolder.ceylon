@@ -69,19 +69,20 @@ shared class MediaItemViewHolder {
     shared static Drawable? getDrawableByState(Context context, State state) {
         initializeColorStateLists(context);
 
-        if (state == State.statePlayable) {
+        switch (state)
+        case (State.statePlayable) {
             value pauseDrawable = ContextCompat.getDrawable(context, R.Drawable.ic_play_arrow_black_36dp);
             DrawableCompat.setTintList(pauseDrawable, sColorStateNotPlaying);
             return pauseDrawable;
         }
-        else if (state == State.statePlaying) {
+        case (State.statePlaying) {
             assert (is AnimationDrawable animation
                     = ContextCompat.getDrawable(context, R.Drawable.ic_equalizer_white_36dp));
             DrawableCompat.setTintList(animation, sColorStatePlaying);
             animation.start();
             return animation;
         }
-        else if (state == State.statePaused) {
+        case (State.statePaused) {
             value playDrawable = ContextCompat.getDrawable(context, R.Drawable.ic_equalizer1_white_36dp);
             DrawableCompat.setTintList(playDrawable, sColorStatePlaying);
             return playDrawable;
@@ -91,13 +92,14 @@ shared class MediaItemViewHolder {
         }
     }
 
+    suppressWarnings("caseNotDisjoint")
     shared static State getStateFromController(Context context) {
         assert (is FragmentActivity context);
         value pbState = context.mediaController.playbackState;
-        return if (is Null pbState) then State.stateNone
-          else if (pbState.state == PlaybackState.stateError) then State.stateNone
-          else if (pbState.state == PlaybackState.statePlaying) then State.statePlaying
-          else State.statePaused;
+        return switch (pbState?.state)
+            case (null | PlaybackState.stateError) State.stateNone
+            case (PlaybackState.statePlaying) State.statePlaying
+            else State.statePaused;
     }
 
     shared static State getMediaItemState(Context context, MediaBrowser.MediaItem mediaItem) {

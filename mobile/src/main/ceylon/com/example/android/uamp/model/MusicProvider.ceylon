@@ -217,11 +217,12 @@ shared class MusicProvider(MusicProviderSource source = RemoteJSONSource()) {
     }
 
     function createBrowsableMediaItemForGenre(String genre, Resources resources) {
-        value description = MediaDescription.Builder()
-            .setMediaId(createMediaID(null, mediaIdMusicsByGenre, genre))
-            .setTitle(genre)
-            .setSubtitle(resources.getString(R.String.browse_musics_by_genre_subtitle, genre))
-            .build();
+        value description
+                = MediaDescription.Builder()
+                .setMediaId(createMediaID(null, mediaIdMusicsByGenre, genre))
+                .setTitle(genre)
+                .setSubtitle(resources.getString(R.String.browse_musics_by_genre_subtitle, genre))
+                .build();
         return MediaBrowser.MediaItem(description, MediaBrowser.MediaItem.flagBrowsable);
     }
 
@@ -229,30 +230,33 @@ shared class MusicProvider(MusicProviderSource source = RemoteJSONSource()) {
         value genre = metadata.getString(MediaMetadata.metadataKeyGenre);
         value hierarchyAwareMediaID
                 = MediaIDHelper.createMediaID(metadata.description.mediaId, mediaIdMusicsByGenre, genre);
-        value copy = MediaMetadata.Builder(metadata)
-            .putString(MediaMetadata.metadataKeyMediaId, hierarchyAwareMediaID)
-            .build();
+        value copy
+                = MediaMetadata.Builder(metadata)
+                .putString(MediaMetadata.metadataKeyMediaId, hierarchyAwareMediaID)
+                .build();
         return MediaBrowser.MediaItem(copy.description, MediaBrowser.MediaItem.flagPlayable);
     }
 
+    suppressWarnings("caseNotDisjoint")
     shared List<MediaBrowser.MediaItem> getChildren(String mediaId, Resources resources) {
         value mediaItems = ArrayList<MediaBrowser.MediaItem>();
-        if (!MediaIDHelper.isBrowseable(mediaId)) {
-            return mediaItems;
-        }
-        if (mediaIdRoot==mediaId) {
-            mediaItems.add(createBrowsableMediaItemForRoot(resources));
-        } else if (mediaIdMusicsByGenre.equals(mediaId)) {
-            for (genre in genres) {
-                mediaItems.add(createBrowsableMediaItemForGenre(genre, resources));
+        if (MediaIDHelper.isBrowseable(mediaId)) {
+            switch (mediaId)
+            case (mediaIdRoot) {
+                mediaItems.add(createBrowsableMediaItemForRoot(resources));
+            } case (mediaIdMusicsByGenre) {
+                for (genre in genres) {
+                    mediaItems.add(createBrowsableMediaItemForGenre(genre, resources));
+                }
             }
-        } else if (mediaId.startsWith(mediaIdMusicsByGenre)) {
-            assert (exists genre = MediaIDHelper.getHierarchy(mediaId)[1]);
-            for (metadata in getMusicsByGenre(genre)) {
-                mediaItems.add(createMediaItem(metadata));
+            else if (mediaId.startsWith(mediaIdMusicsByGenre)) {
+                assert (exists genre = MediaIDHelper.getHierarchy(mediaId)[1]);
+                for (metadata in getMusicsByGenre(genre)) {
+                    mediaItems.add(createMediaItem(metadata));
+                }
+            } else {
+                //LogHelper.w(tag, "Skipping unmatched mediaId: ", mediaId);
             }
-        } else {
-//            LogHelper.w(tag, "Skipping unmatched mediaId: ", mediaId);
         }
         return mediaItems;
     }

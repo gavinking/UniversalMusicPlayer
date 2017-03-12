@@ -226,13 +226,14 @@ shared abstract class ActionBarCastActivity()
             return true;
         });
 
-        Object self = this; //TODO: remove temp hack
-        if (self is MusicPlayerActivity) {
+        switch (self = this) //TODO: remove temp hack
+        case (is MusicPlayerActivity) {
             navigationView.setCheckedItem(R.Id.navigation_allmusic);
         }
-        else if (self is PlaceholderActivity) {
+        case (is PlaceholderActivity) {
             navigationView.setCheckedItem(R.Id.navigation_playlists);
         }
+        else {}
     }
 
     void updateDrawerToggle() {

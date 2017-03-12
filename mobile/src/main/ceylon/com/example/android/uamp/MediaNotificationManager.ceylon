@@ -45,16 +45,21 @@ import android.graphics.drawable {
     Icon
 }
 
-shared class MediaNotificationManager(MusicService service) {
+shared class MediaNotificationManager {
 
-    value notificationId = 412;
-    value requestCode = 100;
+    static value notificationId = 412;
+    static value requestCode = 100;
 
-    value actionPause = "com.example.android.uamp.pause";
-    value actionPlay = "com.example.android.uamp.play";
-    value actionPrev = "com.example.android.uamp.prev";
-    value actionNext = "com.example.android.uamp.next";
-    value actionStopCasting = "com.example.android.uamp.stop_cast";
+    static value actionPause = "com.example.android.uamp.pause";
+    static value actionPlay = "com.example.android.uamp.play";
+    static value actionPrev = "com.example.android.uamp.prev";
+    static value actionNext = "com.example.android.uamp.next";
+    static value actionStopCasting = "com.example.android.uamp.stop_cast";
+
+    MusicService service;
+    shared new (MusicService service) {
+        this.service = service;
+    }
 
 //    value tag = LogHelper.makeLogTag(`MediaNotificationManager`);
 
@@ -225,20 +230,21 @@ shared class MediaNotificationManager(MusicService service) {
     }
 
     object broadcastReceiver extends BroadcastReceiver() {
+        suppressWarnings("caseNotDisjoint")
         shared actual void onReceive(Context context, Intent intent) {
             value action = intent.action;
 
 //            LogHelper.d(tag, "Received intent with action " + action);
-
-            if (action == actionPause) {
+            switch (action)
+            case (actionPause) {
                 transportControls?.pause();
-            } else if (action == actionPlay) {
+            } case (actionPlay) {
                 transportControls?.play();
-            } else if (action == actionNext) {
+            } case (actionNext) {
                 transportControls?.skipToNext();
-            } else if (action == actionPrev) {
+            } case (actionPrev) {
                 transportControls?.skipToPrevious();
-            } else if (action == actionStopCasting) {
+            } case (actionStopCasting) {
                 value i = Intent(context, `MusicService`);
                 i.setAction(MusicService.actionCmd);
                 i.putExtra(MusicService.cmdName, MusicService.cmdStopCasting);
@@ -300,11 +306,13 @@ shared class MediaNotificationManager(MusicService service) {
 
     mediaControllerCallback = object extends MediaController.Callback() {
 
+        suppressWarnings("caseNotDisjoint")
         shared actual void onPlaybackStateChanged(PlaybackState state) {
             playbackState = state;
 //            LogHelper.d(tag, "Received new playback state", state);
-            if (state.state == PlaybackState.stateStopped
-             || state.state == PlaybackState.stateNone) {
+            switch (state.state)
+            case (PlaybackState.stateStopped
+                | PlaybackState.stateNone) {
                 stopNotification();
             } else if (exists notification = createNotification()) {
                 notificationManager.notify(notificationId, notification);

@@ -5,16 +5,8 @@ import android.os {
 import android.provider {
     MediaStore
 }
-import android.text {
-    TextUtils
-}
 
-import com.example.android.uamp.utils {
-    MediaIDHelper {
-        equalIds
-    }
-}
-
+suppressWarnings("caseNotDisjoint")
 shared class VoiceSearchParams(query, Bundle? extras) {
 
     shared String query;
@@ -30,39 +22,40 @@ shared class VoiceSearchParams(query, Bundle? extras) {
     shared variable String album = "";
     shared variable String song = "";
 
-    if (TextUtils.isEmpty(query)) {
+    if (query.empty) {
         isAny = true;
     } else {
         if (!exists extras) {
             isUnstructured = true;
         } else {
-            variable String genreKey;
-            if (Build.VERSION.sdkInt>=21) {
-                genreKey = MediaStore.extraMediaGenre;
-            } else {
-                genreKey = "android.intent.extra.genre";
+            value genreKey
+                    = Build.VERSION.sdkInt>=21
+                    then MediaStore.extraMediaGenre
+                    else "android.intent.extra.genre";
+            switch (mediaFocus = extras.getString(MediaStore.extraMediaFocus))
+            case (null) {
+                isUnstructured = true;
             }
-            String mediaFocus = extras.getString(MediaStore.extraMediaFocus);
-            if (equalIds(mediaFocus, MediaStore.Audio.Genres.entryContentType)) {
+            case (MediaStore.Audio.Genres.entryContentType) {
                 isGenreFocus = true;
-                genre = extras.getString(genreKey);
-                if (TextUtils.isEmpty(genre)) {
+                genre = extras.getString(genreKey) else "";
+                if (genre.empty) {
                     genre = query;
                 }
-            } else if (equalIds(mediaFocus, MediaStore.Audio.Artists.entryContentType)) {
+            } case (MediaStore.Audio.Artists.entryContentType) {
                 isArtistFocus = true;
-                genre = extras.getString(genreKey);
+                genre = extras.getString(genreKey) else "";
                 artist = extras.getString(MediaStore.extraMediaArtist);
-            } else if (equalIds(mediaFocus, MediaStore.Audio.Albums.entryContentType)) {
+            } case (MediaStore.Audio.Albums.entryContentType) {
                 isAlbumFocus = true;
                 album = extras.getString(MediaStore.extraMediaAlbum);
-                genre = extras.getString(genreKey);
+                genre = extras.getString(genreKey) else "";
                 artist = extras.getString(MediaStore.extraMediaArtist);
-            } else if (equalIds(mediaFocus, MediaStore.Audio.Media.entryContentType)) {
+            } case (MediaStore.Audio.Media.entryContentType) {
                 isSongFocus = true;
                 song = extras.getString(MediaStore.extraMediaTitle);
                 album = extras.getString(MediaStore.extraMediaAlbum);
-                genre = extras.getString(genreKey);
+                genre = extras.getString(genreKey) else "";
                 artist = extras.getString(MediaStore.extraMediaArtist);
             } else {
                 isUnstructured = true;

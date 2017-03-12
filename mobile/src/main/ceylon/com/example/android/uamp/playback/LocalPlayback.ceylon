@@ -229,19 +229,23 @@ shared class LocalPlayback(Context context, MusicProvider musicProvider)
         callback?.onPlaybackStatusChanged(state);
     }
 
+    suppressWarnings("caseNotDisjoint")
     void onAudioFocusChange(Integer focusChange) {
 //        LogHelper.d(tag, "onAudioFocusChange. focusChange=", focusChange);
-        if (focusChange == AudioManager.audiofocusGain) {
+        switch (focusChange)
+        case (AudioManager.audiofocusGain) {
             audioFocus = AudioFocus.focused;
-        } else if (focusChange == AudioManager.audiofocusLoss
-        || focusChange == AudioManager.audiofocusLossTransient
-        || focusChange == AudioManager.audiofocusLossTransientCanDuck) {
+        }
+        case (AudioManager.audiofocusLoss
+            | AudioManager.audiofocusLossTransient
+            | AudioManager.audiofocusLossTransientCanDuck) {
             value canDuck = focusChange == AudioManager.audiofocusLossTransientCanDuck;
             audioFocus = canDuck then AudioFocus.noFocusCanDuck else AudioFocus.noFocusNoDuck;
             if (state == PlaybackState.statePlaying, !canDuck) {
                 playOnFocusGain = true;
             }
-        } else {
+        }
+        else {
 //            LogHelper.e(tag, "onAudioFocusChange: Ignoring unsupported focusChange: ", focusChange);
         }
         configMediaPlayerState();

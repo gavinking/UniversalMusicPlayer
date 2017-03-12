@@ -199,21 +199,22 @@
 //        value status = remoteMediaClient.playerState;
 //        value idleReason = remoteMediaClient.idleReason;
 ////        LogHelper.d(tag, "onRemoteMediaPlayerStatusUpdated ", status);
-//        if (status == MediaStatus.playerStateIdle) {
+//        switch (status
+//        case (MediaStatus.playerStateIdle) {
 //            if (idleReason == MediaStatus.idleReasonFinished) {
 //                callback?.onCompletion();
 //            }
 //        }
-//        else if (status == MediaStatus.playerStateBuffering) {
+//        case (MediaStatus.playerStateBuffering) {
 //            state = PlaybackState.stateBuffering;
 //            callback?.onPlaybackStatusChanged(state);
 //        }
-//        else if (status == MediaStatus.playerStatePlaying) {
+//        case (MediaStatus.playerStatePlaying) {
 //            state = PlaybackState.statePlaying;
 //            setMetadataFromRemote();
 //            callback?.onPlaybackStatusChanged(state);
 //        }
-//        else if (status == MediaStatus.playerStatePaused) {
+//        case (MediaStatus.playerStatePaused) {
 //            state = PlaybackState.statePaused;
 //            setMetadataFromRemote();
 //            callback?.onPlaybackStatusChanged(state);

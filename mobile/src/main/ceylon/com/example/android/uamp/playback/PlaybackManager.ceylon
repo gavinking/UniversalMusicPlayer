@@ -218,6 +218,7 @@ shared class PlaybackManager(
 
     currentPlayback.setCallback(callback);
 
+    suppressWarnings("caseNotDisjoint")
     shared void switchToPlayback(Playback playback, Boolean resumePlaying) {
         value oldState = currentPlayback.state;
         value pos = currentPlayback.currentStreamPosition;
@@ -229,12 +230,13 @@ shared class PlaybackManager(
         playback.start();
         currentPlayback = playback;
 
-        if (oldState == PlaybackState.stateBuffering
-         || oldState == PlaybackState.stateConnecting
-         || oldState == PlaybackState.statePaused) {
+        switch (oldState)
+        case (PlaybackState.stateBuffering
+            | PlaybackState.stateConnecting
+            | PlaybackState.statePaused) {
             playback.pause();
         }
-        else if (oldState == PlaybackState.statePlaying) {
+        case (PlaybackState.statePlaying) {
             if (resumePlaying,
                 exists currentMusic = queueManager.currentMusic) {
                 playback.play(currentMusic);
@@ -244,6 +246,7 @@ shared class PlaybackManager(
                 playback.stop(true);
             }
         }
+        else {}
     }
 
 }

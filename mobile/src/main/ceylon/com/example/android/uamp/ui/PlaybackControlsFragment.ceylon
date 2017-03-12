@@ -43,10 +43,10 @@ shared class PlaybackControlsFragment() extends Fragment() {
 //    value tag = LogHelper.makeLogTag(`PlaybackControlsFragment`);
 
     late ImageButton mPlayPause;
-    late TextView mTitle;
-    late TextView mSubtitle;
-    late TextView mExtraInfo;
-    late ImageView mAlbumArt;
+    late TextView title;
+    late TextView subtitle;
+    late TextView extraInfo;
+    late ImageView albumArt;
 
     variable String? mArtUrl = null;
 
@@ -63,6 +63,9 @@ shared class PlaybackControlsFragment() extends Fragment() {
         }
     }
 
+    value mediaController => activity?.mediaController;
+
+    suppressWarnings("caseNotDisjoint")
     shared actual View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         value rootView = inflater.inflate(R.Layout.fragment_playback_controls, container, false);
 
@@ -71,41 +74,42 @@ shared class PlaybackControlsFragment() extends Fragment() {
         mPlayPause.enabled = true;
         mPlayPause.setOnClickListener((v) {
             value state =
-                    if (exists stateObj = activity.mediaController.playbackState)
-                    then stateObj.state
+                    mediaController?.playbackState?.state
                     else PlaybackState.stateNone;
 //            LogHelper.d(tag, "Button pressed, in state " + state);
 
-            if (v.id == R.Id.play_pause) {
+//            if (v.id == R.Id.play_pause) {
 //                LogHelper.d(tag, "Play button pressed, in state " + state);
-                if (state == PlaybackState.statePaused
-                || state == PlaybackState.stateStopped
-                || state == PlaybackState.stateNone) {
-                    playMedia();
-                }
-                else if (state == PlaybackState.statePlaying
-                || state == PlaybackState.stateBuffering
-                || state == PlaybackState.stateConnecting) {
-                    pauseMedia();
-                }
+            value controls = mediaController?.transportControls;
+            switch (state)
+            case (PlaybackState.statePaused
+                | PlaybackState.stateStopped
+                | PlaybackState.stateNone) {
+                controls?.play();
             }
+            case (PlaybackState.statePlaying
+                | PlaybackState.stateBuffering
+                | PlaybackState.stateConnecting) {
+                controls?.pause();
+            }
+            else {}
+//            }
 
         });
 
         assert (is TextView title = rootView.findViewById(R.Id.title));
-        mTitle = title;
+        this.title = title;
         assert (is TextView subtitle = rootView.findViewById(R.Id.artist));
-        mSubtitle = subtitle;
+        this.subtitle = subtitle;
         assert (is TextView extraInfo = rootView.findViewById(R.Id.extra_info));
-        mExtraInfo = extraInfo;
+        this.extraInfo = extraInfo;
         assert (is ImageView albumArt = rootView.findViewById(R.Id.album_art));
-        mAlbumArt = albumArt;
+        this.albumArt = albumArt;
 
         rootView.setOnClickListener((v) {
             value intent = Intent(activity, `FullScreenPlayerActivity`);
             intent.setFlags(Intent.flagActivitySingleTop);
-            value controller = activity.mediaController;
-            if (exists metadata = controller.metadata) {
+            if (exists metadata = mediaController?.metadata) {
                 intent.putExtra(MusicPlayerActivity.extraCurrentMediaDescription, metadata.description);
             }
             startActivity(intent);
@@ -116,22 +120,18 @@ shared class PlaybackControlsFragment() extends Fragment() {
     shared actual void onStart() {
         super.onStart();
 //        LogHelper.d(tag, "fragment.onStart");
-        if (exists controller = activity.mediaController) {
-            onConnected();
-        }
+        onConnected();
     }
 
     shared actual void onStop() {
         super.onStop();
 //        LogHelper.d(tag, "fragment.onStop");
-        if (exists controller = activity.mediaController) {
-            controller.unregisterCallback(mCallback);
-        }
+        mediaController?.unregisterCallback(mCallback);
     }
 
     shared void onConnected() {
 //        LogHelper.d(tag, "onConnected, mediaController==null? ", !controller exists);
-        if (exists controller = activity.mediaController) {
+        if (exists controller = mediaController) {
             onMetadataChanged(controller.metadata);
             onPlaybackStateChanged(controller.playbackState);
             controller.registerCallback(mCallback);
@@ -147,22 +147,23 @@ shared class PlaybackControlsFragment() extends Fragment() {
         if (!exists metadata) {
             return;
         }
-        mTitle.setText(metadata.description.title);
-        mSubtitle.setText(metadata.description.subtitle);
+
+        title.setText(metadata.description.title);
+        subtitle.setText(metadata.description.subtitle);
         value artUrl = metadata.description.iconUri?.string;
         if (!MediaIDHelper.equalIds(artUrl, mArtUrl)) {
             mArtUrl = artUrl;
             if (exists art
                     = metadata.description.iconBitmap
                     else AlbumArtCache.instance.getIconImage(mArtUrl)) {
-                mAlbumArt.setImageBitmap(art);
+                albumArt.setImageBitmap(art);
             }
             else {
                 AlbumArtCache.instance.fetch(artUrl, (artUrl, bitmap, icon) {
                     if (exists icon) {
 //                        LogHelper.d(tag, "album art icon of w=", icon.width, " h=", icon.height);
                         if (added) {
-                            mAlbumArt.setImageBitmap(icon);
+                            albumArt.setImageBitmap(icon);
                         }
                     }
                 });
@@ -170,16 +171,17 @@ shared class PlaybackControlsFragment() extends Fragment() {
         }
     }
 
-    shared void setExtraInfo(String? extraInfo) {
-        if (exists extraInfo) {
-            mExtraInfo.setText(extraInfo);
-            mExtraInfo.visibility = View.visible;
+    shared void setExtraInfo(String? info) {
+        if (exists info) {
+            extraInfo.setText(info);
+            extraInfo.visibility = View.visible;
         }
         else {
-            mExtraInfo.visibility = View.gone;
+            extraInfo.visibility = View.gone;
         }
     }
 
+    suppressWarnings("caseNotDisjoint")
     void onPlaybackStateChanged(PlaybackState? state) {
 //        LogHelper.d(tag, "onPlaybackStateChanged ", state);
         if (!activity exists) {
@@ -191,11 +193,12 @@ shared class PlaybackControlsFragment() extends Fragment() {
         }
 
         Boolean enablePlay;
-        if (state.state == PlaybackState.statePaused ||
-            state.state == PlaybackState.stateStopped) {
+        switch (state.state)
+        case (PlaybackState.statePaused
+            | PlaybackState.stateStopped) {
             enablePlay = true;
         }
-        else if (state.state == PlaybackState.stateError) {
+        case (PlaybackState.stateError) {
 //            LogHelper.e(tag, "error playbackstate: ", state.errorMessage);
             Toast.makeText(activity, state.errorMessage, Toast.lengthLong).show();
             enablePlay = false;
@@ -209,23 +212,11 @@ shared class PlaybackControlsFragment() extends Fragment() {
 
         value extraInfo
                 = if (exists castName
-                            = activity?.mediaController?.extras
+                            = mediaController?.extras
                             ?.getString(MusicService.extraConnectedCast))
                 then resources.getString(R.String.casting_to_device, castName)
                 else null;
         setExtraInfo(extraInfo);
-    }
-
-    void playMedia() {
-        if (exists controller = activity.mediaController) {
-            controller.transportControls.play();
-        }
-    }
-
-    void pauseMedia() {
-        if (exists controller = activity.mediaController) {
-            controller.transportControls.pause();
-        }
     }
 
 }

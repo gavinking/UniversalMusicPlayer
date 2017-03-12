@@ -117,6 +117,7 @@ shared class FullScreenPlayerActivity()
         }
     }
 
+    suppressWarnings("caseNotDisjoint")
     void updatePlaybackState(PlaybackState state) {
         mLastPlaybackState = state;
         if (exists extras = mediaController?.extras) {
@@ -127,28 +128,29 @@ shared class FullScreenPlayerActivity()
             mLine3.setText(line3Text);
         }
 
-        if (state.state == PlaybackState.statePlaying) {
+        switch (state.state)
+        case (PlaybackState.statePlaying) {
             mLoading.visibility = invisible;
             mPlayPause.visibility = visible;
             mPlayPause.setImageDrawable(mPauseDrawable);
             mControllers.visibility = visible;
             scheduleSeekbarUpdate();
         }
-        else if (state.state == PlaybackState.statePaused) {
+        case (PlaybackState.statePaused) {
             mControllers.visibility = visible;
             mLoading.visibility = invisible;
             mPlayPause.visibility = visible;
             mPlayPause.setImageDrawable(mPlayDrawable);
             stopSeekbarUpdate();
         }
-        else if (state.state == PlaybackState.stateNone ||
-                 state.state == PlaybackState.stateStopped) {
+        case (PlaybackState.stateNone |
+              PlaybackState.stateStopped) {
             mLoading.visibility = invisible;
             mPlayPause.visibility = visible;
             mPlayPause.setImageDrawable(mPlayDrawable);
             stopSeekbarUpdate();
         }
-        else if (state.state == PlaybackState.stateBuffering) {
+        case (PlaybackState.stateBuffering) {
             mPlayPause.visibility = invisible;
             mLoading.visibility = visible;
             mLine3.setText(R.String.loading);
@@ -233,6 +235,7 @@ shared class FullScreenPlayerActivity()
         }
     }
 
+    suppressWarnings("caseNotDisjoint")
     shared actual void onCreate(Bundle? savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.Layout.activity_full_player);
@@ -273,13 +276,14 @@ shared class FullScreenPlayerActivity()
         mPlayPause.setOnClickListener((v) {
             if (exists state = mediaController.playbackState) {
                 value controls = mediaController.transportControls;
-                if (state.state == PlaybackState.statePlaying ||
-                    state.state == PlaybackState.stateBuffering) {
+                switch (state.state)
+                case (PlaybackState.statePlaying
+                    | PlaybackState.stateBuffering) {
                     controls.pause();
                     stopSeekbarUpdate();
                 }
-                else if (state.state == PlaybackState.statePaused ||
-                         state.state == PlaybackState.stateStopped) {
+                case (PlaybackState.statePaused
+                    | PlaybackState.stateStopped) {
                     controls.play();
                     scheduleSeekbarUpdate();
                 }
