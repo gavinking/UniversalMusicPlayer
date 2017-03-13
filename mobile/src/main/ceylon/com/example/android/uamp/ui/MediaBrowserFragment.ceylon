@@ -30,12 +30,10 @@ import android.view {
     ViewGroup
 }
 import android.widget {
-    AdapterView,
     ArrayAdapter,
     ListView,
     TextView,
-    Toast,
-    Adapter
+    Toast
 }
 
 import com.example.android.uamp {
@@ -147,12 +145,10 @@ shared class MediaBrowserFragment() extends Fragment() {
 
         assert (is ListView listView = rootView.findViewById(R.Id.list_view));
         listView.setAdapter(browserAdapter);
-        listView.setOnItemClickListener(object satisfies AdapterView.OnItemClickListener {
-            shared actual void onItemClick(AdapterView<out Adapter>? parent, View? view, Integer position, Integer id) {
-                checkForUserVisibleErrors(false);
-                value item = browserAdapter.getItem(position);
-                mediaFragmentListener?.onMediaItemSelected(item);
-            }
+        listView.setOnItemClickListener((parent, view, position, id) {
+            checkForUserVisibleErrors(false);
+            value item = browserAdapter.getItem(position);
+            mediaFragmentListener?.onMediaItemSelected(item);
         });
 
         return rootView;
