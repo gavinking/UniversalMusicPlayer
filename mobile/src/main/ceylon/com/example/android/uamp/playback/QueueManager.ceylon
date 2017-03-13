@@ -36,9 +36,9 @@ shared class QueueManager(
 
 //    value tag = LogHelper.makeLogTag(`QueueManager`);
 
-    variable value mPlayingQueue
+    variable value playingQueue
             = Collections.synchronizedList(ArrayList<MediaSession.QueueItem>());
-    variable value mCurrentIndex = 0;
+    variable value currentIndex = 0;
 
     shared Boolean isSameBrowsingCategory(String mediaId) {
         if (exists current = currentMusic,
@@ -53,36 +53,36 @@ shared class QueueManager(
     }
 
     void setCurrentQueueIndex(Integer index) {
-        if (0 <= index < mPlayingQueue.size()) {
-            mCurrentIndex = index;
-            listener.onCurrentQueueIndexUpdated(mCurrentIndex);
+        if (0 <= index < playingQueue.size()) {
+            currentIndex = index;
+            listener.onCurrentQueueIndexUpdated(currentIndex);
         }
     }
 
     shared Boolean setCurrentQueueItemByQueueId(Integer queueId) {
-        value index = QueueHelper.getMusicIndexOnQueueByQueueId(mPlayingQueue, queueId);
+        value index = QueueHelper.getMusicIndexOnQueueByQueueId(playingQueue, queueId);
         setCurrentQueueIndex(index);
         return index>=0;
     }
 
     shared Boolean setCurrentQueueItemByMediaId(String mediaId) {
-        value index = QueueHelper.getMusicIndexOnQueueByMediaId(mPlayingQueue, mediaId);
+        value index = QueueHelper.getMusicIndexOnQueueByMediaId(playingQueue, mediaId);
         setCurrentQueueIndex(index);
         return index>=0;
     }
 
     shared Boolean skipQueuePosition(Integer amount) {
-        variable Integer index = mCurrentIndex + amount;
+        variable Integer index = currentIndex + amount;
         if (index<0) {
             index = 0;
         } else {
-            index %=mPlayingQueue.size();
+            index %= playingQueue.size();
         }
-        if (!QueueHelper.isIndexPlayable(index, mPlayingQueue)) {
+        if (!QueueHelper.isIndexPlayable(index, playingQueue)) {
 //            LogHelper.e(tag, "Cannot increment queue index by ", amount, ". Current=", mCurrentIndex, " queue length=", mPlayingQueue.size());
             return false;
         }
-        mCurrentIndex = index;
+        currentIndex = index;
         return true;
     }
 
@@ -114,18 +114,20 @@ shared class QueueManager(
     }
 
     shared MediaSession.QueueItem? currentMusic
-            => QueueHelper.isIndexPlayable(mCurrentIndex, mPlayingQueue)
-            then mPlayingQueue.get(mCurrentIndex);
+            => QueueHelper.isIndexPlayable(currentIndex, playingQueue)
+            then playingQueue.get(currentIndex);
 
-    shared Integer currentQueueSize => mPlayingQueue?.size() else 0;
+    shared Integer currentQueueSize => playingQueue?.size() else 0;
 
-    void setCurrentQueue(String title, List<MediaSession.QueueItem>? newQueue, String? initialMediaId = null) {
-        mPlayingQueue = newQueue;
+    void setCurrentQueue(String title,
+            List<MediaSession.QueueItem>? newQueue,
+            String? initialMediaId = null) {
+        playingQueue = newQueue;
         value index
                 = if (exists initialMediaId)
-                then QueueHelper.getMusicIndexOnQueueByMediaId(mPlayingQueue, initialMediaId)
+                then QueueHelper.getMusicIndexOnQueueByMediaId(playingQueue, initialMediaId)
                 else 0;
-        mCurrentIndex = largest(index, 0);
+        currentIndex = largest(index, 0);
         listener.onQueueUpdated(title, newQueue);
     }
 
