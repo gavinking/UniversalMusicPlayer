@@ -26,13 +26,13 @@ shared class MusicPlayerActivity
         extends BaseActivity
         satisfies MediaFragmentListener {
 
-    static String savedMediaId = "com.example.android.uamp.MEDIA_ID";
-    static String fragmentTag = "uamp_list_container";
-
     shared static String extraStartFullscreen = "com.example.android.uamp.EXTRA_START_FULLSCREEN";
     shared static String extraCurrentMediaDescription = "com.example.android.uamp.CURRENT_MEDIA_DESCRIPTION";
 
-    variable Bundle? mVoiceSearchParams = null;
+    static value savedMediaId = "com.example.android.uamp.MEDIA_ID";
+    static value fragmentTag = "uamp_list_container";
+
+    variable Bundle? voiceSearchParams = null;
 
 //    value tag = LogHelper.makeLogTag(`MusicPlayerActivity`);
 
@@ -104,7 +104,7 @@ shared class MusicPlayerActivity
         String? mediaId;
         if (exists action = intent.action,
             action == MediaStore.intentActionMediaPlayFromSearch) {
-            mVoiceSearchParams = intent.extras;
+            voiceSearchParams = intent.extras;
 //            LogHelper.d(tag, "Starting from voice search query=",
 //                mVoiceSearchParams?.getString(SearchManager.query));
             mediaId = null;
@@ -140,10 +140,10 @@ shared class MusicPlayerActivity
     shared String? mediaId => browseFragment?.mediaId;
 
     shared actual void onMediaControllerConnected() {
-        if (exists params = mVoiceSearchParams) {
+        if (exists params = voiceSearchParams) {
             value query = params.getString(SearchManager.query);
-            mediaController.transportControls.playFromSearch(query, mVoiceSearchParams);
-            mVoiceSearchParams = null;
+            mediaController.transportControls.playFromSearch(query, voiceSearchParams);
+            voiceSearchParams = null;
         }
         browseFragment?.onConnected();
     }
