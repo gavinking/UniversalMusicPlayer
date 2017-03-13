@@ -141,7 +141,8 @@ shared class MediaNotificationManager {
             return;
         }
 
-        if (playback.state == PlaybackState.statePlaying, playback.position>=0) {
+        if (playback.state == PlaybackState.statePlaying,
+            playback.position>=0) {
 //            LogHelper.d(tag, "updateNotificationPlaybackState. updating playback position to ",
 //                (System.currentTimeMillis() - playback.position) / 1000, " seconds");
             builder.setWhen(System.currentTimeMillis() - playback.position)
@@ -149,7 +150,9 @@ shared class MediaNotificationManager {
                 .setUsesChronometer(true);
         } else {
 //            LogHelper.d(tag, "updateNotificationPlaybackState. hiding playback position");
-            builder.setWhen(0).setShowWhen(false).setUsesChronometer(false);
+            builder.setWhen(0)
+                .setShowWhen(false)
+                .setUsesChronometer(false);
         }
         builder.setOngoing(playback.state == PlaybackState.statePlaying);
     }

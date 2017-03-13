@@ -39,7 +39,6 @@ import com.example.android.uamp.model {
     MusicProvider
 }
 import com.example.android.uamp.playback {
-//    CastPlayback,
     LocalPlayback,
     PlaybackManager,
     PlaybackServiceCallback,
@@ -51,15 +50,11 @@ import com.example.android.uamp.ui {
 }
 import com.example.android.uamp.utils {
     CarHelper,
-//    TvHelper,
     WearHelper,
     MediaIDHelper
 }
 import com.google.android.gms.cast.framework {
-    CastContext,
-    CastSession,
-    SessionManager,
-    SessionManagerListener
+    CastContext
 }
 
 import java.lang.ref {
@@ -80,24 +75,35 @@ shared class MusicService
     static shared String cmdPause = "CMD_PAUSE";
     static shared String cmdStopCasting = "CMD_STOP_CASTING";
 
-    shared new () extends MediaBrowserService() {}
+    static value stopDelay = 30000;
 
-    value stopDelay = 30000;
+    static class DelayedStopHandler(MusicService service)
+            extends Handler() {
+        value serviceReference = WeakReference(service);
+        shared actual void handleMessage(Message msg) {
+            if (exists service = serviceReference.get(),
+                !service.playbackManager.playback.playing) {
+                service.stopSelf();
+            }
+        }
+    }
+
+    shared new () extends MediaBrowserService() {}
 
 //    value tag = LogHelper.makeLogTag(`MusicService`);
 
-    late MusicProvider mMusicProvider;
-    late PackageValidator mPackageValidator;
-    late MediaNotificationManager mMediaNotificationManager;
-    late PlaybackManager mPlaybackManager;
-    late MediaSession mSession;
-    late Bundle mSessionExtras;
-    late MediaRouter mMediaRouter;
+    late MusicProvider musicProvider;
+    late PackageValidator packageValidator;
+    late MediaNotificationManager mediaNotificationManager;
+    late PlaybackManager playbackManager;
+    late MediaSession session;
+    late Bundle sessionExtras;
+    late MediaRouter mediaRouter;
 
-    late SessionManager? mCastSessionManager;
-    late SessionManagerListener<CastSession>? mCastSessionManagerListener;
+//    late SessionManager? castSessionManager;
+//    late SessionManagerListener<CastSession>? castSessionManagerListener;
 
-    late Handler mDelayedStopHandler;
+    late Handler delayedStopHandler;
 
     variable Boolean mIsConnectedToCar;
     variable BroadcastReceiver? mCarConnectionReceiver = null;
@@ -105,59 +111,47 @@ shared class MusicService
     shared actual void onCreate() {
         super.onCreate();
 
-        mDelayedStopHandler = object extends Handler() {
-            value mWeakReference = WeakReference(service);
-            shared actual void handleMessage(Message msg) {
-                if (exists service = mWeakReference.get()) {
-                    if (mPlaybackManager.playback.playing) {
-                    //LogHelper.d(tag, "Ignoring delayed stop since the media player is in use.");
-                        return;
-                    }
-                    //LogHelper.d(tag, "Stopping service with delay handler.");
-                    stopSelf();
-                }
-            }
-        };
+        delayedStopHandler = DelayedStopHandler(this);
 
 //        LogHelper.d(tag, "onCreate");
-        mMusicProvider = MusicProvider();
-        mMusicProvider.retrieveMediaAsync(noop);
-        mPackageValidator = PackageValidator(this);
+        musicProvider = MusicProvider();
+        musicProvider.retrieveMediaAsync(noop);
+        packageValidator = PackageValidator(this);
+        playbackManager
+                = PlaybackManager(this, resources, musicProvider,
+                    QueueManager(musicProvider, resources,
+                        object satisfies MetadataUpdateListener {
+                            onMetadataChanged(MediaMetadata metadata)
+                                    => session.setMetadata(metadata);
+                            onMetadataRetrieveError()
+                                    => playbackManager.updatePlaybackState(
+                                        getString(R.String.error_no_metadata));
+                            onCurrentQueueIndexUpdated(Integer queueIndex)
+                                    => playbackManager.handlePlayRequest();
+                            shared actual void onQueueUpdated(String title,
+                                    List<MediaSession.QueueItem>? newQueue) {
+                                session.setQueue(newQueue);
+                                session.setQueueTitle(title);
+                            }
+                        }),
+                    LocalPlayback(this, musicProvider));
+        sessionExtras = Bundle();
+        CarHelper.setSlotReservationFlags(sessionExtras, true, true, true);
+        WearHelper.setSlotReservationFlags(sessionExtras, true, true);
+        WearHelper.setUseBackgroundFromTheme(sessionExtras, true);
 
-        value queueManager
-                = QueueManager(mMusicProvider, resources,
-            object satisfies MetadataUpdateListener {
-                onMetadataChanged(MediaMetadata metadata)
-                        => mSession.setMetadata(metadata);
-                onMetadataRetrieveError()
-                        => mPlaybackManager.updatePlaybackState(getString(R.String.error_no_metadata));
-                onCurrentQueueIndexUpdated(Integer queueIndex)
-                        => mPlaybackManager.handlePlayRequest();
-                shared actual void onQueueUpdated(String title, List<MediaSession.QueueItem>? newQueue) {
-                    mSession.setQueue(newQueue);
-                    mSession.setQueueTitle(title);
-                }
-            });
-        mPlaybackManager
-                = PlaybackManager(this, resources, mMusicProvider, queueManager,
-                    LocalPlayback(this, mMusicProvider));
-        mSessionExtras = Bundle();
-        CarHelper.setSlotReservationFlags(mSessionExtras, true, true, true);
-        WearHelper.setSlotReservationFlags(mSessionExtras, true, true);
-        WearHelper.setUseBackgroundFromTheme(mSessionExtras, true);
-
-        mSession = MediaSession(this, "MusicService");
-        sessionToken = mSession.sessionToken;
-        mSession.setCallback(mPlaybackManager);
-        mSession.setFlags(MediaSession.flagHandlesMediaButtons.or(MediaSession.flagHandlesTransportControls));
+        session = MediaSession(this, "MusicService");
+        sessionToken = session.sessionToken;
+        session.setCallback(playbackManager);
+        session.setFlags(MediaSession.flagHandlesMediaButtons.or(MediaSession.flagHandlesTransportControls));
         value intent = Intent(applicationContext, `NowPlayingActivity`);
         value pi = PendingIntent.getActivity(applicationContext, 99, intent, PendingIntent.flagUpdateCurrent);
-        mSession.setSessionActivity(pi);
-        mSession.setExtras(mSessionExtras);
+        session.setSessionActivity(pi);
+        session.setExtras(sessionExtras);
 
-        mPlaybackManager.updatePlaybackState(null);
+        playbackManager.updatePlaybackState(null);
 
-        mMediaNotificationManager = MediaNotificationManager(this);
+        mediaNotificationManager = MediaNotificationManager(this);
 //        if (!TvHelper.isTvUiMode(this)) {
 //            value manager = CastContext.getSharedInstance(this).sessionManager;
 //            mCastSessionManager = manager;
@@ -195,11 +189,11 @@ shared class MusicService
 //            manager.addSessionManagerListener(mCastSessionManagerListener, `CastSession`);
 //        }
 //        else {
-            mCastSessionManager = null;
-            mCastSessionManagerListener = null;
+//            castSessionManager = null;
+//            castSessionManagerListener = null;
 //        }
 
-        mMediaRouter = MediaRouter.getInstance(applicationContext);
+        mediaRouter = MediaRouter.getInstance(applicationContext);
         registerCarConnectionReceiver();
     }
 
@@ -209,32 +203,32 @@ shared class MusicService
                 actionCmd==action) {
                 value command = startIntent.getStringExtra(cmdName);
                 if (cmdPause==command) {
-                    mPlaybackManager.handlePauseRequest();
+                    playbackManager.handlePauseRequest();
                 } else if (cmdStopCasting==command) {
                     CastContext.getSharedInstance(this).sessionManager.endCurrentSession(true);
                 }
             } else {
-                MediaButtonReceiver.handleIntent(MediaSessionCompat.fromMediaSession(this, mSession), startIntent);
+                MediaButtonReceiver.handleIntent(MediaSessionCompat.fromMediaSession(this, session), startIntent);
             }
         }
-        mDelayedStopHandler.removeCallbacksAndMessages(null);
-        mDelayedStopHandler.sendEmptyMessageDelayed(0, stopDelay);
+        delayedStopHandler.removeCallbacksAndMessages(null);
+        delayedStopHandler.sendEmptyMessageDelayed(0, stopDelay);
         return startSticky;
     }
 
     shared actual void onDestroy() {
 //        LogHelper.d(tag, "onDestroy");
-        unregisterCarConnectionReceiver();
-        mPlaybackManager.handleStopRequest(null);
-        mMediaNotificationManager.stopNotification();
-        mCastSessionManager?.removeSessionManagerListener(mCastSessionManagerListener, `CastSession`);
-        mDelayedStopHandler.removeCallbacksAndMessages(null);
-        mSession.release();
+        unregisterReceiver(mCarConnectionReceiver);
+        playbackManager.handleStopRequest(null);
+        mediaNotificationManager.stopNotification();
+//        castSessionManager?.removeSessionManagerListener(castSessionManagerListener, `CastSession`);
+        delayedStopHandler.removeCallbacksAndMessages(null);
+        session.release();
     }
 
     shared actual BrowserRoot onGetRoot(String clientPackageName, Integer clientUid, Bundle rootHints) {
 //        LogHelper.d(tag, "OnGetRoot: clientPackageName=" + clientPackageName, "; clientUid=" + clientUid + " ; rootHints=", rootHints);
-        if (!mPackageValidator.isCallerAllowed(this, clientPackageName, clientUid)) {
+        if (!packageValidator.isCallerAllowed(this, clientPackageName, clientUid)) {
 //            LogHelper.i(tag, "OnGetRoot: Browsing NOT ALLOWED for unknown caller. " + "Returning empty browser root so all apps can use MediaController." + clientPackageName);
             return MediaBrowserService.BrowserRoot(MediaIDHelper.mediaIdEmptyRoot, null);
         }
@@ -250,47 +244,44 @@ shared class MusicService
 //        LogHelper.d(tag, "OnLoadChildren: parentMediaId=", parentMediaId);
         if (MediaIDHelper.mediaIdEmptyRoot == parentMediaId) {
             result.sendResult(ArrayList<MediaItem>());
-        } else if (mMusicProvider.initialized) {
-            result.sendResult(mMusicProvider.getChildren(parentMediaId, resources));
+        } else if (musicProvider.initialized) {
+            result.sendResult(musicProvider.getChildren(parentMediaId, resources));
         } else {
             result.detach();
-            mMusicProvider.retrieveMediaAsync((success)
-                    => result.sendResult(mMusicProvider.getChildren(parentMediaId, resources)));
+            musicProvider.retrieveMediaAsync((success)
+                    => result.sendResult(musicProvider.getChildren(parentMediaId, resources)));
         }
     }
 
     shared actual void onPlaybackStart() {
-        mSession.active = true;
-        mDelayedStopHandler.removeCallbacksAndMessages(null);
+        session.active = true;
+        delayedStopHandler.removeCallbacksAndMessages(null);
         startService(Intent(applicationContext, `MusicService`));
     }
 
     shared actual void onPlaybackStop() {
-        mSession.active = false;
-        mDelayedStopHandler.removeCallbacksAndMessages(null);
-        mDelayedStopHandler.sendEmptyMessageDelayed(0, stopDelay);
+        session.active = false;
+        delayedStopHandler.removeCallbacksAndMessages(null);
+        delayedStopHandler.sendEmptyMessageDelayed(0, stopDelay);
         stopForeground(true);
     }
 
     shared actual void onNotificationRequired()
-            => mMediaNotificationManager.startNotification();
+            => mediaNotificationManager.startNotification();
 
     shared actual void onPlaybackStateUpdated(PlaybackState newState)
-            => mSession.setPlaybackState(newState);
+            => session.setPlaybackState(newState);
 
     void registerCarConnectionReceiver() {
         value filter = IntentFilter(CarHelper.actionMediaStatus);
-        mCarConnectionReceiver = object extends BroadcastReceiver() {
-            shared actual void onReceive(Context context, Intent intent) {
-                value connectionEvent = intent.getStringExtra(CarHelper.mediaConnectionStatus);
-                mIsConnectedToCar = CarHelper.mediaConnected==connectionEvent;
-//                LogHelper.i(tag, "Connection event to Android Auto: ", connectionEvent, " isConnectedToCar=", mIsConnectedToCar);
-            }
-        };
+        mCarConnectionReceiver
+                = object extends BroadcastReceiver() {
+                    onReceive(Context context, Intent intent)
+                            => mIsConnectedToCar
+                                = CarHelper.mediaConnected
+                                == intent.getStringExtra(CarHelper.mediaConnectionStatus);
+                };
         registerReceiver(mCarConnectionReceiver, filter);
     }
-
-    void unregisterCarConnectionReceiver()
-            => unregisterReceiver(mCarConnectionReceiver);
 
 }
