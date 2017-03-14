@@ -1,3 +1,6 @@
+import android.app {
+    Activity
+}
 import android.content {
     Context
 }
@@ -9,9 +12,6 @@ import android.media.session {
 }
 import android.os {
     Bundle
-}
-import android.support.v4.app {
-    FragmentActivity
 }
 
 import com.example.android.uamp {
@@ -174,7 +174,7 @@ shared class QueueHelper {
     }
 
     shared static Boolean isQueueItemPlaying(Context context, MediaSession.QueueItem queueItem) {
-        if (is FragmentActivity context,
+        if (is Activity context,
             exists controller = context.mediaController,
             exists state = controller.playbackState) {
             value currentPlayingQueueId = state.activeQueueItemId;

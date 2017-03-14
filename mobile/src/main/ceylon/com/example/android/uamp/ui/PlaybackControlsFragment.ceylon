@@ -14,9 +14,6 @@ import android.media.session {
 import android.os {
     Bundle
 }
-import android.support.v4.content {
-    ContextCompat
-}
 import android.view {
     LayoutInflater,
     View,
@@ -207,8 +204,10 @@ shared class PlaybackControlsFragment() extends Fragment() {
             enablePlay = false;
         }
 
-        mPlayPause.setImageDrawable(ContextCompat.getDrawable(activity,
-            enablePlay then R.Drawable.ic_play_arrow_black_36dp else R.Drawable.ic_pause_black_36dp));
+        mPlayPause.setImageDrawable(
+            activity.getDrawable(enablePlay
+                then R.Drawable.ic_play_arrow_black_36dp
+                else R.Drawable.ic_pause_black_36dp));
 
         value extraInfo
                 = if (exists castName

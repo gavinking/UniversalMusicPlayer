@@ -23,9 +23,6 @@ import android.os {
     RemoteException,
     SystemClock
 }
-import android.support.v4.content {
-    ContextCompat
-}
 import android.text.format {
     DateUtils
 }
@@ -246,8 +243,8 @@ shared class FullScreenPlayerActivity()
         }
         assert (is ImageView backgroundImage = findViewById(R.Id.background_image));
         mBackgroundImage = backgroundImage;
-        mPauseDrawable = ContextCompat.getDrawable(this, R.Drawable.uamp_ic_pause_white_48dp);
-        mPlayDrawable = ContextCompat.getDrawable(this, R.Drawable.uamp_ic_play_arrow_white_48dp);
+        mPauseDrawable = getDrawable(R.Drawable.uamp_ic_pause_white_48dp);
+        mPlayDrawable = getDrawable(R.Drawable.uamp_ic_play_arrow_white_48dp);
         assert (is ImageView playPause = findViewById(R.Id.play_pause));
         mPlayPause = playPause;
         assert (is ImageView skipNext = findViewById(R.Id.next));

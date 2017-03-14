@@ -1,11 +1,11 @@
+import android.app {
+    Activity
+}
 import android.content {
     Context
 }
 import android.media.browse {
     MediaBrowser
-}
-import android.support.v4.app {
-    FragmentActivity
 }
 
 import java.util {
@@ -81,7 +81,7 @@ shared class MediaIDHelper {
 //    }
 
     shared static Boolean isMediaItemPlaying(Context context, MediaBrowser.MediaItem mediaItem) {
-        if (is FragmentActivity context,
+        if (is Activity context,
             exists metadata = context.mediaController?.metadata) {
             value itemMusicId = extractMusicIDFromMediaID(mediaItem.description.mediaId);
             if (exists currentPlayingMediaId = metadata.description.mediaId,
