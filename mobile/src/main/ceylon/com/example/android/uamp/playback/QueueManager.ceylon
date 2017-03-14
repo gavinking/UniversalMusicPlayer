@@ -72,18 +72,19 @@ shared class QueueManager(
     }
 
     shared Boolean skipQueuePosition(Integer amount) {
-        variable Integer index = currentIndex + amount;
-        if (index<0) {
-            index = 0;
-        } else {
-            index %= playingQueue.size();
+        value indexAfterSkip = currentIndex + amount;
+        value index
+                = indexAfterSkip<0 then 0
+                else indexAfterSkip % playingQueue.size();
+
+        if (QueueHelper.isIndexPlayable(index, playingQueue)) {
+            currentIndex = index;
+            return true;
         }
-        if (!QueueHelper.isIndexPlayable(index, playingQueue)) {
+        else {
 //            LogHelper.e(tag, "Cannot increment queue index by ", amount, ". Current=", mCurrentIndex, " queue length=", mPlayingQueue.size());
             return false;
         }
-        currentIndex = index;
-        return true;
     }
 
     shared Boolean setQueueFromSearch(String query, Bundle extras) {
@@ -127,7 +128,7 @@ shared class QueueManager(
                 = if (exists initialMediaId)
                 then QueueHelper.getMusicIndexOnQueueByMediaId(playingQueue, initialMediaId)
                 else 0;
-        currentIndex = largest(index, 0);
+        currentIndex = Integer.largest(index, 0);
         listener.onQueueUpdated(title, newQueue);
     }
 
