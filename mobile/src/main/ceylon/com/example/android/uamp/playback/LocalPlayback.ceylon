@@ -53,11 +53,12 @@ shared class LocalPlayback(Context context, MusicProvider musicProvider)
 //    value tag = LogHelper.makeLogTag(`LocalPlayback`);
 
     variable Boolean playOnFocusGain = false;
-    variable Callback? callback = null;
     variable Boolean noisyReceiverRegistered = false;
     variable Integer currentPosition = 0;
     variable AudioFocus audioFocus = AudioFocus.noFocusNoDuck;
     variable MediaPlayer? mediaPlayer = null;
+
+    shared actual variable Callback? callback = null;
 
     value noisyIntentFilter = IntentFilter(AudioManager.actionAudioBecomingNoisy);
 
@@ -179,8 +180,6 @@ shared class LocalPlayback(Context context, MusicProvider musicProvider)
             currentPosition = position;
         }
     }
-
-    shared actual void setCallback(Callback callback) => this.callback = callback;
 
     void tryToGetAudioFocus() {
 //        LogHelper.d(tag, "tryToGetAudioFocus");

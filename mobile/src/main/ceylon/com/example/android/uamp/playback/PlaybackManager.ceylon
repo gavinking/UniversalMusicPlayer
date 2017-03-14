@@ -2,7 +2,6 @@ import android.content.res {
     Resources
 }
 import android.media.session {
-    MediaSession,
     PlaybackState
 }
 import android.os {
@@ -10,6 +9,9 @@ import android.os {
     SystemClock {
         elapsedRealtime
     }
+}
+import android.support.v4.media.session {
+    MediaSessionCompat
 }
 
 import com.example.android.uamp {
@@ -29,7 +31,7 @@ shared class PlaybackManager(
         MusicProvider musicProvider,
         QueueManager queueManager,
         variable Playback currentPlayback)
-        extends MediaSession.Callback() {
+        extends MediaSessionCompat.Callback() {
 
 //    value tag = LogHelper.makeLogTag(`PlaybackManager`);
 
@@ -58,9 +60,13 @@ shared class PlaybackManager(
 //            LogHelper.d(tag, "updatePlaybackState, setting Favorite custom action of music ", musicId, " current favorite=", musicProvider.isFavorite(musicId));
             value customActionExtras = Bundle();
             WearHelper.setShowCustomActionOnWear(customActionExtras, true);
-            stateBuilder.addCustomAction(PlaybackState.CustomAction.Builder(customActionThumbsUp,
-                        resources.getString(R.String.favorite), favoriteIcon)
-                .setExtras(customActionExtras).build());
+            stateBuilder.addCustomAction(
+                PlaybackState.CustomAction.Builder(
+                        customActionThumbsUp,
+                        resources.getString(R.String.favorite),
+                        favoriteIcon)
+                    .setExtras(customActionExtras)
+                    .build());
         }
     }
 
@@ -216,7 +222,7 @@ shared class PlaybackManager(
                 => queueManager.setQueueFromMusic(mediaId);
     }
 
-    currentPlayback.setCallback(callback);
+    currentPlayback.callback = callback;
 
     suppressWarnings("caseNotDisjoint")
     shared void switchToPlayback(Playback playback, Boolean resumePlaying) {
@@ -224,7 +230,7 @@ shared class PlaybackManager(
         value pos = currentPlayback.currentStreamPosition;
         value currentMediaId = currentPlayback.currentMediaId;
         currentPlayback.stop(false);
-        playback.setCallback(callback);
+        playback.callback = callback;
         playback.currentStreamPosition = pos<0 then 0 else pos;
         playback.currentMediaId = currentMediaId;
         playback.start();

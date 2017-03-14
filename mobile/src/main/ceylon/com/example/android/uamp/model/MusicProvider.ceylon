@@ -66,19 +66,19 @@ shared class MusicProvider(MusicProviderSource source = RemoteJSONSource()) {
 
 //    static value tag = LogHelper.makeLogTag(`MusicProvider`);
 
-    variable State mCurrentState = State.nonInitialized;
+    variable State currentState = State.nonInitialized;
 
     value musicListByGenre = ConcurrentHashMap<String,List<MediaMetadata>>();
     value musicListById = ConcurrentHashMap<String,MutableMediaMetadata>();
     value favoriteTracks = Collections.newSetFromMap(ConcurrentHashMap<String,JBoolean>());
 
     shared JIterable<String> genres
-            => if (mCurrentState != State.initialized)
+            => if (currentState != State.initialized)
             then Collections.emptyList<String>()
             else musicListByGenre.keySet();
 
     shared JIterable<MediaMetadata> shuffledMusic {
-        if (mCurrentState != State.initialized) {
+        if (currentState != State.initialized) {
             return Collections.emptyList<MediaMetadata>();
         }
         value shuffled = ArrayList<MediaMetadata>(musicListById.size());
@@ -90,13 +90,13 @@ shared class MusicProvider(MusicProviderSource source = RemoteJSONSource()) {
     }
 
     shared JIterable<MediaMetadata> getMusicsByGenre(String genre)
-            => if (mCurrentState != State.initialized
+            => if (currentState != State.initialized
                 || !musicListByGenre.containsKey(genre))
             then Collections.emptyList<MediaMetadata>()
             else musicListByGenre.get(genre);
 
     function searchMusic(String metadataField, String query) {
-        if (mCurrentState != State.initialized) {
+        if (currentState != State.initialized) {
             return Collections.emptyList<MediaMetadata>();
         }
         value result = ArrayList<MediaMetadata>();
@@ -141,14 +141,14 @@ shared class MusicProvider(MusicProviderSource source = RemoteJSONSource()) {
     }
 
     shared Boolean initialized
-            => mCurrentState == State.initialized;
+            => currentState == State.initialized;
 
     shared Boolean isFavorite(String musicId)
             => musicId in favoriteTracks;
 
     shared void retrieveMediaAsync(void onMusicCatalogReady(Boolean success)) {
 //        LogHelper.d(tag, "retrieveMediaAsync called");
-        if (mCurrentState == State.initialized) {
+        if (currentState == State.initialized) {
 //            if (exists callback) {
             onMusicCatalogReady(true);
 //            }
@@ -157,7 +157,7 @@ shared class MusicProvider(MusicProviderSource source = RemoteJSONSource()) {
         object extends AsyncTask<Anything,Anything,State>() {
             shared actual State doInBackground(Anything* params) {
                 retrieveMedia();
-                return mCurrentState;
+                return currentState;
             }
             shared actual void onPostExecute(State current) {
 //                if (exists callback) {
@@ -187,19 +187,19 @@ shared class MusicProvider(MusicProviderSource source = RemoteJSONSource()) {
 
     void retrieveMedia() {
         try {
-            if (mCurrentState == State.nonInitialized) {
-                mCurrentState = State.initializing;
+            if (currentState == State.nonInitialized) {
+                currentState = State.initializing;
                 for (item in source) {
                     value musicId = item.getString(MediaMetadata.metadataKeyMediaId);
                     musicListById.put(musicId, MutableMediaMetadata(musicId, item));
                 }
                 buildListsByGenre();
-                mCurrentState = State.initialized;
+                currentState = State.initialized;
             }
         }
         finally {
-            if (mCurrentState != State.initialized) {
-                mCurrentState = State.nonInitialized;
+            if (currentState != State.initialized) {
+                currentState = State.nonInitialized;
             }
         }
     }
@@ -249,9 +249,10 @@ shared class MusicProvider(MusicProviderSource source = RemoteJSONSource()) {
                 }
             }
             else if (mediaId.startsWith(mediaIdMusicsByGenre)) {
-                assert (exists genre = MediaIDHelper.getHierarchy(mediaId)[1]);
-                for (metadata in getMusicsByGenre(genre)) {
-                    mediaItems.add(createMediaItem(metadata));
+                if (exists genre = MediaIDHelper.getHierarchy(mediaId)[1]) {
+                    for (metadata in getMusicsByGenre(genre)) {
+                        mediaItems.add(createMediaItem(metadata));
+                    }
                 }
             } else {
                 //LogHelper.w(tag, "Skipping unmatched mediaId: ", mediaId);

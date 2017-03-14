@@ -19,42 +19,28 @@ import org.json {
     JSONException
 }
 
-shared class RemoteJSONSource satisfies MusicProviderSource {
+shared class RemoteJSONSource() satisfies MusicProviderSource {
 
 //    static value tag = LogHelper.makeLogTag(`RemoteJSONSource`);
 
-    static value catalogUrl = "http://storage.googleapis.com/automotive-media/music.json";
-    static value jsonMusic = "music";
-    static value jsonTitle = "title";
-    static value jsonAlbum = "album";
-    static value jsonArtist = "artist";
-    static value jsonGenre = "genre";
-    static value jsonSource = "source";
-    static value jsonImage = "image";
-    static value jsonTrackNumber = "trackNumber";
-    static value jsonTotalTrackCount = "totalTrackCount";
-    static value jsonDuration = "duration";
-
-    shared new () {}
+    value catalogUrl = "http://storage.googleapis.com/automotive-media/music.json";
 
     function buildFromJSON(JSONObject json, String basePath) {
 
-        value title = json.getString(jsonTitle);
-        value album = json.getString(jsonAlbum);
-        value artist = json.getString(jsonArtist);
-        value genre = json.getString(jsonGenre);
-        variable value source = json.getString(jsonSource);
-        variable value iconUrl = json.getString(jsonImage);
-        value trackNumber = json.getInt(jsonTrackNumber);
-        value totalTrackCount = json.getInt(jsonTotalTrackCount);
-        value duration = json.getInt(jsonDuration) * 1000;
+        function withBasePath(String path)
+                => path.startsWith("http") then path
+                else basePath + path;
+
+        value title = json.getString("title");
+        value album = json.getString("album");
+        value artist = json.getString("artist");
+        value genre = json.getString("genre");
+        value source = withBasePath(json.getString("source"));
+        value iconUrl = withBasePath(json.getString("image"));
+        value trackNumber = json.getInt("trackNumber");
+        value totalTrackCount = json.getInt("totalTrackCount");
+        value duration = json.getInt("duration") * 1000;
 //        LogHelper.d(tag, "Found music track: ", json);
-        if (!source.startsWith("http")) {
-            source = basePath + source;
-        }
-        if (!iconUrl.startsWith("http")) {
-            iconUrl = basePath + iconUrl;
-        }
 
         return MediaMetadata.Builder()
             .putString(MediaMetadata.metadataKeyMediaId, source.hash.string)
@@ -93,10 +79,9 @@ shared class RemoteJSONSource satisfies MusicProviderSource {
     shared actual Iterator<MediaMetadata> iterator() {
 //        try {
         value slashPos = catalogUrl.lastIndexOf("/");
-        value path = catalogUrl.substring(0, slashPos+1);
+        value path = catalogUrl[0:slashPos+1];
         value tracks = ArrayList<MediaMetadata>();
-        if (exists jsonObj = fetchJSONFromUrl(catalogUrl),
-            exists jsonTracks = jsonObj.getJSONArray(jsonMusic)) {
+        if (exists jsonTracks = fetchJSONFromUrl(catalogUrl)?.getJSONArray("music")) {
             for (j in 0:jsonTracks.length()) {
                 tracks.add(buildFromJSON(jsonTracks.getJSONObject(j), path));
             }

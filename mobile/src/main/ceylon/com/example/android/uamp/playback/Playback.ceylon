@@ -10,17 +10,18 @@ shared interface Callback {
 }
 
 shared interface Playback {
-    shared formal void start() ;
-    shared formal void stop(Boolean notifyListeners) ;
+    shared formal void start();
+    shared formal void stop(Boolean notifyListeners);
     shared formal variable Integer state;
     shared formal Boolean connected;
     shared formal Boolean playing;
     shared formal variable Integer currentStreamPosition;
-    shared formal void updateLastKnownStreamPosition() ;
-    shared formal void play(MediaSession.QueueItem item) ;
-    shared formal void pause() ;
-    shared formal void seekTo(Integer position) ;
+    shared formal void updateLastKnownStreamPosition();
+    shared formal void play(MediaSession.QueueItem item);
+    shared formal void pause();
+    shared formal void seekTo(Integer position);
+
     shared formal variable String? currentMediaId;
 
-    shared formal void setCallback(Callback callback) ;
+    shared formal variable Callback? callback;
 }
