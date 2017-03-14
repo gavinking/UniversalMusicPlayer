@@ -25,48 +25,42 @@ shared class MediaIDHelper {
     shared static Boolean equalIds(String? x, String ? y) => Objects.equals(x, y);
 
     static Boolean isValidCategory(String category)
-            => category.indexOf(categorySeparator.string) < 0
-            && category.indexOf(leafSeparator.string) < 0;
+            => !categorySeparator in category
+            && !leafSeparator in category;
 
     shared static String createMediaID(String? musicID, String* categories) {
-        value sb = StringBuilder();
-        variable value i = 0;
-        while (i<categories.size) {
-            assert (exists cat = categories.get(i));
+        value mediaID = StringBuilder();
+        for (cat in categories) {
+            if (!mediaID.empty) {
+                mediaID.appendCharacter(categorySeparator);
+            }
             "Invalid category: ``cat``"
             assert (isValidCategory(cat));
-            sb.append(cat);
-            if (i<categories.size - 1) {
-                sb.appendCharacter(categorySeparator);
-            }
-            i++;
+            mediaID.append(cat);
         }
         if (exists musicID) {
-            sb.appendCharacter(leafSeparator).append(musicID);
+            mediaID.appendCharacter(leafSeparator)
+                .append(musicID);
         }
-        return sb.string;
+        return mediaID.string;
     }
 
     shared static String? extractMusicIDFromMediaID(String mediaID) {
-        value pos = mediaID.indexOf(leafSeparator.string);
-        return pos>=0 then mediaID.substring(pos + 1);
+        value pos = mediaID.firstOccurrence(leafSeparator);
+        return if (exists pos) then mediaID[pos+1...] else null;
     }
 
-    shared static String[] getHierarchy(variable String mediaID) {
-        value pos = mediaID.indexOf(leafSeparator.string);
-        if (pos>=0) {
-            mediaID = mediaID.substring(0, pos);
-        }
-        return mediaID.split(categorySeparator.equals).sequence();
+    shared static String[] getHierarchy(String mediaID) {
+        value pos = mediaID.firstOccurrence(leafSeparator);
+        value initial = if (exists pos) then mediaID[0:pos] else mediaID;
+        return initial.split(categorySeparator.equals).sequence();
     }
 
-    shared static String? extractBrowseCategoryValueFromMediaID(String mediaID) {
-        value hierarchy = getHierarchy(mediaID);
-        return if (hierarchy.size == 2) then hierarchy[1] else null;
-    }
+    shared static String? extractBrowseCategoryValueFromMediaID(String mediaID)
+            => getHierarchy(mediaID)[1];
 
     shared static Boolean isBrowseable(String mediaID)
-            => mediaID.indexOf(leafSeparator.string) < 0;
+            => !leafSeparator in mediaID;
 
 //    shared static String getParentMediaID(String mediaID) {
 //        value hierarchy = getHierarchy(mediaID);
@@ -80,17 +74,13 @@ shared class MediaIDHelper {
 //        return createMediaID(null, *parentHierarchy);
 //    }
 
-    shared static Boolean isMediaItemPlaying(Context context, MediaBrowser.MediaItem mediaItem) {
-        if (is Activity context,
-            exists metadata = context.mediaController?.metadata) {
-            value itemMusicId = extractMusicIDFromMediaID(mediaItem.description.mediaId);
-            if (exists currentPlayingMediaId = metadata.description.mediaId,
-                MediaIDHelper.equalIds(currentPlayingMediaId, itemMusicId)) {
-                return true;
-            }
-        }
-        return false;
-    }
+    shared static Boolean isMediaItemPlaying(Context context, MediaBrowser.MediaItem mediaItem)
+            => if (is Activity context,
+                    exists metadata = context.mediaController?.metadata,
+                    exists itemMusicId = extractMusicIDFromMediaID(mediaItem.description.mediaId),
+                    exists currentPlayingMediaId = metadata.description.mediaId)
+            then MediaIDHelper.equalIds(currentPlayingMediaId, itemMusicId)
+            else false;
 
     shared new () {}
 
