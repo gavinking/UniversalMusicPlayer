@@ -17,9 +17,6 @@ import android.os {
 import android.support.design.widget {
     NavigationView
 }
-import android.support.v4.view {
-    GravityCompat
-}
 import android.support.v4.widget {
     DrawerLayout
 }
@@ -34,7 +31,8 @@ import android.support.v7.widget {
 import android.view {
     Menu,
     MenuItem,
-    View
+    View,
+    Gravity
 }
 
 import ceylon.language.meta.model {
@@ -141,7 +139,7 @@ shared abstract class ActionBarCastActivity()
 
     shared actual void onBackPressed() {
         if (exists layout = drawerLayout,
-            layout.isDrawerOpen(GravityCompat.start)) {
+            layout.isDrawerOpen(Gravity.start)) {
             layout.closeDrawers();
         }
         else {
