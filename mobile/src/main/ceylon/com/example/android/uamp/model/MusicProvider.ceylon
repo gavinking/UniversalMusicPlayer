@@ -36,9 +36,7 @@ import java.lang {
 import java.util {
     List,
     ArrayList,
-    Collections,
-    Map,
-    Set
+    Collections
 }
 import java.util.concurrent {
     ConcurrentHashMap
@@ -70,9 +68,9 @@ shared class MusicProvider(MusicProviderSource source = RemoteJSONSource()) {
 
     variable State mCurrentState = State.nonInitialized;
 
-    Map<String,List<MediaMetadata>> musicListByGenre = ConcurrentHashMap<String,List<MediaMetadata>>();
-    Map<String,MutableMediaMetadata> musicListById = ConcurrentHashMap<String,MutableMediaMetadata>();
-    Set<String> favoriteTracks = Collections.newSetFromMap(ConcurrentHashMap<String,JBoolean>());
+    value musicListByGenre = ConcurrentHashMap<String,List<MediaMetadata>>();
+    value musicListById = ConcurrentHashMap<String,MutableMediaMetadata>();
+    value favoriteTracks = Collections.newSetFromMap(ConcurrentHashMap<String,JBoolean>());
 
     shared JIterable<String> genres
             => if (mCurrentState != State.initialized)
@@ -207,12 +205,13 @@ shared class MusicProvider(MusicProviderSource source = RemoteJSONSource()) {
     }
 
     function createBrowsableMediaItemForRoot(Resources resources) {
-        value description = MediaDescription.Builder()
-            .setMediaId(mediaIdMusicsByGenre)
-            .setTitle(resources.getString(R.String.browse_genres))
-            .setSubtitle(resources.getString(R.String.browse_genre_subtitle))
-            .setIconUri(Uri.parse("android.resource://com.example.android.uamp/drawable/ic_by_genre"))
-            .build();
+        value description
+                = MediaDescription.Builder()
+                .setMediaId(mediaIdMusicsByGenre)
+                .setTitle(resources.getString(R.String.browse_genres))
+                .setSubtitle(resources.getString(R.String.browse_genre_subtitle))
+                .setIconUri(Uri.parse("android.resource://com.example.android.uamp/drawable/ic_by_genre"))
+                .build();
         return MediaBrowser.MediaItem(description, MediaBrowser.MediaItem.flagBrowsable);
     }
 
