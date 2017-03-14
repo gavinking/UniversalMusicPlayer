@@ -14,6 +14,9 @@ import android.graphics {
     BitmapFactory,
     Color
 }
+import android.graphics.drawable {
+    Icon
+}
 import android.media {
     MediaDescription,
     MediaMetadata
@@ -40,9 +43,6 @@ import java.lang {
 }
 import java.util {
     Objects
-}
-import android.graphics.drawable {
-    Icon
 }
 
 shared class MediaNotificationManager {
@@ -235,10 +235,8 @@ shared class MediaNotificationManager {
     object broadcastReceiver extends BroadcastReceiver() {
         suppressWarnings("caseNotDisjoint")
         shared actual void onReceive(Context context, Intent intent) {
-            value action = intent.action;
-
 //            LogHelper.d(tag, "Received intent with action " + action);
-            switch (action)
+            switch (action = intent.action)
             case (actionPause) {
                 transportControls?.pause();
             } case (actionPlay) {
@@ -293,7 +291,7 @@ shared class MediaNotificationManager {
     }
 
     void updateSessionToken(MusicService musicService) {
-        value freshToken = musicService.sessionToken;
+        value freshToken = musicService.currentToken;
         if (!Objects.equals(sessionToken, freshToken)) {
             controller?.unregisterCallback(mediaControllerCallback);
             sessionToken = freshToken;
