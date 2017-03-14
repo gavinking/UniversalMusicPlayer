@@ -44,8 +44,6 @@ import java.util.concurrent {
 
 shared String customMetadataTrackSource = "__SOURCE__";
 
-shared interface MusicProviderSource satisfies JIterable<MediaMetadata> {}
-
 class State
         of nonInitialized
          | initializing
@@ -62,7 +60,7 @@ class State
     }
 }
 
-shared class MusicProvider(MusicProviderSource source = RemoteJSONSource()) {
+shared class MusicProvider({MediaMetadata*} source = RemoteJSONSource()) {
 
 //    static value tag = LogHelper.makeLogTag(`MusicProvider`);
 

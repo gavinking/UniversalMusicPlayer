@@ -9,17 +9,13 @@ import java.io {
 import java.net {
     URL
 }
-import java.util {
-    ArrayList,
-    Iterator
-}
 
 import org.json {
     JSONObject,
     JSONException
 }
 
-shared class RemoteJSONSource() satisfies MusicProviderSource {
+shared class RemoteJSONSource() satisfies {MediaMetadata*} {
 
 //    static value tag = LogHelper.makeLogTag(`RemoteJSONSource`);
 
@@ -77,21 +73,20 @@ shared class RemoteJSONSource() satisfies MusicProviderSource {
     }
 
     shared actual Iterator<MediaMetadata> iterator() {
-//        try {
-        value slashPos = catalogUrl.lastIndexOf("/");
-        value path = catalogUrl[0:slashPos+1];
-        value tracks = ArrayList<MediaMetadata>();
-        if (exists jsonTracks = fetchJSONFromUrl(catalogUrl)?.getJSONArray("music")) {
-            for (j in 0:jsonTracks.length()) {
-                tracks.add(buildFromJSON(jsonTracks.getJSONObject(j), path));
-            }
+        try {
+            value slashPos = catalogUrl.lastIndexOf("/");
+            value path = catalogUrl[0:slashPos+1];
+            value jsonTracks = fetchJSONFromUrl(catalogUrl)?.getJSONArray("music");
+            return {
+                if (exists jsonTracks)
+                for (j in 0:jsonTracks.length())
+                buildFromJSON(jsonTracks.getJSONObject(j), path)
+            }.iterator();
         }
-        return tracks.iterator();
-//        }
-//        catch (JSONException e) {
+        catch (JSONException e) {
 //            LogHelper.e(tag, e, "Could not retrieve music list");
-//            throw Exception("Could not retrieve music list", e);
-//        }
+            throw Exception("Could not retrieve music list", e);
+        }
     }
 
 }
