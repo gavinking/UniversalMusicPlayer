@@ -58,30 +58,20 @@ shared class QueueHelper {
     }
 
     shared static List<MediaSession.QueueItem>? getPlayingQueue(String mediaId, MusicProvider musicProvider) {
-        value hierarchy = [ for (str in MediaIDHelper.getHierarchy(mediaId)) str.string ];
-        if (hierarchy.size != 2) {
-//            LogHelper.e(tag, "Could not build a playing queue for this mediaId: ", mediaId);
-            return null;
-        }
+        value hierarchy = MediaIDHelper.getHierarchy(mediaId);
 
-        assert (exists categoryType = hierarchy[0],
-                exists categoryValue = hierarchy[1]);
-//        LogHelper.d(tag, "Creating playing queue for ", categoryType, ",  ", categoryValue);
+        if (exists categoryType = hierarchy[0],
+            exists categoryValue = hierarchy[1]) {
+            suppressWarnings ("caseNotDisjoint")
+            value tracks
+                    = switch (categoryType)
+                    case (mediaIdMusicsByGenre) musicProvider.getMusicsByGenre(categoryValue)
+                    case (mediaIdMusicsBySearch) musicProvider.searchMusicBySongTitle(categoryValue)
+                    else null;
 
-        Iterable<MediaMetadata>? tracks;
-        if (categoryType == mediaIdMusicsByGenre) {
-            tracks = musicProvider.getMusicsByGenre(categoryValue);
-        } else if (categoryType == mediaIdMusicsBySearch) {
-            tracks = musicProvider.searchMusicBySongTitle(categoryValue);
+            return if (exists tracks) then convertToQueue(tracks, categoryType, categoryValue) else null;
         }
         else {
-            tracks = null;
-        }
-        if (exists tracks) {
-            return convertToQueue(tracks, categoryType, categoryValue);
-        }
-        else {
-//            LogHelper.e(tag, "Unrecognized category type: ", categoryType, " for media ", mediaId);
             return null;
         }
     }
@@ -108,20 +98,19 @@ shared class QueueHelper {
             return getRandomQueue(musicProvider);
         }
 
-        Iterable<MediaMetadata> result;
-        if (params.isUnstructured) {
-            result = musicProvider.searchMusicBySongTitle(query);
-        } else if (params.isAlbumFocus) {
-            result = musicProvider.searchMusicByAlbum(params.album);
-        } else if (params.isGenreFocus) {
-            result = musicProvider.getMusicsByGenre(params.genre);
-        } else if (params.isArtistFocus) {
-            result = musicProvider.searchMusicByArtist(params.artist);
-        } else if (params.isSongFocus) {
-            result = musicProvider.searchMusicBySongTitle(params.song);
-        } else {
-            result = musicProvider.searchMusicBySongTitle(query);
-        }
+        value result
+                = if (params.isUnstructured)
+                    then musicProvider.searchMusicBySongTitle(query)
+                else if (params.isAlbumFocus)
+                    then musicProvider.searchMusicByAlbum(params.album)
+                else if (params.isGenreFocus)
+                    then musicProvider.getMusicsByGenre(params.genre)
+                else if (params.isArtistFocus)
+                    then musicProvider.searchMusicByArtist(params.artist)
+                else if (params.isSongFocus)
+                    then musicProvider.searchMusicBySongTitle(params.song)
+                else musicProvider.searchMusicBySongTitle(query);
+
         value finalResult
                 = result.iterator().hasNext()
                 then result else
@@ -130,48 +119,24 @@ shared class QueueHelper {
         return convertToQueue(finalResult, mediaIdMusicsBySearch, query);
     }
 
-    shared static Integer getMusicIndexOnQueueByMediaId(Iterable<MediaSession.QueueItem> queue, String mediaId) {
-        variable value index = 0;
-        for (item in queue) {
-            if (mediaId == item.description.mediaId) {
-                return index;
-            }
-            index++;
-        }
-        return -1;
-    }
+    shared static Integer getMusicIndexOnQueueByMediaId(List<MediaSession.QueueItem> queue, String mediaId)
+            => (0:queue.size()).find((index) => queue.get(index).description.mediaId == mediaId) else -1;
 
-    shared static Integer getMusicIndexOnQueueByQueueId(Iterable<MediaSession.QueueItem> queue, Integer queueId) {
-        variable value index = 0;
-        for (item in queue) {
-            if (queueId == item.queueId) {
-                return index;
-            }
-            index++;
-        }
-        return -1;
-    }
+    shared static Integer getMusicIndexOnQueueByQueueId(List<MediaSession.QueueItem> queue, Integer queueId)
+            => (0:queue.size()).find((index) => queue.get(index).queueId == queueId) else -1;
 
     shared static Boolean isIndexPlayable(Integer index, List<MediaSession.QueueItem> queue)
             => 0 <= index < queue.size();
 
-    shared static Boolean equalQueues(List<MediaSession.QueueItem> list1, List<MediaSession.QueueItem> list2) {
-        if (list1.size() != list2.size()) {
-            return false;
-        }
-        variable Integer i = 0;
-        while (i<list1.size()) {
-            value item1 = list1.get(i);
-            value item2 = list2.get(i);
-            if (item1.queueId != item2.queueId
-                || !MediaIDHelper.equalIds(item1.description.mediaId,
-                                     item2.description.mediaId)) {
-                return false;
-            }
-            i++;
-        }
-        return true;
-    }
+    shared static Boolean equalQueues(List<MediaSession.QueueItem> list1, List<MediaSession.QueueItem> list2)
+            => list1.size() == list2.size()
+            && (0:list1.size()).every((index) {
+                value item1 = list1.get(index);
+                value item2 = list2.get(index);
+                return item1.queueId == item2.queueId
+                    && !MediaIDHelper.equalIds(item1.description.mediaId,
+                                               item2.description.mediaId);
+            });
 
     shared static Boolean isQueueItemPlaying(Context context, MediaSession.QueueItem queueItem) {
         if (is Activity context,
