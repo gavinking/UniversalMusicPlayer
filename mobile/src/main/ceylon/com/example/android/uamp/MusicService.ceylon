@@ -111,8 +111,8 @@ shared class MusicService
 
     late Handler delayedStopHandler;
 
-    variable Boolean mIsConnectedToCar;
-    variable BroadcastReceiver? mCarConnectionReceiver = null;
+    variable Boolean connectedToCar;
+    variable BroadcastReceiver? carConnectionReceiver = null;
 
     shared MediaSession.Token? currentToken {
         assert (is MediaSession.Token? token = sessionToken?.token);
@@ -233,7 +233,7 @@ shared class MusicService
 
     shared actual void onDestroy() {
 //        LogHelper.d(tag, "onDestroy");
-        unregisterReceiver(mCarConnectionReceiver);
+        unregisterReceiver(carConnectionReceiver);
         playbackManager.handleStopRequest(null);
         mediaNotificationManager.stopNotification();
         castSessionManager?.removeSessionManagerListener(castSessionManagerListener, `CastSession`);
@@ -293,14 +293,14 @@ shared class MusicService
 
     void registerCarConnectionReceiver() {
         value filter = IntentFilter(CarHelper.actionMediaStatus);
-        mCarConnectionReceiver
+        carConnectionReceiver
                 = object extends BroadcastReceiver() {
                     onReceive(Context context, Intent intent)
-                            => mIsConnectedToCar
+                            => connectedToCar
                                 = CarHelper.mediaConnected
                                 == intent.getStringExtra(CarHelper.mediaConnectionStatus);
                 };
-        registerReceiver(mCarConnectionReceiver, filter);
+        registerReceiver(carConnectionReceiver, filter);
     }
 
 }
