@@ -143,7 +143,8 @@ shared class LocalPlayback(Context context, MusicProvider musicProvider)
                 state = PlaybackStateCompat.stateBuffering;
                 player.setAudioStreamType(AudioManager.streamMusic);
                 player.setDataSource(source);
-                player.prepareAsync();
+//                player.prepareAsync();
+                player.prepare();
                 wifiLock.acquire();
                 callback?.onPlaybackStatusChanged(state);
             }
