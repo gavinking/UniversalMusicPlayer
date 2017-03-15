@@ -27,8 +27,8 @@ Getting Started
 ---------------
 
 The sample depends on a snapshot build of Ceylon 1.3.3. You can get it
-from [Jenkins][] or build it yourself. To edit the same in Android Studio,
-you'll also need a snapshot build of [Ceylon IDE][].
+from [Jenkins][] or build it yourself. To edit the sample code in Android
+Studio, you'll also need a snapshot build of [Ceylon IDE][].
 
 Edit `mobile/build.gradle`, specifing the `ceylonLocation` of your snapshot
 build of Ceylon 1.3.3.
