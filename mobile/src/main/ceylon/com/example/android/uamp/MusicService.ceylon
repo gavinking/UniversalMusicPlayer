@@ -44,7 +44,7 @@ import com.example.android.uamp.utils {
     CarHelper,
     WearHelper,
     MediaIDHelper,
-    TvHelper
+    tvUiMode
 }
 import com.google.android.gms.cast.framework {
     CastContext,
@@ -158,7 +158,7 @@ shared class MusicService
         playbackManager.updatePlaybackState(null);
 
         mediaNotificationManager = MediaNotificationManager(this);
-        if (!TvHelper.isTvUiMode(this)) {
+        if (!tvUiMode(this)) {
             value manager = CastContext.getSharedInstance(this).sessionManager;
             castSessionManager = manager;
             castSessionManagerListener
