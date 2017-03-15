@@ -4,8 +4,11 @@ import android.app {
 import android.content {
     Context
 }
-import android.media.browse {
-    MediaBrowser
+import android.support.v4.media {
+    MediaBrowserCompat
+}
+import android.support.v4.media.session {
+    MediaControllerCompat
 }
 
 import java.util {
@@ -45,9 +48,14 @@ shared class MediaIDHelper {
         return mediaID.string;
     }
 
-    shared static String? extractMusicIDFromMediaID(String mediaID) {
-        value pos = mediaID.firstOccurrence(leafSeparator);
-        return if (exists pos) then mediaID[pos+1...] else null;
+    shared static String? extractMusicIDFromMediaID(String? mediaID) {
+        if (exists mediaID) {
+            value pos = mediaID.firstOccurrence(leafSeparator);
+            return if (exists pos) then mediaID[pos + 1...] else null;
+        }
+        else {
+            return null;
+        }
     }
 
     shared static String[] getHierarchy(String mediaID) {
@@ -74,9 +82,9 @@ shared class MediaIDHelper {
 //        return createMediaID(null, *parentHierarchy);
 //    }
 
-    shared static Boolean isMediaItemPlaying(Context context, MediaBrowser.MediaItem mediaItem)
+    shared static Boolean isMediaItemPlaying(Context context, MediaBrowserCompat.MediaItem mediaItem)
             => if (is Activity context,
-                    exists metadata = context.mediaController?.metadata,
+                    exists metadata = MediaControllerCompat.getMediaController(context)?.metadata,
                     exists itemMusicId = extractMusicIDFromMediaID(mediaItem.description.mediaId),
                     exists currentPlayingMediaId = metadata.description.mediaId)
             then MediaIDHelper.equalIds(currentPlayingMediaId, itemMusicId)

@@ -1,5 +1,5 @@
-import android.media {
-    MediaMetadata
+import android.support.v4.media {
+    MediaMetadataCompat
 }
 
 import com.example.android.uamp.utils {
@@ -9,7 +9,7 @@ import com.example.android.uamp.utils {
 shared class MutableMediaMetadata(trackId, metadata) {
 
     shared String trackId;
-    shared variable MediaMetadata metadata;
+    shared variable MediaMetadataCompat metadata;
 
     equals(Object that)
             => if (is MutableMediaMetadata that)

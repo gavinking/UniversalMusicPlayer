@@ -1,13 +1,6 @@
 import android.content {
     Context
 }
-import android.media {
-    MediaMetadata
-}
-import android.media.session {
-    PlaybackState,
-    MediaSession
-}
 import android.net {
     Uri
 }
@@ -38,6 +31,13 @@ import org.json {
     JSONObject,
     JSONException
 }
+import android.support.v4.media.session {
+    PlaybackStateCompat,
+    MediaSessionCompat
+}
+import android.support.v4.media {
+    MediaMetadataCompat
+}
 
 shared class CastPlayback(MusicProvider musicProvider, Context context)
         satisfies Playback
@@ -47,13 +47,13 @@ shared class CastPlayback(MusicProvider musicProvider, Context context)
 
     value itemId = "itemId";
 
-    function toCastMediaMetadata(MediaMetadata track, JSONObject customData) {
+    function toCastMediaMetadata(MediaMetadataCompat track, JSONObject customData) {
         value metadata = MediaData(MediaData.mediaTypeMusicTrack);
         metadata.putString(MediaData.keyTitle, track.description.title?.string else "");
         metadata.putString(MediaData.keySubtitle, track.description.subtitle?.string else "");
-        metadata.putString(MediaData.keyAlbumArtist, track.getString(MediaMetadata.metadataKeyAlbumArtist));
-        metadata.putString(MediaData.keyAlbumTitle, track.getString(MediaMetadata.metadataKeyAlbum));
-        value image = WebImage(Uri.Builder().encodedPath(track.getString(MediaMetadata.metadataKeyAlbumArtUri)).build());
+        metadata.putString(MediaData.keyAlbumArtist, track.getString(MediaMetadataCompat.metadataKeyAlbumArtist));
+        metadata.putString(MediaData.keyAlbumTitle, track.getString(MediaMetadataCompat.metadataKeyAlbum));
+        value image = WebImage(Uri.Builder().encodedPath(track.getString(MediaMetadataCompat.metadataKeyAlbumArtUri)).build());
         metadata.addImage(image);
         metadata.addImage(image);
         return MediaInfo.Builder(track.getString(customMetadataTrackSource))
@@ -83,7 +83,7 @@ shared class CastPlayback(MusicProvider musicProvider, Context context)
 
     shared actual void stop(Boolean notifyListeners) {
         remoteMediaClient.removeListener(this);
-        state = PlaybackState.stateStopped;
+        state = PlaybackStateCompat.stateStopped;
         if (notifyListeners) {
             callback?.onPlaybackStatusChanged(state);
         }
@@ -99,11 +99,11 @@ shared class CastPlayback(MusicProvider musicProvider, Context context)
     shared actual void updateLastKnownStreamPosition()
             => currentPosition = currentStreamPosition;
 
-    shared actual void play(MediaSession.QueueItem item) {
+    shared actual void play(MediaSessionCompat.QueueItem item) {
         try {
             assert (exists id = item.description.mediaId);
             loadMedia(id, true);
-            state = PlaybackState.stateBuffering;
+            state = PlaybackStateCompat.stateBuffering;
             callback?.onPlaybackStatusChanged(state);
         }
         catch (JSONException e) {
@@ -190,7 +190,7 @@ shared class CastPlayback(MusicProvider musicProvider, Context context)
     }
 
     suppressWarnings("caseNotDisjoint")
-    void updatePlaybackState() {
+    void updatePlaybackStateCompat() {
 //        LogHelper.d(tag, "onRemoteMediaPlayerStatusUpdated ", status);
         switch (status = remoteMediaClient.playerState)
         case (MediaStatus.playerStateIdle) {
@@ -199,16 +199,16 @@ shared class CastPlayback(MusicProvider musicProvider, Context context)
             }
         }
         case (MediaStatus.playerStateBuffering) {
-            state = PlaybackState.stateBuffering;
+            state = PlaybackStateCompat.stateBuffering;
             callback?.onPlaybackStatusChanged(state);
         }
         case (MediaStatus.playerStatePlaying) {
-            state = PlaybackState.statePlaying;
+            state = PlaybackStateCompat.statePlaying;
             setMetadataFromRemote();
             callback?.onPlaybackStatusChanged(state);
         }
         case (MediaStatus.playerStatePaused) {
-            state = PlaybackState.statePaused;
+            state = PlaybackStateCompat.statePaused;
             setMetadataFromRemote();
             callback?.onPlaybackStatusChanged(state);
         }
@@ -219,7 +219,7 @@ shared class CastPlayback(MusicProvider musicProvider, Context context)
 
     shared actual void onMetadataUpdated() => setMetadataFromRemote();
 
-    shared actual void onStatusUpdated() => updatePlaybackState();
+    shared actual void onStatusUpdated() => updatePlaybackStateCompat();
 
     shared actual void onSendingRemoteMediaRequest() {}
     shared actual void onAdBreakStatusUpdated() {}

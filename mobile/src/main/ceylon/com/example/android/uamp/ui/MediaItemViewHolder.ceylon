@@ -11,13 +11,12 @@ import android.graphics.drawable {
     AnimationDrawable,
     Drawable
 }
-import android.media.browse {
-    MediaBrowser {
-        MediaItem
-    }
+import android.support.v4.media {
+    MediaBrowserCompat
 }
-import android.media.session {
-    PlaybackState
+import android.support.v4.media.session {
+    PlaybackStateCompat,
+    MediaControllerCompat
 }
 import android.view {
     LayoutInflater,
@@ -93,15 +92,20 @@ shared class MediaItemViewHolder {
 
     suppressWarnings("caseNotDisjoint")
     shared static State getStateFromController(Context context) {
-        assert (is Activity context);
-        value pbState = context.mediaController.playbackState;
-        return switch (pbState?.state)
-            case (null | PlaybackState.stateError) State.stateNone
-            case (PlaybackState.statePlaying) State.statePlaying
+        assert (is Activity context,
+                exists controller = MediaControllerCompat.getMediaController(context));
+        if (exists state = controller.playbackState?.state) {
+            return switch (state)
+            case (PlaybackStateCompat.statePlaying) State.statePlaying
+            case (PlaybackStateCompat.stateError) State.stateNone
             else State.statePaused;
+        }
+        else {
+            return State.stateNone;
+        }
     }
 
-    shared static State getMediaItemState(Context context, MediaItem mediaItem) {
+    shared static State getMediaItemState(Context context, MediaBrowserCompat.MediaItem mediaItem) {
         if (mediaItem.playable) {
             return MediaIDHelper.isMediaItemPlaying(context, mediaItem)
                 then getStateFromController(context)
@@ -112,7 +116,7 @@ shared class MediaItemViewHolder {
         }
     }
 
-    shared static View setupListView(Activity activity, View? view, ViewGroup parent, MediaItem item) {
+    shared static View setupListView(Activity activity, View? view, ViewGroup parent, MediaBrowserCompat.MediaItem item) {
         initializeColorStateLists(activity);
 
         MediaItemViewHolder holder;

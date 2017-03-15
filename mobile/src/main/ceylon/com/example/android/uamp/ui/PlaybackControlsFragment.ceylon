@@ -4,15 +4,15 @@ import android.app {
 import android.content {
     Intent
 }
-import android.media {
-    MediaMetadata
-}
-import android.media.session {
-    MediaController,
-    PlaybackState
-}
 import android.os {
     Bundle
+}
+import android.support.v4.media {
+    MediaMetadataCompat
+}
+import android.support.v4.media.session {
+    PlaybackStateCompat,
+    MediaControllerCompat
 }
 import android.view {
     LayoutInflater,
@@ -47,20 +47,7 @@ shared class PlaybackControlsFragment() extends Fragment() {
 
     variable String? mArtUrl = null;
 
-    object mCallback extends MediaController.Callback() {
-        shared actual void onPlaybackStateChanged(PlaybackState state) {
-//            LogHelper.d(tag, "Received playback state change to state ", state.state);
-            super.onPlaybackStateChanged(state);
-        }
-        shared actual void onMetadataChanged(MediaMetadata? metadata) {
-            if (exists metadata) {
-//                LogHelper.d(tag, "Received metadata state change to mediaId=", metadata.description.mediaId, " song=", metadata.description.title);
-                super.onMetadataChanged(metadata);
-            }
-        }
-    }
-
-    value mediaController => activity?.mediaController;
+    MediaControllerCompat? mediaController => MediaControllerCompat.getMediaController(activity);
 
     suppressWarnings("caseNotDisjoint")
     shared actual View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -72,21 +59,21 @@ shared class PlaybackControlsFragment() extends Fragment() {
         mPlayPause.setOnClickListener((v) {
             value state =
                     mediaController?.playbackState?.state
-                    else PlaybackState.stateNone;
+                    else PlaybackStateCompat.stateNone;
 //            LogHelper.d(tag, "Button pressed, in state " + state);
 
 //            if (v.id == R.Id.play_pause) {
 //                LogHelper.d(tag, "Play button pressed, in state " + state);
             value controls = mediaController?.transportControls;
             switch (state)
-            case (PlaybackState.statePaused
-                | PlaybackState.stateStopped
-                | PlaybackState.stateNone) {
+            case (PlaybackStateCompat.statePaused
+                | PlaybackStateCompat.stateStopped
+                | PlaybackStateCompat.stateNone) {
                 controls?.play();
             }
-            case (PlaybackState.statePlaying
-                | PlaybackState.stateBuffering
-                | PlaybackState.stateConnecting) {
+            case (PlaybackStateCompat.statePlaying
+                | PlaybackStateCompat.stateBuffering
+                | PlaybackStateCompat.stateConnecting) {
                 controls?.pause();
             }
             else {}
@@ -114,28 +101,7 @@ shared class PlaybackControlsFragment() extends Fragment() {
         return rootView;
     }
 
-    shared actual void onStart() {
-        super.onStart();
-//        LogHelper.d(tag, "fragment.onStart");
-        onConnected();
-    }
-
-    shared actual void onStop() {
-        super.onStop();
-//        LogHelper.d(tag, "fragment.onStop");
-        mediaController?.unregisterCallback(mCallback);
-    }
-
-    shared void onConnected() {
-//        LogHelper.d(tag, "onConnected, mediaController==null? ", !controller exists);
-        if (exists controller = mediaController) {
-            onMetadataChanged(controller.metadata);
-            onPlaybackStateChanged(controller.playbackState);
-            controller.registerCallback(mCallback);
-        }
-    }
-
-    void onMetadataChanged(MediaMetadata? metadata) {
+    void onMetadataChanged(MediaMetadataCompat? metadata) {
 //        LogHelper.d(tag, "onMetadataChanged ", metadata);
         if (!activity exists) {
 //            LogHelper.w(tag, "onMetadataChanged called when getActivity null," + "this should not happen if the callback was properly unregistered. Ignoring.");
@@ -179,10 +145,10 @@ shared class PlaybackControlsFragment() extends Fragment() {
     }
 
     suppressWarnings("caseNotDisjoint")
-    void onPlaybackStateChanged(PlaybackState? state) {
-//        LogHelper.d(tag, "onPlaybackStateChanged ", state);
+    void onPlaybackStateChanged(PlaybackStateCompat? state) {
+//        LogHelper.d(tag, "onPlaybackStateCompatChanged ", state);
         if (!activity exists) {
-//            LogHelper.w(tag, "onPlaybackStateChanged called when getActivity null," + "this should not happen if the callback was properly unregistered. Ignoring.");
+//            LogHelper.w(tag, "onPlaybackStateCompatChanged called when getActivity null," + "this should not happen if the callback was properly unregistered. Ignoring.");
             return ;
         }
         if (!exists state) {
@@ -191,12 +157,12 @@ shared class PlaybackControlsFragment() extends Fragment() {
 
         Boolean enablePlay;
         switch (state.state)
-        case (PlaybackState.statePaused
-            | PlaybackState.stateStopped) {
+        case (PlaybackStateCompat.statePaused
+            | PlaybackStateCompat.stateStopped) {
             enablePlay = true;
         }
-        case (PlaybackState.stateError) {
-//            LogHelper.e(tag, "error playbackstate: ", state.errorMessage);
+        case (PlaybackStateCompat.stateError) {
+//            LogHelper.e(tag, "error PlaybackStateCompat: ", state.errorMessage);
             Toast.makeText(activity, state.errorMessage, Toast.lengthLong).show();
             enablePlay = false;
         }
@@ -216,6 +182,40 @@ shared class PlaybackControlsFragment() extends Fragment() {
                 then resources.getString(R.String.casting_to_device, castName)
                 else null;
         setExtraInfo(extraInfo);
+    }
+
+    object callback extends MediaControllerCompat.Callback() {
+        shared actual void onPlaybackStateChanged(PlaybackStateCompat state) {
+//            LogHelper.d(tag, "Received playback state change to state ", state.state);
+            outer.onPlaybackStateChanged(state);
+        }
+        shared actual void onMetadataChanged(MediaMetadataCompat? metadata) {
+            if (exists metadata) {
+//                LogHelper.d(tag, "Received metadata state change to mediaId=", metadata.description.mediaId, " song=", metadata.description.title);
+                outer.onMetadataChanged(metadata);
+            }
+        }
+    }
+
+    shared actual void onStart() {
+        super.onStart();
+//        LogHelper.d(tag, "fragment.onStart");
+        onConnected();
+    }
+
+    shared actual void onStop() {
+        super.onStop();
+//        LogHelper.d(tag, "fragment.onStop");
+        mediaController?.unregisterCallback(callback);
+    }
+
+    shared void onConnected() {
+//        LogHelper.d(tag, "onConnected, mediaController==null? ", !controller exists);
+        if (exists controller = mediaController) {
+            onMetadataChanged(controller.metadata);
+            onPlaybackStateChanged(controller.playbackState);
+            controller.registerCallback(callback);
+        }
     }
 
 }

@@ -1,5 +1,5 @@
-import android.media {
-    MediaMetadata
+import android.support.v4.media {
+    MediaMetadataCompat
 }
 
 import java.io {
@@ -15,7 +15,7 @@ import org.json {
     JSONException
 }
 
-shared class RemoteJSONSource() satisfies {MediaMetadata*} {
+shared class RemoteJSONSource() satisfies {MediaMetadataCompat*} {
 
 //    static value tag = LogHelper.makeLogTag(`RemoteJSONSource`);
 
@@ -38,17 +38,17 @@ shared class RemoteJSONSource() satisfies {MediaMetadata*} {
         value duration = json.getInt("duration") * 1000;
 //        LogHelper.d(tag, "Found music track: ", json);
 
-        return MediaMetadata.Builder()
-            .putString(MediaMetadata.metadataKeyMediaId, source.hash.string)
+        return MediaMetadataCompat.Builder()
+            .putString(MediaMetadataCompat.metadataKeyMediaId, source.hash.string)
             .putString(customMetadataTrackSource, source)
-            .putString(MediaMetadata.metadataKeyAlbum, album)
-            .putString(MediaMetadata.metadataKeyArtist, artist)
-            .putLong(MediaMetadata.metadataKeyDuration, duration)
-            .putString(MediaMetadata.metadataKeyGenre, genre)
-            .putString(MediaMetadata.metadataKeyAlbumArtUri, iconUrl)
-            .putString(MediaMetadata.metadataKeyTitle, title)
-            .putLong(MediaMetadata.metadataKeyTrackNumber, trackNumber)
-            .putLong(MediaMetadata.metadataKeyNumTracks, totalTrackCount)
+            .putString(MediaMetadataCompat.metadataKeyAlbum, album)
+            .putString(MediaMetadataCompat.metadataKeyArtist, artist)
+            .putLong(MediaMetadataCompat.metadataKeyDuration, duration)
+            .putString(MediaMetadataCompat.metadataKeyGenre, genre)
+            .putString(MediaMetadataCompat.metadataKeyAlbumArtUri, iconUrl)
+            .putString(MediaMetadataCompat.metadataKeyTitle, title)
+            .putLong(MediaMetadataCompat.metadataKeyTrackNumber, trackNumber)
+            .putLong(MediaMetadataCompat.metadataKeyNumTracks, totalTrackCount)
             .build();
     }
 
@@ -72,7 +72,7 @@ shared class RemoteJSONSource() satisfies {MediaMetadata*} {
         }
     }
 
-    shared actual Iterator<MediaMetadata> iterator() {
+    shared actual Iterator<MediaMetadataCompat> iterator() {
         try {
             value slashPos = catalogUrl.lastIndexOf("/");
             value path = catalogUrl[0:slashPos+1];

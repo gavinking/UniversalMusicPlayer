@@ -1,14 +1,14 @@
 import android.content.res {
     Resources
 }
-import android.media {
-    MediaMetadata
-}
-import android.media.session {
-    MediaSession
-}
 import android.os {
     Bundle
+}
+import android.support.v4.media {
+    MediaMetadataCompat
+}
+import android.support.v4.media.session {
+    MediaSessionCompat
 }
 
 import com.example.android.uamp {
@@ -37,7 +37,7 @@ shared class QueueManager(
 //    value tag = LogHelper.makeLogTag(`QueueManager`);
 
     variable value playingQueue
-            = Collections.synchronizedList(ArrayList<MediaSession.QueueItem>());
+            = Collections.synchronizedList(ArrayList<MediaSessionCompat.QueueItem>());
     variable value currentIndex = 0;
 
     shared Boolean isSameBrowsingCategory(String mediaId) {
@@ -114,14 +114,14 @@ shared class QueueManager(
         updateMetadata();
     }
 
-    shared MediaSession.QueueItem? currentMusic
+    shared MediaSessionCompat.QueueItem? currentMusic
             => QueueHelper.isIndexPlayable(currentIndex, playingQueue)
             then playingQueue.get(currentIndex);
 
     shared Integer currentQueueSize => playingQueue?.size() else 0;
 
     void setCurrentQueue(String title,
-            List<MediaSession.QueueItem>? newQueue,
+            List<MediaSessionCompat.QueueItem>? newQueue,
             String? initialMediaId = null) {
         playingQueue = newQueue;
         value index
@@ -161,8 +161,8 @@ shared class QueueManager(
 }
 
 shared interface MetadataUpdateListener {
-    shared formal void onMetadataChanged(MediaMetadata metadata) ;
+    shared formal void onMetadataChanged(MediaMetadataCompat metadata) ;
     shared formal void onMetadataRetrieveError() ;
     shared formal void onCurrentQueueIndexUpdated(Integer queueIndex) ;
-    shared formal void onQueueUpdated(String title, List<MediaSession.QueueItem>? newQueue) ;
+    shared formal void onQueueUpdated(String title, List<MediaSessionCompat.QueueItem>? newQueue) ;
 }

@@ -4,14 +4,15 @@ import android.app {
 import android.content {
     Context
 }
-import android.media {
-    MediaMetadata
-}
-import android.media.session {
-    MediaSession
-}
 import android.os {
     Bundle
+}
+import android.support.v4.media {
+    MediaMetadataCompat
+}
+import android.support.v4.media.session {
+    MediaSessionCompat,
+    MediaControllerCompat
 }
 
 import com.example.android.uamp {
@@ -41,23 +42,23 @@ shared class QueueHelper {
 
     static value randomQueueSize = 10;
 
-    static function convertToQueue(Iterable<MediaMetadata> tracks, String* categories) {
-        value queue = ArrayList<MediaSession.QueueItem>();
+    static function convertToQueue(Iterable<MediaMetadataCompat> tracks, String* categories) {
+        value queue = ArrayList<MediaSessionCompat.QueueItem>();
         variable value count = 0;
         for (track in tracks) {
             value hierarchyAwareMediaID
                     = MediaIDHelper.createMediaID(track.description.mediaId, *categories);
             value trackCopy
-                    = MediaMetadata.Builder(track)
-                    .putString(MediaMetadata.metadataKeyMediaId, hierarchyAwareMediaID)
+                    = MediaMetadataCompat.Builder(track)
+                    .putString(MediaMetadataCompat.metadataKeyMediaId, hierarchyAwareMediaID)
                     .build();
-            value item = MediaSession.QueueItem(trackCopy.description, count++);
+            value item = MediaSessionCompat.QueueItem(trackCopy.description, count++);
             queue.add(item);
         }
         return queue;
     }
 
-    shared static List<MediaSession.QueueItem>? getPlayingQueue(String mediaId, MusicProvider musicProvider) {
+    shared static List<MediaSessionCompat.QueueItem>? getPlayingQueue(String mediaId, MusicProvider musicProvider) {
         value hierarchy = MediaIDHelper.getHierarchy(mediaId);
 
         if (exists categoryType = hierarchy[0],
@@ -76,8 +77,8 @@ shared class QueueHelper {
         }
     }
 
-    shared static List<MediaSession.QueueItem> getRandomQueue(MusicProvider musicProvider) {
-        value result = ArrayList<MediaMetadata>(randomQueueSize);
+    shared static List<MediaSessionCompat.QueueItem> getRandomQueue(MusicProvider musicProvider) {
+        value result = ArrayList<MediaMetadataCompat>(randomQueueSize);
         value shuffled = musicProvider.shuffledMusic;
         for (metadata in shuffled) {
             if (result.size() == randomQueueSize) {
@@ -89,7 +90,7 @@ shared class QueueHelper {
         return convertToQueue(result, mediaIdMusicsBySearch, "random");
     }
 
-    shared static List<MediaSession.QueueItem> getPlayingQueueFromSearch(
+    shared static List<MediaSessionCompat.QueueItem> getPlayingQueueFromSearch(
             String query, Bundle queryParams, MusicProvider musicProvider) {
 //        LogHelper.d(tag, "Creating playing queue for musics from search: ", query, " params=", queryParams);
         value params = VoiceSearchParams(query, queryParams);
@@ -119,16 +120,16 @@ shared class QueueHelper {
         return convertToQueue(finalResult, mediaIdMusicsBySearch, query);
     }
 
-    shared static Integer getMusicIndexOnQueueByMediaId(List<MediaSession.QueueItem> queue, String mediaId)
-            => (0:queue.size()).find((index) => queue.get(index).description.mediaId == mediaId) else -1;
+    shared static Integer getMusicIndexOnQueueByMediaId(List<MediaSessionCompat.QueueItem> queue, String mediaId)
+            => (0:queue.size()).find((index) => (queue.get(index).description.mediaId else "") == mediaId) else -1;
 
-    shared static Integer getMusicIndexOnQueueByQueueId(List<MediaSession.QueueItem> queue, Integer queueId)
+    shared static Integer getMusicIndexOnQueueByQueueId(List<MediaSessionCompat.QueueItem> queue, Integer queueId)
             => (0:queue.size()).find((index) => queue.get(index).queueId == queueId) else -1;
 
-    shared static Boolean isIndexPlayable(Integer index, List<MediaSession.QueueItem> queue)
+    shared static Boolean isIndexPlayable(Integer index, List<MediaSessionCompat.QueueItem> queue)
             => 0 <= index < queue.size();
 
-    shared static Boolean equalQueues(List<MediaSession.QueueItem> list1, List<MediaSession.QueueItem> list2)
+    shared static Boolean equalQueues(List<MediaSessionCompat.QueueItem> list1, List<MediaSessionCompat.QueueItem> list2)
             => list1.size() == list2.size()
             && (0:list1.size()).every((index) {
                 value item1 = list1.get(index);
@@ -138,9 +139,9 @@ shared class QueueHelper {
                                                item2.description.mediaId);
             });
 
-    shared static Boolean isQueueItemPlaying(Context context, MediaSession.QueueItem queueItem) {
+    shared static Boolean isQueueItemPlaying(Context context, MediaSessionCompat.QueueItem queueItem) {
         if (is Activity context,
-            exists controller = context.mediaController,
+            exists controller = MediaControllerCompat.getMediaController(context),
             exists state = controller.playbackState) {
             value currentPlayingQueueId = state.activeQueueItemId;
             value itemMusicId = MediaIDHelper.extractMusicIDFromMediaID(queueItem.description.mediaId);

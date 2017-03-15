@@ -11,17 +11,6 @@ import android.content {
 import android.graphics {
     BitmapFactory
 }
-import android.media {
-    MediaMetadata
-}
-import android.media.browse {
-    MediaBrowser
-}
-import android.media.session {
-    PlaybackState,
-    MediaSession,
-    MediaController
-}
 import android.net {
     ConnectivityManager
 }
@@ -29,6 +18,15 @@ import android.os {
     Bundle,
     Build,
     RemoteException
+}
+import android.support.v4.media {
+    MediaMetadataCompat,
+    MediaBrowserCompat
+}
+import android.support.v4.media.session {
+    PlaybackStateCompat,
+    MediaControllerCompat,
+    MediaSessionCompat
 }
 
 import com.example.android.uamp {
@@ -45,12 +43,15 @@ shared abstract class BaseActivity()
 
 //    value tag = LogHelper.makeLogTag(`BaseActivity`);
 
-    shared actual late MediaBrowser mediaBrowser;
+    shared actual late MediaBrowserCompat mediaBrowser;
     shared variable PlaybackControlsFragment? controlsFragment = null;
 
     shared Boolean online {
-        assert (is ConnectivityManager connMgr = getSystemService(Context.connectivityService));
-        return if (exists networkInfo = connMgr.activeNetworkInfo) then networkInfo.connected else false;
+        assert (is ConnectivityManager connMgr
+                = getSystemService(Context.connectivityService));
+        return if (exists networkInfo = connMgr.activeNetworkInfo)
+            then networkInfo.connected
+            else false;
     }
 
     void showPlaybackControls() {
@@ -78,9 +79,9 @@ shared abstract class BaseActivity()
         if (exists mediaController = this.mediaController,
             mediaController.metadata exists,
             exists state = mediaController.playbackState?.state) {
-            return state != PlaybackState.stateError
-                && state != PlaybackState.stateNone
-                && state != PlaybackState.stateStopped;
+            return state != PlaybackStateCompat.stateError
+                && state != PlaybackStateCompat.stateNone
+                && state != PlaybackStateCompat.stateStopped;
         }
         else {
             return false;
@@ -88,16 +89,16 @@ shared abstract class BaseActivity()
     }
 
     object mediaControllerCallback
-            extends MediaController.Callback() {
-        shared actual void onPlaybackStateChanged(PlaybackState state) {
+            extends MediaControllerCompat.Callback() {
+        shared actual void onPlaybackStateChanged(PlaybackStateCompat? state) {
             if (shouldShowControls()) {
                 showPlaybackControls();
             } else {
-//                LogHelper.d(tag, "mediaControllerCallback.onPlaybackStateChanged: hiding controls because state is ", state.state);
+//                LogHelper.d(tag, "mediaControllerCallback.onPlaybackStateCompatChanged: hiding controls because state is ", state.state);
                 hidePlaybackControls();
             }
         }
-        shared actual void onMetadataChanged(MediaMetadata metadata) {
+        shared actual void onMetadataChanged(MediaMetadataCompat? metadata) {
             if (shouldShowControls()) {
                 showPlaybackControls();
             } else {
@@ -109,9 +110,10 @@ shared abstract class BaseActivity()
 
     shared default void onMediaControllerConnected() {}
 
-    void connectToSession(MediaSession.Token token) {
-        mediaController = MediaController(this, token);
-        mediaController.registerCallback(mediaControllerCallback);
+    void connectToSession(MediaSessionCompat.Token token) {
+        value controller = MediaControllerCompat(this, token);
+        MediaControllerCompat.setMediaController(this, controller);
+        controller.registerCallback(mediaControllerCallback);
         if (shouldShowControls()) {
             showPlaybackControls();
         } else {
@@ -132,9 +134,9 @@ shared abstract class BaseActivity()
                 themeColor(this, R.Attr.colorPrimary, AndroidR.Color.darker_gray));
             setTaskDescription(taskDesc);
         }
-        mediaBrowser = MediaBrowser(this,
+        mediaBrowser = MediaBrowserCompat(this,
             ComponentName(this, `MusicService`),
-            object extends MediaBrowser.ConnectionCallback() {
+            object extends MediaBrowserCompat.ConnectionCallback() {
                 shared actual void onConnected() {
 //                    LogHelper.d(tag, "onConnected");
                     try {
@@ -163,7 +165,7 @@ shared abstract class BaseActivity()
     shared actual void onStop() {
         super.onStop();
 //        LogHelper.d(tag, "Activity onStop");
-        mediaController?.unregisterCallback(mediaControllerCallback);
+        MediaControllerCompat.getMediaController(this)?.unregisterCallback(mediaControllerCallback);
         mediaBrowser.disconnect();
     }
 

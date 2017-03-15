@@ -1,15 +1,15 @@
 import android.content.res {
     Resources
 }
-import android.media.session {
-    PlaybackState,
-    MediaSession
-}
 import android.os {
     Bundle,
     SystemClock {
         elapsedRealtime
     }
+}
+import android.support.v4.media.session {
+    MediaSessionCompat,
+    PlaybackStateCompat
 }
 
 import com.example.android.uamp {
@@ -29,25 +29,25 @@ shared class PlaybackManager(
         MusicProvider musicProvider,
         QueueManager queueManager,
         variable Playback currentPlayback)
-        extends MediaSession.Callback() {
+        extends MediaSessionCompat.Callback() {
 
 //    value tag = LogHelper.makeLogTag(`PlaybackManager`);
 
     value customActionThumbsUp = "com.example.android.uamp.THUMBS_UP";
 
     value availableActions
-            => PlaybackState.actionPlayPause
-            .or(PlaybackState.actionPlayFromMediaId)
-            .or(PlaybackState.actionPlayFromSearch)
-            .or(PlaybackState.actionSkipToPrevious)
-            .or(PlaybackState.actionSkipToNext)
+            => PlaybackStateCompat.actionPlayPause
+            .or(PlaybackStateCompat.actionPlayFromMediaId)
+            .or(PlaybackStateCompat.actionPlayFromSearch)
+            .or(PlaybackStateCompat.actionSkipToPrevious)
+            .or(PlaybackStateCompat.actionSkipToNext)
             .or(currentPlayback.playing
-                    then PlaybackState.actionPause
-                    else PlaybackState.actionPlay);
+                    then PlaybackStateCompat.actionPause
+                    else PlaybackStateCompat.actionPlay);
 
     shared Playback playback => currentPlayback;
 
-    void setCustomAction(PlaybackState.Builder stateBuilder) {
+    void setCustomAction(PlaybackStateCompat.Builder stateBuilder) {
         if (exists currentMusic = queueManager.currentMusic,
             exists mediaId = currentMusic.description.mediaId,
             exists musicId = MediaIDHelper.extractMusicIDFromMediaID(mediaId)) {
@@ -55,11 +55,11 @@ shared class PlaybackManager(
                     = musicProvider.isFavorite(musicId)
                     then R.Drawable.ic_star_on
                     else R.Drawable.ic_star_off;
-//            LogHelper.d(tag, "updatePlaybackState, setting Favorite custom action of music ", musicId, " current favorite=", musicProvider.isFavorite(musicId));
+//            LogHelper.d(tag, "updatePlaybackStateCompat, setting Favorite custom action of music ", musicId, " current favorite=", musicProvider.isFavorite(musicId));
             value customActionExtras = Bundle();
             WearHelper.setShowCustomActionOnWear(customActionExtras, true);
             stateBuilder.addCustomAction(
-                PlaybackState.CustomAction.Builder(
+                PlaybackStateCompat.CustomAction.Builder(
                         customActionThumbsUp,
                         resources.getString(R.String.favorite),
                         favoriteIcon)
@@ -68,20 +68,20 @@ shared class PlaybackManager(
         }
     }
 
-    shared void updatePlaybackState(String? error) {
-//        LogHelper.d(tag, "updatePlaybackState, playback state=``currentPlayback.state``");
+    shared void updatePlaybackStateCompat(String? error) {
+//        LogHelper.d(tag, "updatePlaybackStateCompat, playback state=``currentPlayback.state``");
         value position
                 = currentPlayback.connected
                 then currentPlayback.currentStreamPosition
-                else PlaybackState.playbackPositionUnknown;
+                else PlaybackStateCompat.playbackPositionUnknown;
         value stateBuilder
-                = PlaybackState.Builder()
+                = PlaybackStateCompat.Builder()
                 .setActions(availableActions);
         setCustomAction(stateBuilder);
         Integer state;
         if (exists error) {
             stateBuilder.setErrorMessage(error);
-            state = PlaybackState.stateError;
+            state = PlaybackStateCompat.stateError;
         }
         else {
             state = currentPlayback.state;
@@ -90,9 +90,9 @@ shared class PlaybackManager(
         if (exists currentMusic = queueManager.currentMusic) {
             stateBuilder.setActiveQueueItemId(currentMusic.queueId);
         }
-        serviceCallback.onPlaybackStateUpdated(stateBuilder.build());
-        if (state == PlaybackState.statePlaying
-         || state == PlaybackState.statePaused) {
+        serviceCallback.onPlaybackStateCompatUpdated(stateBuilder.build());
+        if (state == PlaybackStateCompat.statePlaying
+         || state == PlaybackStateCompat.statePaused) {
             serviceCallback.onNotificationRequired();
         }
     }
@@ -117,7 +117,7 @@ shared class PlaybackManager(
 //        LogHelper.d(tag, "handleStopRequest: mState=``currentPlayback.state`` error=", withError);
         currentPlayback.stop(true);
         serviceCallback.onPlaybackStop();
-        updatePlaybackState(withError);
+        updatePlaybackStateCompat(withError);
     }
 
     shared actual void onPlay() {
@@ -182,7 +182,7 @@ shared class PlaybackManager(
                 exists musicId = MediaIDHelper.extractMusicIDFromMediaID(mediaId)) {
                 musicProvider.setFavorite(musicId, !musicProvider.isFavorite(musicId));
             }
-            updatePlaybackState(null);
+            updatePlaybackStateCompat(null);
         } else {
 //            LogHelper.e(tag, "Unsupported action: ", action);
         }
@@ -190,13 +190,13 @@ shared class PlaybackManager(
 
     shared actual void onPlayFromSearch(String query, Bundle extras) {
 //        LogHelper.d(tag, "playFromSearch  query=", query, " extras=", extras);
-        currentPlayback.state = PlaybackState.stateConnecting;
+        currentPlayback.state = PlaybackStateCompat.stateConnecting;
         value successSearch = queueManager.setQueueFromSearch(query, extras);
         if (successSearch) {
             handlePlayRequest();
             queueManager.updateMetadata();
         } else {
-            updatePlaybackState("Could not find music");
+            updatePlaybackStateCompat("Could not find music");
         }
     }
 
@@ -211,10 +211,10 @@ shared class PlaybackManager(
         }
 
         onPlaybackStatusChanged(Integer state)
-                => updatePlaybackState(null);
+                => updatePlaybackStateCompat(null);
 
         onError(String error)
-                => updatePlaybackState(error);
+                => updatePlaybackStateCompat(error);
 
         setCurrentMediaId(String mediaId)
                 => queueManager.setQueueFromMusic(mediaId);
@@ -235,12 +235,12 @@ shared class PlaybackManager(
         currentPlayback = playback;
 
         switch (oldState)
-        case (PlaybackState.stateBuffering
-            | PlaybackState.stateConnecting
-            | PlaybackState.statePaused) {
+        case (PlaybackStateCompat.stateBuffering
+            | PlaybackStateCompat.stateConnecting
+            | PlaybackStateCompat.statePaused) {
             playback.pause();
         }
-        case (PlaybackState.statePlaying) {
+        case (PlaybackStateCompat.statePlaying) {
             if (resumePlaying,
                 exists currentMusic = queueManager.currentMusic) {
                 playback.play(currentMusic);
@@ -259,5 +259,5 @@ shared interface PlaybackServiceCallback {
     shared formal void onPlaybackStart();
     shared formal void onNotificationRequired();
     shared formal void onPlaybackStop();
-    shared formal void onPlaybackStateUpdated(PlaybackState newState);
+    shared formal void onPlaybackStateCompatUpdated(PlaybackStateCompat newState);
 }
