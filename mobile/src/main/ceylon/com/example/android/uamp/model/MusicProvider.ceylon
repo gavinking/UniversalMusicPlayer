@@ -31,12 +31,14 @@ import com.example.android.uamp.utils {
 
 import java.lang {
     JBoolean=Boolean,
-    JIterable=Iterable
+    Iterable
 }
 import java.util {
     List,
     ArrayList,
-    Collections
+    Collections,
+    Map,
+    Set
 }
 import java.util.concurrent {
     ConcurrentHashMap
@@ -66,16 +68,20 @@ shared class MusicProvider({MediaMetadata*} source = RemoteJSONSource()) {
 
     variable State currentState = State.nonInitialized;
 
-    value musicListByGenre = ConcurrentHashMap<String,List<MediaMetadata>>();
-    value musicListById = ConcurrentHashMap<String,MutableMediaMetadata>();
-    value favoriteTracks = Collections.newSetFromMap(ConcurrentHashMap<String,JBoolean>());
+    //declare explicit type here because of bug in Android's ConcurrentHashMap
+    Map<String,List<MediaMetadata>> musicListByGenre
+            = ConcurrentHashMap<String,List<MediaMetadata>>();
+    Map<String,MutableMediaMetadata> musicListById
+            = ConcurrentHashMap<String,MutableMediaMetadata>();
+    Set<String> favoriteTracks
+            = Collections.newSetFromMap(ConcurrentHashMap<String,JBoolean>());
 
-    shared JIterable<String> genres
+    shared Iterable<String> genres
             => if (currentState != State.initialized)
             then Collections.emptyList<String>()
             else musicListByGenre.keySet();
 
-    shared JIterable<MediaMetadata> shuffledMusic {
+    shared Iterable<MediaMetadata> shuffledMusic {
         if (currentState != State.initialized) {
             return Collections.emptyList<MediaMetadata>();
         }
@@ -87,7 +93,7 @@ shared class MusicProvider({MediaMetadata*} source = RemoteJSONSource()) {
         return shuffled;
     }
 
-    shared JIterable<MediaMetadata> getMusicsByGenre(String genre)
+    shared Iterable<MediaMetadata> getMusicsByGenre(String genre)
             => if (currentState != State.initialized
                 || !musicListByGenre.containsKey(genre))
             then Collections.emptyList<MediaMetadata>()
@@ -106,13 +112,13 @@ shared class MusicProvider({MediaMetadata*} source = RemoteJSONSource()) {
         return result;
     }
 
-    shared JIterable<MediaMetadata> searchMusicBySongTitle(String query)
+    shared Iterable<MediaMetadata> searchMusicBySongTitle(String query)
             => searchMusic(MediaMetadata.metadataKeyTitle, query);
 
-    shared JIterable<MediaMetadata> searchMusicByAlbum(String query)
+    shared Iterable<MediaMetadata> searchMusicByAlbum(String query)
             => searchMusic(MediaMetadata.metadataKeyAlbum, query);
 
-    shared JIterable<MediaMetadata> searchMusicByArtist(String query)
+    shared Iterable<MediaMetadata> searchMusicByArtist(String query)
             => searchMusic(MediaMetadata.metadataKeyArtist, query);
 
     shared MediaMetadata? getMusic(String musicId)
@@ -150,20 +156,20 @@ shared class MusicProvider({MediaMetadata*} source = RemoteJSONSource()) {
 //            if (exists callback) {
             onMusicCatalogReady(true);
 //            }
-            return;
         }
-        object extends AsyncTask<Anything,Anything,State>() {
-            shared actual State doInBackground(Anything* params) {
-                retrieveMedia();
-                return currentState;
-            }
-            shared actual void onPostExecute(State current) {
-//                if (exists callback) {
-                onMusicCatalogReady(current == State.initialized);
-//                }
-            }
-
-        }.execute();
+        else {
+            object extends AsyncTask<Anything,Anything,State>() {
+                shared actual State doInBackground(Anything*params) {
+                    retrieveMedia();
+                    return currentState;
+                }
+                shared actual void onPostExecute(State current) {
+                    //                if (exists callback) {
+                    onMusicCatalogReady(current == State.initialized);
+                    //                }
+                }
+            }.execute();
+        }
     }
 
     void buildListsByGenre() {
