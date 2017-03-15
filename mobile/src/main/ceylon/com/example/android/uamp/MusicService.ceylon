@@ -209,16 +209,19 @@ shared class MusicService
         registerCarConnectionReceiver();
     }
 
+    suppressWarnings("caseNotDisjoint")
     shared actual Integer onStartCommand(Intent? startIntent, Integer flags, Integer startId) {
         if (exists startIntent) {
             if (exists action = startIntent.action,
                 actionCmd==action) {
-                value command = startIntent.getStringExtra(cmdName);
-                if (cmdPause==command) {
+                switch (command = startIntent.getStringExtra(cmdName))
+                case (cmdPause) {
                     playbackManager.handlePauseRequest();
-                } else if (cmdStopCasting==command) {
+                }
+                case (cmdStopCasting) {
                     CastContext.getSharedInstance(this).sessionManager.endCurrentSession(true);
                 }
+                else {}
             } else {
                 MediaButtonReceiver.handleIntent(session, startIntent);
             }
