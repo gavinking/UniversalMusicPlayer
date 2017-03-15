@@ -1,17 +1,8 @@
 Universal Music Player sample  for Ceylon on Android
 ====================================================
 
-This sample shows how to implement an audio media app that works
-across multiple form factors and provide a consistent user experience
-on Android phones, tablets, Android Auto, Android Wear, Android TV and
-Google Cast devices.
-
-
-Introduction
-------------
-
 This is a [Universal Music Player][1] sample application for Android,
-partially ported to [Ceylon](https://ceylon-lang.org).
+ported to the [Ceylon language](https://ceylon-lang.org).
 
 It demonstrates how to implement an audio media app that works
 across multiple form factors and provide a consistent user experience
@@ -29,13 +20,16 @@ demonstrate this.)
 Pre-requisites
 --------------
 
-- Ceylon 1.3.2
-- Android SDK v17
+- Ceylon 1.3.3 (unreleased)
+- Android SDK v25
 
 Getting Started
 ---------------
 
-This sample uses the Gradle build system. To build this project, use the
+The sample depends on a snapshot build of Ceylon 1.3.3. Edit
+`mobile/build.gradle` to specify the `ceylonLocation` for Ceylon 1.3.3.
+
+This sample uses the Gradle build system. To build the project, use the
 `gradlew build` command or use 'Import Project' in Android Studio.
 
 Screenshots
