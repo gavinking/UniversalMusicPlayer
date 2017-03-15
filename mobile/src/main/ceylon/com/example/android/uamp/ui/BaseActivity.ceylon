@@ -77,8 +77,7 @@ shared abstract class BaseActivity()
     function shouldShowControls() {
         if (exists mediaController = this.mediaController,
             mediaController.metadata exists,
-            mediaController.playbackState exists) {
-            value state = mediaController.playbackState.state;
+            exists state = mediaController.playbackState?.state) {
             return state != PlaybackState.stateError
                 && state != PlaybackState.stateNone
                 && state != PlaybackState.stateStopped;
