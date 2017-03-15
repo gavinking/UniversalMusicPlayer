@@ -22,14 +22,12 @@ import android.os {
     Handler,
     Message
 }
-import android.support.v4.media {
-    MediaBrowserServiceCompat,
-    MediaBrowserCompat
+import android.service.media {
+    MediaBrowserService
 }
 import android.support.v4.media.session {
     MediaButtonReceiver,
-    MediaSessionCompat,
-    PlaybackStateCompat
+    MediaSessionCompat
 }
 import android.support.v7.media {
     MediaRouter
@@ -67,11 +65,11 @@ import java.lang.ref {
 }
 import java.util {
     List,
-    Arrays
+    Collections
 }
 
 shared class MusicService
-        extends MediaBrowserServiceCompat
+        extends MediaBrowserService
         satisfies PlaybackServiceCallback {
 
     static shared String extraConnectedCast = "com.example.android.uamp.CAST_NAME";
@@ -93,7 +91,7 @@ shared class MusicService
         }
     }
 
-    shared new () extends MediaBrowserServiceCompat() {}
+    shared new () extends MediaBrowserService() {}
 
 //    value tag = LogHelper.makeLogTag(`MusicService`);
 
@@ -101,8 +99,8 @@ shared class MusicService
     late PackageValidator packageValidator;
     late MediaNotificationManager mediaNotificationManager;
     late PlaybackManager playbackManager;
-    late MediaSessionCompat session;
-    late MediaSession sess;
+//    late MediaSessionCompat session;
+    late MediaSession session;
     late Bundle sessionExtras;
     late MediaRouter mediaRouter;
 
@@ -115,8 +113,9 @@ shared class MusicService
     variable BroadcastReceiver? carConnectionReceiver = null;
 
     shared MediaSession.Token? currentToken {
-        assert (is MediaSession.Token? token = sessionToken?.token);
-        return token;
+//        assert (is MediaSession.Token? token = sessionToken?.token);
+//        return token;
+        return sessionToken;
     }
 
     shared actual void onCreate() {
@@ -133,7 +132,7 @@ shared class MusicService
                     QueueManager(musicProvider, resources,
                         object satisfies MetadataUpdateListener {
                             onMetadataChanged(MediaMetadata metadata)
-                                    => sess.setMetadata(metadata);
+                                    => session.setMetadata(metadata);
                             onMetadataRetrieveError()
                                     => playbackManager.updatePlaybackState(
                                         getString(R.String.error_no_metadata));
@@ -141,8 +140,8 @@ shared class MusicService
                                     => playbackManager.handlePlayRequest();
                             shared actual void onQueueUpdated(String title,
                                     List<MediaSession.QueueItem>? newQueue) {
-                                sess.setQueue(newQueue);
-                                sess.setQueueTitle(title);
+                                session.setQueue(newQueue);
+                                session.setQueueTitle(title);
                             }
                         }),
                     LocalPlayback(this, musicProvider));
@@ -151,9 +150,11 @@ shared class MusicService
         WearHelper.setSlotReservationFlags(sessionExtras, true, true);
         WearHelper.setUseBackgroundFromTheme(sessionExtras, true);
 
-        sess = MediaSession(this, "MusicService");
-        session = MediaSessionCompat.fromMediaSession(this, sess);
+        session = MediaSession(this, "MusicService");
+//        session = MediaSessionCompat.fromMediaSession(this, sess);
 //        assert (is MediaSession.Token token = session.sessionToken.token);
+//        sessionToken = session.sessionToken;
+//        session.setCallback(playbackManager);
         sessionToken = session.sessionToken;
         session.setCallback(playbackManager);
         session.setFlags(MediaSession.flagHandlesMediaButtons.or(MediaSession.flagHandlesTransportControls));
@@ -223,7 +224,7 @@ shared class MusicService
                 }
                 else {}
             } else {
-                MediaButtonReceiver.handleIntent(session, startIntent);
+                MediaButtonReceiver.handleIntent(MediaSessionCompat.fromMediaSession(this, session), startIntent);
             }
         }
         delayedStopHandler.removeCallbacksAndMessages(null);
@@ -245,7 +246,7 @@ shared class MusicService
 //        LogHelper.d(tag, "OnGetRoot: clientPackageName=" + clientPackageName, "; clientUid=" + clientUid + " ; rootHints=", rootHints);
         if (!packageValidator.isCallerAllowed(this, clientPackageName, clientUid)) {
 //            LogHelper.i(tag, "OnGetRoot: Browsing NOT ALLOWED for unknown caller. " + "Returning empty browser root so all apps can use MediaController." + clientPackageName);
-            return MediaBrowserServiceCompat.BrowserRoot(MediaIDHelper.mediaIdEmptyRoot, null);
+            return MediaBrowserService.BrowserRoot(MediaIDHelper.mediaIdEmptyRoot, null);
         }
 //        if (CarHelper.isValidCarPackage(clientPackageName)) {
 //        }
@@ -254,21 +255,21 @@ shared class MusicService
         return BrowserRoot(MediaIDHelper.mediaIdRoot, null);
     }
 
-    function repackage(MediaBrowser.MediaItem* list)
-            => Arrays.asList(for (item in list)
-                    MediaBrowserCompat.MediaItem.fromMediaItem(item));
+//    function repackage(MediaBrowser.MediaItem* list)
+//            => Arrays.asList(for (item in list)
+//                    MediaBrowserCompat.MediaItem.fromMediaItem(item));
 
     shared actual void onLoadChildren(String parentMediaId,
-            Result<List<MediaBrowserCompat.MediaItem>> result) {
+            Result<List<MediaBrowser.MediaItem>> result) {
 //        LogHelper.d(tag, "OnLoadChildren: parentMediaId=", parentMediaId);
         if (MediaIDHelper.mediaIdEmptyRoot == parentMediaId) {
-            result.sendResult(repackage());
+            result.sendResult(Collections.emptyList<MediaBrowser.MediaItem>());
         } else if (musicProvider.initialized) {
-            result.sendResult(repackage(*musicProvider.getChildren(parentMediaId, resources)));
+            result.sendResult(musicProvider.getChildren(parentMediaId, resources));
         } else {
             result.detach();
             musicProvider.retrieveMediaAsync((success)
-                    => result.sendResult(repackage(*musicProvider.getChildren(parentMediaId, resources))));
+                    => result.sendResult(musicProvider.getChildren(parentMediaId, resources)));
         }
     }
 
@@ -289,7 +290,8 @@ shared class MusicService
             => mediaNotificationManager.startNotification();
 
     shared actual void onPlaybackStateUpdated(PlaybackState newState)
-            => session.setPlaybackState(PlaybackStateCompat.fromPlaybackState(newState));
+            => session.setPlaybackState(newState);
+//            => session.setPlaybackState(PlaybackStateCompat.fromPlaybackState(newState));
 
     void registerCarConnectionReceiver() {
         value filter = IntentFilter(CarHelper.actionMediaStatus);

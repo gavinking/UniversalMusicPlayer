@@ -2,16 +2,14 @@ import android.content.res {
     Resources
 }
 import android.media.session {
-    PlaybackState
+    PlaybackState,
+    MediaSession
 }
 import android.os {
     Bundle,
     SystemClock {
         elapsedRealtime
     }
-}
-import android.support.v4.media.session {
-    MediaSessionCompat
 }
 
 import com.example.android.uamp {
@@ -31,7 +29,7 @@ shared class PlaybackManager(
         MusicProvider musicProvider,
         QueueManager queueManager,
         variable Playback currentPlayback)
-        extends MediaSessionCompat.Callback() {
+        extends MediaSession.Callback() {
 
 //    value tag = LogHelper.makeLogTag(`PlaybackManager`);
 
