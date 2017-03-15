@@ -12,14 +12,14 @@ import android.os {
     SystemClock
 }
 import android.support.v4.media {
-    MediaMetadataCompat,
-    MediaDescriptionCompat,
-    MediaBrowserCompat
+    MediaMetadata=MediaMetadataCompat,
+    MediaDescription=MediaDescriptionCompat,
+    MediaBrowser=MediaBrowserCompat
 }
 import android.support.v4.media.session {
-    PlaybackStateCompat,
-    MediaControllerCompat,
-    MediaSessionCompat
+    PlaybackState=PlaybackStateCompat,
+    MediaController=MediaControllerCompat,
+    MediaSession=MediaSessionCompat
 }
 import android.text.format {
     DateUtils
@@ -72,7 +72,7 @@ shared class FullScreenPlayerActivity()
     late Drawable mPauseDrawable;
     late Drawable mPlayDrawable;
     late ImageView mBackgroundImage;
-    late MediaBrowserCompat mMediaBrowser;
+    late MediaBrowser mMediaBrowser;
 
     variable String mCurrentArtUrl;
 
@@ -80,12 +80,12 @@ shared class FullScreenPlayerActivity()
     value mExecutorService = Executors.newSingleThreadScheduledExecutor();
 
     variable ScheduledFuture<out Object>? mScheduleFuture = null;
-    variable PlaybackStateCompat? mLastPlaybackStateCompat = null;
+    variable PlaybackState? mLastPlaybackState = null;
 
     void updateProgress() {
-        if (exists playbackState = mLastPlaybackStateCompat) {
+        if (exists playbackState = mLastPlaybackState) {
             Integer currentPosition;
-            if (playbackState.state != PlaybackStateCompat.statePaused) {
+            if (playbackState.state != PlaybackState.statePaused) {
                 value timeDelta
                         = SystemClock.elapsedRealtime()
                         - playbackState.lastPositionUpdateTime;
@@ -113,8 +113,8 @@ shared class FullScreenPlayerActivity()
     }
 
     suppressWarnings("caseNotDisjoint")
-    void updatePlaybackStateCompat(PlaybackStateCompat state) {
-        mLastPlaybackStateCompat = state;
+    void updatePlaybackState(PlaybackState state) {
+        mLastPlaybackState = state;
         if (exists extras = mediaController?.extras) {
             value line3Text
                     = if (exists castName= extras.getString(MusicService.extraConnectedCast))
@@ -124,28 +124,28 @@ shared class FullScreenPlayerActivity()
         }
 
         switch (state.state)
-        case (PlaybackStateCompat.statePlaying) {
+        case (PlaybackState.statePlaying) {
             mLoading.visibility = invisible;
             mPlayPause.visibility = visible;
             mPlayPause.setImageDrawable(mPauseDrawable);
             mControllers.visibility = visible;
             scheduleSeekbarUpdate();
         }
-        case (PlaybackStateCompat.statePaused) {
+        case (PlaybackState.statePaused) {
             mControllers.visibility = visible;
             mLoading.visibility = invisible;
             mPlayPause.visibility = visible;
             mPlayPause.setImageDrawable(mPlayDrawable);
             stopSeekbarUpdate();
         }
-        case (PlaybackStateCompat.stateNone |
-              PlaybackStateCompat.stateStopped) {
+        case (PlaybackState.stateNone |
+              PlaybackState.stateStopped) {
             mLoading.visibility = invisible;
             mPlayPause.visibility = visible;
             mPlayPause.setImageDrawable(mPlayDrawable);
             stopSeekbarUpdate();
         }
-        case (PlaybackStateCompat.stateBuffering) {
+        case (PlaybackState.stateBuffering) {
             mPlayPause.visibility = invisible;
             mLoading.visibility = visible;
             mLine3.setText(R.String.loading);
@@ -154,13 +154,13 @@ shared class FullScreenPlayerActivity()
         else {
 //            LogHelper.d(tag, "Unhandled state ", state.state);
         }
-        mSkipNext.setVisibility(state.actions.and(PlaybackStateCompat.actionSkipToNext) == 0
+        mSkipNext.setVisibility(state.actions.and(PlaybackState.actionSkipToNext) == 0
                                 then invisible else visible);
-        mSkipPrev.setVisibility(state.actions.and(PlaybackStateCompat.actionSkipToPrevious) == 0
+        mSkipPrev.setVisibility(state.actions.and(PlaybackState.actionSkipToPrevious) == 0
                                 then invisible else visible);
     }
 
-    void fetchImageAsync(MediaDescriptionCompat description) {
+    void fetchImageAsync(MediaDescription description) {
         if (exists uri = description.iconUri) {
             value artUrl = uri.string;
             mCurrentArtUrl = artUrl;
@@ -178,7 +178,7 @@ shared class FullScreenPlayerActivity()
         }
     }
 
-    void updateMediaDescription(MediaDescriptionCompat? description) {
+    void updateMediaDescription(MediaDescription? description) {
         if (exists description) {
 //            LogHelper.d(tag, "updateMediaDescription called ");
             mLine1.setText(description.title);
@@ -187,21 +187,21 @@ shared class FullScreenPlayerActivity()
         }
     }
 
-    void updateDuration(MediaMetadataCompat? metadata) {
+    void updateDuration(MediaMetadata? metadata) {
         if (exists metadata) {
 //            LogHelper.d(tag, "updateDuration called ");
-            value duration = metadata.getLong(MediaMetadataCompat.metadataKeyDuration);
+            value duration = metadata.getLong(MediaMetadata.metadataKeyDuration);
             mSeekbar.setMax(duration);
             mEnd.setText(DateUtils.formatElapsedTime(duration / 1000));
         }
     }
 
-    object callback extends MediaControllerCompat.Callback() {
-        shared actual void onPlaybackStateChanged(PlaybackStateCompat state) {
-//            LogHelper.d(tag, "onPlaybackStateCompat changed", state);
-            updatePlaybackStateCompat(state);
+    object callback extends MediaController.Callback() {
+        shared actual void onPlaybackStateChanged(PlaybackState state) {
+//            LogHelper.d(tag, "onPlaybackState changed", state);
+            updatePlaybackState(state);
         }
-        shared actual void onMetadataChanged(MediaMetadataCompat? metadata) {
+        shared actual void onMetadataChanged(MediaMetadata? metadata) {
             if (exists metadata) {
                 updateMediaDescription(metadata.description);
                 updateDuration(metadata);
@@ -209,19 +209,19 @@ shared class FullScreenPlayerActivity()
         }
     }
 
-    void connectToSession(MediaSessionCompat.Token token) {
-        value mediaController = MediaControllerCompat(this, token);
+    void connectToSession(MediaSession.Token token) {
+        value mediaController = MediaController(this, token);
         if (exists metadata = mediaController.metadata) {
-            MediaControllerCompat.setMediaController(this, mediaController);
+            MediaController.setMediaController(this, mediaController);
             mediaController.registerCallback(callback);
             value state = mediaController.playbackState;
-            updatePlaybackStateCompat(state);
+            updatePlaybackState(state);
             updateMediaDescription(metadata.description);
             updateDuration(metadata);
             updateProgress();
             if (state exists,
-                state.state == PlaybackStateCompat.statePlaying
-                || state.state == PlaybackStateCompat.stateBuffering) {
+                state.state == PlaybackState.statePlaying
+                || state.state == PlaybackState.stateBuffering) {
                 scheduleSeekbarUpdate();
             }
         }
@@ -272,13 +272,13 @@ shared class FullScreenPlayerActivity()
             if (exists state = mediaController.playbackState) {
                 value controls = mediaController.transportControls;
                 switch (state.state)
-                case (PlaybackStateCompat.statePlaying
-                    | PlaybackStateCompat.stateBuffering) {
+                case (PlaybackState.statePlaying
+                    | PlaybackState.stateBuffering) {
                     controls.pause();
                     stopSeekbarUpdate();
                 }
-                case (PlaybackStateCompat.statePaused
-                    | PlaybackStateCompat.stateStopped) {
+                case (PlaybackState.statePaused
+                    | PlaybackState.stateStopped) {
                     controls.play();
                     scheduleSeekbarUpdate();
                 }
@@ -304,9 +304,9 @@ shared class FullScreenPlayerActivity()
         }
 
         mMediaBrowser
-                = MediaBrowserCompat(this,
+                = MediaBrowser(this,
                     ComponentName(this, `MusicService`),
-                    object extends MediaBrowserCompat.ConnectionCallback() {
+                    object extends MediaBrowser.ConnectionCallback() {
                         shared actual void onConnected() {
 //                            LogHelper.d(tag, "onConnected");
                             try {
@@ -322,7 +322,7 @@ shared class FullScreenPlayerActivity()
 
     void updateFromParams(Intent? intent) {
         if (exists description
-                    = intent?.getParcelableExtra<MediaDescriptionCompat>
+                    = intent?.getParcelableExtra<MediaDescription>
                     (MusicPlayerActivity.extraCurrentMediaDescription)) {
             updateMediaDescription(description);
         }
@@ -336,7 +336,7 @@ shared class FullScreenPlayerActivity()
     shared actual void onStop() {
         super.onStop();
         mMediaBrowser.disconnect();
-        MediaControllerCompat.getMediaController(this)?.unregisterCallback(callback);
+        MediaController.getMediaController(this)?.unregisterCallback(callback);
     }
 
     shared actual void onDestroy() {

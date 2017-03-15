@@ -5,10 +5,10 @@ import android.content {
     Context
 }
 import android.support.v4.media {
-    MediaBrowserCompat
+    MediaBrowser=MediaBrowserCompat
 }
 import android.support.v4.media.session {
-    MediaControllerCompat
+    MediaController=MediaControllerCompat
 }
 
 import java.util {
@@ -82,9 +82,9 @@ shared class MediaIDHelper {
 //        return createMediaID(null, *parentHierarchy);
 //    }
 
-    shared static Boolean isMediaItemPlaying(Context context, MediaBrowserCompat.MediaItem mediaItem)
+    shared static Boolean isMediaItemPlaying(Context context, MediaBrowser.MediaItem mediaItem)
             => if (is Activity context,
-                    exists metadata = MediaControllerCompat.getMediaController(context)?.metadata,
+                    exists metadata = MediaController.getMediaController(context)?.metadata,
                     exists itemMusicId = extractMusicIDFromMediaID(mediaItem.description.mediaId),
                     exists currentPlayingMediaId = metadata.description.mediaId)
             then MediaIDHelper.equalIds(currentPlayingMediaId, itemMusicId)

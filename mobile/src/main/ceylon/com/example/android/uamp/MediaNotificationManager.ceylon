@@ -1,5 +1,4 @@
 import android.app {
-    Notification,
     PendingIntent,
     NotificationManager
 }
@@ -18,16 +17,16 @@ import android.os {
     RemoteException
 }
 import android.support.v4.media {
-    MediaMetadataCompat,
-    MediaDescriptionCompat
+    MediaMetadata=MediaMetadataCompat,
+    MediaDescription=MediaDescriptionCompat
 }
 import android.support.v4.media.session {
-    PlaybackStateCompat,
-    MediaSessionCompat,
-    MediaControllerCompat
+    PlaybackState=PlaybackStateCompat,
+    MediaSession=MediaSessionCompat,
+    MediaController=MediaControllerCompat
 }
 import android.support.v7.app {
-    NotificationCompat
+    Notification=NotificationCompat
 }
 
 import com.example.android.uamp.ui {
@@ -84,22 +83,22 @@ shared class MediaNotificationManager {
     value stopCastIntent = PendingIntent.getBroadcast(service, requestCode,
         Intent(actionStopCasting).setPackage(pkg), PendingIntent.flagCancelCurrent);
 
-    variable MediaSessionCompat.Token? sessionToken = null;
-    variable MediaControllerCompat? controller = null;
-    variable MediaControllerCompat.TransportControls? transportControls = null;
-    variable MediaMetadataCompat? metadata = null;
-    variable PlaybackStateCompat? playbackState = null;
+    variable MediaSession.Token? sessionToken = null;
+    variable MediaController? controller = null;
+    variable MediaController.TransportControls? transportControls = null;
+    variable MediaMetadata? metadata = null;
+    variable PlaybackState? playbackState = null;
 
     variable Boolean started = false;
 
-    void addPlayPauseAction(NotificationCompat.Builder builder) {
+    void addPlayPauseAction(Notification.Builder builder) {
 //        LogHelper.d(tag, "updatePlayPauseAction");
 
         String label;
         Integer icon;
         PendingIntent intent;
         if (exists playback = playbackState,
-            playback.state == PlaybackStateCompat.statePlaying) {
+            playback.state == PlaybackState.statePlaying) {
             label = service.getString(R.String.label_pause);
             icon = R.Drawable.uamp_ic_pause_white_24dp;
             intent = pauseIntent;
@@ -112,7 +111,7 @@ shared class MediaNotificationManager {
         builder.addAction(icon, label, intent);
     }
 
-    function createContentIntent(MediaDescriptionCompat? description) {
+    function createContentIntent(MediaDescription? description) {
         value openUI = Intent(service, `MusicPlayerActivity`);
         openUI.setFlags(Intent.flagActivitySingleTop);
         openUI.putExtra(MusicPlayerActivity.extraStartFullscreen, true);
@@ -122,30 +121,30 @@ shared class MediaNotificationManager {
         return PendingIntent.getActivity(service, requestCode, openUI, PendingIntent.flagCancelCurrent);
     }
 
-    void setNotificationPlaybackStateCompat(NotificationCompat.Builder builder) {
-//        LogHelper.d(tag, "updateNotificationPlaybackStateCompat. mPlaybackStateCompat=" + mPlaybackStateCompat);
+    void setNotificationPlaybackState(Notification.Builder builder) {
+//        LogHelper.d(tag, "updateNotificationPlaybackState. mPlaybackState=" + mPlaybackState);
         if (exists playbackState = this.playbackState, started) {
-            if (playbackState.state == PlaybackStateCompat.statePlaying,
+            if (playbackState.state == PlaybackState.statePlaying,
                 playbackState.position>=0) {
-                //            LogHelper.d(tag, "updateNotificationPlaybackStateCompat. updating playback position to ",
+                //            LogHelper.d(tag, "updateNotificationPlaybackState. updating playback position to ",
                 //                (System.currentTimeMillis() - playback.position) / 1000, " seconds");
                 builder.setWhen(System.currentTimeMillis() - playbackState.position)
                     .setShowWhen(true)
                     .setUsesChronometer(true);
             } else {
-                //            LogHelper.d(tag, "updateNotificationPlaybackStateCompat. hiding playback position");
+                //            LogHelper.d(tag, "updateNotificationPlaybackState. hiding playback position");
                 builder.setWhen(0)
                     .setShowWhen(false)
                     .setUsesChronometer(false);
             }
-            builder.setOngoing(playbackState.state == PlaybackStateCompat.statePlaying);
+            builder.setOngoing(playbackState.state == PlaybackState.statePlaying);
         }
         else {
             service.stopForeground(true);
         }
     }
 
-    void fetchBitmapFromURLAsync(String bitmapUrl, NotificationCompat.Builder builder) {
+    void fetchBitmapFromURLAsync(String bitmapUrl, Notification.Builder builder) {
         AlbumArtCache.instance.fetch(bitmapUrl, (artUrl, bitmap, icon) {
             if (exists artUrl,
                 exists uri = metadata?.description?.iconUri,
@@ -157,14 +156,14 @@ shared class MediaNotificationManager {
         });
     }
 
-    Notification? createNotification() {
+    function createNotification() {
 //        LogHelper.d(tag, "updateNotificationMetadata. mMetadata=" + mMetadata);
         if (exists metadata = this.metadata,
             exists playbackState = this.playbackState) {
 
-            value notificationBuilder = NotificationCompat.Builder(service);
+            value notificationBuilder = Notification.Builder(service);
             Integer playPauseButtonPosition;
-            if (playbackState.actions.and(PlaybackStateCompat.actionSkipToPrevious) != 0) {
+            if (playbackState.actions.and(PlaybackState.actionSkipToPrevious) != 0) {
                 notificationBuilder.addAction(R.Drawable.ic_skip_previous_white_24dp,
                     service.getString(R.String.label_previous), previousIntent);
                 playPauseButtonPosition = 1;
@@ -173,7 +172,7 @@ shared class MediaNotificationManager {
                 playPauseButtonPosition = 0;
             }
             addPlayPauseAction(notificationBuilder);
-            if (playbackState.actions.and(PlaybackStateCompat.actionSkipToNext) != 0) {
+            if (playbackState.actions.and(PlaybackState.actionSkipToNext) != 0) {
                 notificationBuilder.addAction(R.Drawable.ic_skip_next_white_24dp,
                     service.getString(R.String.label_next), nextIntent);
             }
@@ -196,7 +195,7 @@ shared class MediaNotificationManager {
                 art = null;
             }
 
-            notificationBuilder.setStyle(NotificationCompat.MediaStyle()
+            notificationBuilder.setStyle(Notification.MediaStyle()
                 .setShowActionsInCompactView(playPauseButtonPosition)
                 .setMediaSession(sessionToken))
                 .setColor(notificationColor).setSmallIcon(R.Drawable.ic_notification)
@@ -212,7 +211,7 @@ shared class MediaNotificationManager {
                 notificationBuilder.addAction(R.Drawable.ic_close_black_24dp,
                     service.getString(R.String.stop_casting), stopCastIntent);
             }
-            setNotificationPlaybackStateCompat(notificationBuilder);
+            setNotificationPlaybackState(notificationBuilder);
             if (exists fetchArtUrl) {
                 fetchBitmapFromURLAsync(fetchArtUrl, notificationBuilder);
             }
@@ -247,7 +246,7 @@ shared class MediaNotificationManager {
         }
     }
 
-    late MediaControllerCompat.Callback mediaControllerCallback;
+    late MediaController.Callback mediaControllerCallback;
 
     shared void startNotification() {
         if (!started) {
@@ -287,7 +286,7 @@ shared class MediaNotificationManager {
             controller?.unregisterCallback(mediaControllerCallback);
             sessionToken = freshToken;
             if (exists freshToken) {
-                controller = MediaControllerCompat(musicService, freshToken);
+                controller = MediaController(musicService, freshToken);
                 transportControls = controller?.transportControls;
                 if (started) {
                     controller?.registerCallback(mediaControllerCallback);
@@ -296,22 +295,22 @@ shared class MediaNotificationManager {
         }
     }
 
-    mediaControllerCallback = object extends MediaControllerCompat.Callback() {
+    mediaControllerCallback = object extends MediaController.Callback() {
 
         suppressWarnings("caseNotDisjoint")
-        shared actual void onPlaybackStateChanged(PlaybackStateCompat state) {
+        shared actual void onPlaybackStateChanged(PlaybackState state) {
             playbackState = state;
 //            LogHelper.d(tag, "Received new playback state", state);
             switch (state.state)
-            case (PlaybackStateCompat.stateStopped
-                | PlaybackStateCompat.stateNone) {
+            case (PlaybackState.stateStopped
+                | PlaybackState.stateNone) {
                 stopNotification();
             } else if (exists notification = createNotification()) {
                 notificationManager.notify(notificationId, notification);
             }
         }
 
-        shared actual void onMetadataChanged(MediaMetadataCompat metadata) {
+        shared actual void onMetadataChanged(MediaMetadata metadata) {
             outer.metadata = metadata;
 //            LogHelper.d(tag, "Received new metadata ", metadata);
             if (exists notification = createNotification()) {

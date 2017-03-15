@@ -12,11 +12,11 @@ import android.graphics.drawable {
     Drawable
 }
 import android.support.v4.media {
-    MediaBrowserCompat
+    MediaBrowser=MediaBrowserCompat
 }
 import android.support.v4.media.session {
-    PlaybackStateCompat,
-    MediaControllerCompat
+    PlaybackState=PlaybackStateCompat,
+    MediaController=MediaControllerCompat
 }
 import android.view {
     LayoutInflater,
@@ -93,11 +93,11 @@ shared class MediaItemViewHolder {
     suppressWarnings("caseNotDisjoint")
     shared static State getStateFromController(Context context) {
         assert (is Activity context,
-                exists controller = MediaControllerCompat.getMediaController(context));
+                exists controller = MediaController.getMediaController(context));
         if (exists state = controller.playbackState?.state) {
             return switch (state)
-            case (PlaybackStateCompat.statePlaying) State.statePlaying
-            case (PlaybackStateCompat.stateError) State.stateNone
+            case (PlaybackState.statePlaying) State.statePlaying
+            case (PlaybackState.stateError) State.stateNone
             else State.statePaused;
         }
         else {
@@ -105,7 +105,7 @@ shared class MediaItemViewHolder {
         }
     }
 
-    shared static State getMediaItemState(Context context, MediaBrowserCompat.MediaItem mediaItem) {
+    shared static State getMediaItemState(Context context, MediaBrowser.MediaItem mediaItem) {
         if (mediaItem.playable) {
             return MediaIDHelper.isMediaItemPlaying(context, mediaItem)
                 then getStateFromController(context)
@@ -116,7 +116,7 @@ shared class MediaItemViewHolder {
         }
     }
 
-    shared static View setupListView(Activity activity, View? view, ViewGroup parent, MediaBrowserCompat.MediaItem item) {
+    shared static View setupListView(Activity activity, View? view, ViewGroup parent, MediaBrowser.MediaItem item) {
         initializeColorStateLists(activity);
 
         MediaItemViewHolder holder;

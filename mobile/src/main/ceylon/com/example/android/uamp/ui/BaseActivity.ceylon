@@ -20,13 +20,13 @@ import android.os {
     RemoteException
 }
 import android.support.v4.media {
-    MediaMetadataCompat,
-    MediaBrowserCompat
+    MediaMetadata=MediaMetadataCompat,
+    MediaBrowser=MediaBrowserCompat
 }
 import android.support.v4.media.session {
-    PlaybackStateCompat,
-    MediaControllerCompat,
-    MediaSessionCompat
+    PlaybackState=PlaybackStateCompat,
+    MediaController=MediaControllerCompat,
+    MediaSession=MediaSessionCompat
 }
 
 import com.example.android.uamp {
@@ -43,7 +43,7 @@ shared abstract class BaseActivity()
 
 //    value tag = LogHelper.makeLogTag(`BaseActivity`);
 
-    shared actual late MediaBrowserCompat mediaBrowser;
+    shared actual late MediaBrowser mediaBrowser;
     shared variable PlaybackControlsFragment? controlsFragment = null;
 
     shared Boolean online {
@@ -79,9 +79,9 @@ shared abstract class BaseActivity()
         if (exists mediaController = this.mediaController,
             mediaController.metadata exists,
             exists state = mediaController.playbackState?.state) {
-            return state != PlaybackStateCompat.stateError
-                && state != PlaybackStateCompat.stateNone
-                && state != PlaybackStateCompat.stateStopped;
+            return state != PlaybackState.stateError
+                && state != PlaybackState.stateNone
+                && state != PlaybackState.stateStopped;
         }
         else {
             return false;
@@ -89,16 +89,16 @@ shared abstract class BaseActivity()
     }
 
     object mediaControllerCallback
-            extends MediaControllerCompat.Callback() {
-        shared actual void onPlaybackStateChanged(PlaybackStateCompat? state) {
+            extends MediaController.Callback() {
+        shared actual void onPlaybackStateChanged(PlaybackState? state) {
             if (shouldShowControls()) {
                 showPlaybackControls();
             } else {
-//                LogHelper.d(tag, "mediaControllerCallback.onPlaybackStateCompatChanged: hiding controls because state is ", state.state);
+//                LogHelper.d(tag, "mediaControllerCallback.onPlaybackStateChanged: hiding controls because state is ", state.state);
                 hidePlaybackControls();
             }
         }
-        shared actual void onMetadataChanged(MediaMetadataCompat? metadata) {
+        shared actual void onMetadataChanged(MediaMetadata? metadata) {
             if (shouldShowControls()) {
                 showPlaybackControls();
             } else {
@@ -110,9 +110,9 @@ shared abstract class BaseActivity()
 
     shared default void onMediaControllerConnected() {}
 
-    void connectToSession(MediaSessionCompat.Token token) {
-        value controller = MediaControllerCompat(this, token);
-        MediaControllerCompat.setMediaController(this, controller);
+    void connectToSession(MediaSession.Token token) {
+        value controller = MediaController(this, token);
+        MediaController.setMediaController(this, controller);
         controller.registerCallback(mediaControllerCallback);
         if (shouldShowControls()) {
             showPlaybackControls();
@@ -134,9 +134,9 @@ shared abstract class BaseActivity()
                 themeColor(this, R.Attr.colorPrimary, AndroidR.Color.darker_gray));
             setTaskDescription(taskDesc);
         }
-        mediaBrowser = MediaBrowserCompat(this,
+        mediaBrowser = MediaBrowser(this,
             ComponentName(this, `MusicService`),
-            object extends MediaBrowserCompat.ConnectionCallback() {
+            object extends MediaBrowser.ConnectionCallback() {
                 shared actual void onConnected() {
 //                    LogHelper.d(tag, "onConnected");
                     try {
@@ -165,7 +165,7 @@ shared abstract class BaseActivity()
     shared actual void onStop() {
         super.onStop();
 //        LogHelper.d(tag, "Activity onStop");
-        MediaControllerCompat.getMediaController(this)?.unregisterCallback(mediaControllerCallback);
+        MediaController.getMediaController(this)?.unregisterCallback(mediaControllerCallback);
         mediaBrowser.disconnect();
     }
 

@@ -15,12 +15,12 @@ import android.os {
     Bundle
 }
 import android.support.v4.media {
-    MediaMetadataCompat,
-    MediaBrowserCompat
+    MediaMetadata=MediaMetadataCompat,
+    MediaBrowser=MediaBrowserCompat
 }
 import android.support.v4.media.session {
-    PlaybackStateCompat,
-    MediaControllerCompat
+    PlaybackState=PlaybackStateCompat,
+    MediaController=MediaControllerCompat
 }
 import android.view {
     LayoutInflater,
@@ -55,12 +55,12 @@ shared class MediaBrowserFragment() extends Fragment() {
     variable String? currentMediaId = null;
     variable MediaFragmentListener? mediaFragmentListener = null;
 
-    late variable ArrayAdapter<MediaBrowserCompat.MediaItem> browserAdapter;
+    late variable ArrayAdapter<MediaBrowser.MediaItem> browserAdapter;
     late variable View errorView;
     late variable TextView errorMessage;
 
-    MediaBrowserCompat? mediaBrowser => mediaFragmentListener?.mediaBrowser;
-    MediaControllerCompat? mediaController => MediaControllerCompat.getMediaController(activity);
+    MediaBrowser? mediaBrowser => mediaFragmentListener?.mediaBrowser;
+    MediaController? mediaController => MediaController.getMediaController(activity);
 
     function showError(Boolean forceError) {
         if (!networkOnline(activity)) {
@@ -70,7 +70,7 @@ shared class MediaBrowserFragment() extends Fragment() {
         else if (exists controller = mediaController,
                 controller.metadata exists,
                 exists playbackState = controller.playbackState,
-                playbackState.state == PlaybackStateCompat.stateError,
+                playbackState.state == PlaybackState.stateError,
                 playbackState.errorMessage exists) {
             errorMessage.text = playbackState.errorMessage;
             return true;
@@ -108,14 +108,14 @@ shared class MediaBrowserFragment() extends Fragment() {
         }
     }
 
-    object mediaControllerCallback extends MediaControllerCompat.Callback() {
-        shared actual void onMetadataChanged(MediaMetadataCompat? metadata) {
+    object mediaControllerCallback extends MediaController.Callback() {
+        shared actual void onMetadataChanged(MediaMetadata? metadata) {
             if (exists metadata) {
 //                LogHelper.d(tag, "Received metadata change to media ", metadata.description.mediaId);
                 browserAdapter.notifyDataSetChanged();
             }
         }
-        shared actual void onPlaybackStateChanged(PlaybackStateCompat? state) {
+        shared actual void onPlaybackStateChanged(PlaybackState? state) {
 //            LogHelper.d(tag, "Received state change: ", state);
             checkForUserVisibleErrors(false);
             browserAdapter.notifyDataSetChanged();
@@ -131,8 +131,8 @@ shared class MediaBrowserFragment() extends Fragment() {
 
     shared actual View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 //        LogHelper.d(tag, "fragment.onCreateView");
-        browserAdapter = object extends ArrayAdapter<MediaBrowserCompat.MediaItem>
-                (activity, R.Layout.media_list_item, ArrayList<MediaBrowserCompat.MediaItem>()) {
+        browserAdapter = object extends ArrayAdapter<MediaBrowser.MediaItem>
+                (activity, R.Layout.media_list_item, ArrayList<MediaBrowser.MediaItem>()) {
             getView(Integer position, View convertView, ViewGroup parent)
                     => MediaItemViewHolder.setupListView(activity, convertView, parent, getItem(position));
         };
@@ -203,8 +203,8 @@ shared class MediaBrowserFragment() extends Fragment() {
         assert (exists id = currentMediaId);
         mediaBrowser?.unsubscribe(id);
         mediaBrowser?.subscribe(id,
-            object extends MediaBrowserCompat.SubscriptionCallback() {
-                shared actual void onChildrenLoaded(String parentId, List<MediaBrowserCompat.MediaItem> children) {
+            object extends MediaBrowser.SubscriptionCallback() {
+                shared actual void onChildrenLoaded(String parentId, List<MediaBrowser.MediaItem> children) {
                     try {
 //                        LogHelper.d(tag, "fragment onChildrenLoaded, parentId=", parentId, "  count=", children.size());
                         checkForUserVisibleErrors(children.empty);
@@ -233,8 +233,8 @@ shared class MediaBrowserFragment() extends Fragment() {
             mediaFragmentListener?.setToolbarTitle(null);
         }
         else if (exists id = currentMediaId) {
-            mediaBrowser?.getItem(id, object extends MediaBrowserCompat.ItemCallback() {
-                onItemLoaded(MediaBrowserCompat.MediaItem item)
+            mediaBrowser?.getItem(id, object extends MediaBrowser.ItemCallback() {
+                onItemLoaded(MediaBrowser.MediaItem item)
                         => mediaFragmentListener?.setToolbarTitle(item.description.title?.string);
             });
         }

@@ -11,9 +11,9 @@ import android.os {
     AsyncTask
 }
 import android.support.v4.media {
-    MediaMetadataCompat,
-    MediaBrowserCompat,
-    MediaDescriptionCompat
+    MediaMetadata=MediaMetadataCompat,
+    MediaBrowser=MediaBrowserCompat,
+    MediaDescription=MediaDescriptionCompat
 }
 
 import com.example.android.uamp {
@@ -60,15 +60,15 @@ class State
     }
 }
 
-shared class MusicProvider({MediaMetadataCompat*} source = RemoteJSONSource()) {
+shared class MusicProvider({MediaMetadata*} source = RemoteJSONSource()) {
 
 //    static value tag = LogHelper.makeLogTag(`MusicProvider`);
 
     variable State currentState = State.nonInitialized;
 
     //declare explicit type here because of bug in Android's ConcurrentHashMap
-    Map<String,List<MediaMetadataCompat>> musicListByGenre
-            = ConcurrentHashMap<String,List<MediaMetadataCompat>>();
+    Map<String,List<MediaMetadata>> musicListByGenre
+            = ConcurrentHashMap<String,List<MediaMetadata>>();
     Map<String,MutableMediaMetadata> musicListById
             = ConcurrentHashMap<String,MutableMediaMetadata>();
     Set<String> favoriteTracks
@@ -79,11 +79,11 @@ shared class MusicProvider({MediaMetadataCompat*} source = RemoteJSONSource()) {
             then Collections.emptyList<String>()
             else musicListByGenre.keySet();
 
-    shared Iterable<MediaMetadataCompat> shuffledMusic {
+    shared Iterable<MediaMetadata> shuffledMusic {
         if (currentState != State.initialized) {
-            return Collections.emptyList<MediaMetadataCompat>();
+            return Collections.emptyList<MediaMetadata>();
         }
-        value shuffled = ArrayList<MediaMetadataCompat>(musicListById.size());
+        value shuffled = ArrayList<MediaMetadata>(musicListById.size());
         for (mutableMetadata in musicListById.values()) {
             shuffled.add(mutableMetadata.metadata);
         }
@@ -91,17 +91,17 @@ shared class MusicProvider({MediaMetadataCompat*} source = RemoteJSONSource()) {
         return shuffled;
     }
 
-    shared Iterable<MediaMetadataCompat> getMusicsByGenre(String genre)
+    shared Iterable<MediaMetadata> getMusicsByGenre(String genre)
             => if (currentState != State.initialized
                 || !musicListByGenre.containsKey(genre))
-            then Collections.emptyList<MediaMetadataCompat>()
+            then Collections.emptyList<MediaMetadata>()
             else musicListByGenre.get(genre);
 
     function searchMusic(String metadataField, String query) {
         if (currentState != State.initialized) {
-            return Collections.emptyList<MediaMetadataCompat>();
+            return Collections.emptyList<MediaMetadata>();
         }
-        value result = ArrayList<MediaMetadataCompat>();
+        value result = ArrayList<MediaMetadata>();
         for (track in musicListById.values()) {
             if (query.lowercased in track.metadata.getString(metadataField)) {
                 result.add(track.metadata);
@@ -110,24 +110,24 @@ shared class MusicProvider({MediaMetadataCompat*} source = RemoteJSONSource()) {
         return result;
     }
 
-    shared Iterable<MediaMetadataCompat> searchMusicBySongTitle(String query)
-            => searchMusic(MediaMetadataCompat.metadataKeyTitle, query);
+    shared Iterable<MediaMetadata> searchMusicBySongTitle(String query)
+            => searchMusic(MediaMetadata.metadataKeyTitle, query);
 
-    shared Iterable<MediaMetadataCompat> searchMusicByAlbum(String query)
-            => searchMusic(MediaMetadataCompat.metadataKeyAlbum, query);
+    shared Iterable<MediaMetadata> searchMusicByAlbum(String query)
+            => searchMusic(MediaMetadata.metadataKeyAlbum, query);
 
-    shared Iterable<MediaMetadataCompat> searchMusicByArtist(String query)
-            => searchMusic(MediaMetadataCompat.metadataKeyArtist, query);
+    shared Iterable<MediaMetadata> searchMusicByArtist(String query)
+            => searchMusic(MediaMetadata.metadataKeyArtist, query);
 
-    shared MediaMetadataCompat? getMusic(String musicId)
+    shared MediaMetadata? getMusic(String musicId)
             => musicListById.containsKey(musicId)
             then musicListById.get(musicId).metadata;
 
     shared void updateMusicArt(String musicId, Bitmap? albumArt, Bitmap? icon) {
         value metadata
-                = MediaMetadataCompat.Builder(getMusic(musicId))
-                .putBitmap(MediaMetadataCompat.metadataKeyAlbumArt, albumArt)
-                .putBitmap(MediaMetadataCompat.metadataKeyDisplayIcon, icon)
+                = MediaMetadata.Builder(getMusic(musicId))
+                .putBitmap(MediaMetadata.metadataKeyAlbumArt, albumArt)
+                .putBitmap(MediaMetadata.metadataKeyDisplayIcon, icon)
                 .build();
         "Unexpected error: Inconsistent data structures in MusicProvider"
         assert (exists mutableMetadata = musicListById.get(musicId));
@@ -171,14 +171,14 @@ shared class MusicProvider({MediaMetadataCompat*} source = RemoteJSONSource()) {
     }
 
     void buildListsByGenre() {
-        value newMusicListByGenre = ConcurrentHashMap<String,List<MediaMetadataCompat>>();
+        value newMusicListByGenre = ConcurrentHashMap<String,List<MediaMetadata>>();
         for (m in musicListById.values()) {
-            value genre = m.metadata.getString(MediaMetadataCompat.metadataKeyGenre);
+            value genre = m.metadata.getString(MediaMetadata.metadataKeyGenre);
             if (exists list = newMusicListByGenre[genre]) {
                 list.add(m.metadata);
             }
             else {
-                value list = ArrayList<MediaMetadataCompat>();
+                value list = ArrayList<MediaMetadata>();
                 newMusicListByGenre.put(genre, list);
                 list.add(m.metadata);
             }
@@ -192,7 +192,7 @@ shared class MusicProvider({MediaMetadataCompat*} source = RemoteJSONSource()) {
             if (currentState == State.nonInitialized) {
                 currentState = State.initializing;
                 for (item in source) {
-                    value musicId = item.getString(MediaMetadataCompat.metadataKeyMediaId);
+                    value musicId = item.getString(MediaMetadata.metadataKeyMediaId);
                     musicListById.put(musicId, MutableMediaMetadata(musicId, item));
                 }
                 buildListsByGenre();
@@ -208,39 +208,39 @@ shared class MusicProvider({MediaMetadataCompat*} source = RemoteJSONSource()) {
 
     function createBrowsableMediaItemForRoot(Resources resources) {
         value description
-                = MediaDescriptionCompat.Builder()
+                = MediaDescription.Builder()
                 .setMediaId(mediaIdMusicsByGenre)
                 .setTitle(resources.getString(R.String.browse_genres))
                 .setSubtitle(resources.getString(R.String.browse_genre_subtitle))
                 .setIconUri(Uri.parse("android.resource://com.example.android.uamp/drawable/ic_by_genre"))
                 .build();
-        return MediaBrowserCompat.MediaItem(description, MediaBrowserCompat.MediaItem.flagBrowsable);
+        return MediaBrowser.MediaItem(description, MediaBrowser.MediaItem.flagBrowsable);
     }
 
     function createBrowsableMediaItemForGenre(String genre, Resources resources) {
         value description
-                = MediaDescriptionCompat.Builder()
+                = MediaDescription.Builder()
                 .setMediaId(createMediaID(null, mediaIdMusicsByGenre, genre))
                 .setTitle(genre)
                 .setSubtitle(resources.getString(R.String.browse_musics_by_genre_subtitle, genre))
                 .build();
-        return MediaBrowserCompat.MediaItem(description, MediaBrowserCompat.MediaItem.flagBrowsable);
+        return MediaBrowser.MediaItem(description, MediaBrowser.MediaItem.flagBrowsable);
     }
 
-    function createMediaItem(MediaMetadataCompat metadata) {
-        value genre = metadata.getString(MediaMetadataCompat.metadataKeyGenre);
+    function createMediaItem(MediaMetadata metadata) {
+        value genre = metadata.getString(MediaMetadata.metadataKeyGenre);
         value hierarchyAwareMediaID
                 = MediaIDHelper.createMediaID(metadata.description.mediaId, mediaIdMusicsByGenre, genre);
         value copy
-                = MediaMetadataCompat.Builder(metadata)
-                .putString(MediaMetadataCompat.metadataKeyMediaId, hierarchyAwareMediaID)
+                = MediaMetadata.Builder(metadata)
+                .putString(MediaMetadata.metadataKeyMediaId, hierarchyAwareMediaID)
                 .build();
-        return MediaBrowserCompat.MediaItem(copy.description, MediaBrowserCompat.MediaItem.flagPlayable);
+        return MediaBrowser.MediaItem(copy.description, MediaBrowser.MediaItem.flagPlayable);
     }
 
     suppressWarnings("caseNotDisjoint")
-    shared List<MediaBrowserCompat.MediaItem> getChildren(String mediaId, Resources resources) {
-        value mediaItems = ArrayList<MediaBrowserCompat.MediaItem>();
+    shared List<MediaBrowser.MediaItem> getChildren(String mediaId, Resources resources) {
+        value mediaItems = ArrayList<MediaBrowser.MediaItem>();
         if (MediaIDHelper.isBrowseable(mediaId)) {
             switch (mediaId)
             case (mediaIdRoot) {

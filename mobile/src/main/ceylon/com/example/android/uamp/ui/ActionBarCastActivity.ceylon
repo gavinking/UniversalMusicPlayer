@@ -22,7 +22,7 @@ import android.support.v4.widget {
 }
 import android.support.v7.app {
     ActionBarDrawerToggle,
-    AppCompatActivity,
+    AppActivity=AppCompatActivity,
     MediaRouteButton
 }
 import android.support.v7.widget {
@@ -54,7 +54,7 @@ import java.lang {
 }
 
 shared abstract class ActionBarCastActivity()
-        extends AppCompatActivity() {
+        extends AppActivity() {
 
 //    value tag = LogHelper.makeLogTag(`ActionBarCastActivity`);
     value delayMillis = 1000;

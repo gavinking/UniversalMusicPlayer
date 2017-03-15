@@ -12,7 +12,7 @@ import android.provider {
     MediaStore
 }
 import android.support.v4.media {
-    MediaBrowserCompat
+    MediaBrowser=MediaBrowserCompat
 }
 
 import com.example.android.uamp {
@@ -62,7 +62,7 @@ shared class MusicPlayerActivity
         super.onSaveInstanceState(outState);
     }
 
-    shared actual void onMediaItemSelected(MediaBrowserCompat.MediaItem item) {
+    shared actual void onMediaItemSelected(MediaBrowser.MediaItem item) {
 //        LogHelper.d(tag, "onMediaItemSelected, mediaId=" + item.mediaId);
         if (item.playable) {
             value controls = mediaController.transportControls;
