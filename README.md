@@ -26,11 +26,18 @@ Pre-requisites
 Getting Started
 ---------------
 
-The sample depends on a snapshot build of Ceylon 1.3.3. Edit
-`mobile/build.gradle` to specify the `ceylonLocation` for Ceylon 1.3.3.
+The sample depends on a snapshot build of Ceylon 1.3.3. You can get it
+from [Jenkins][] or build it yourself. To edit the same in Android Studio,
+you'll also need a snapshot build of [Ceylon IDE][].
+
+Edit `mobile/build.gradle`, specifing the `ceylonLocation` of your snapshot
+build of Ceylon 1.3.3.
 
 This sample uses the Gradle build system. To build the project, use the
 `gradlew build` command or use 'Import Project' in Android Studio.
+
+[Jenkins]: https://ci-ceylon.rhcloud.com/job/ceylon-distribution/lastSuccessfulBuild/artifact/ceylon/dist/
+[Ceylon IDE]: https://ci-ceylon.rhcloud.com/job/ceylon-ide-intellij/ws/out/installation-packages/
 
 Screenshots
 -----------
