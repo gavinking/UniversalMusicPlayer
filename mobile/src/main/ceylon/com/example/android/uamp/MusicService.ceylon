@@ -126,7 +126,7 @@ shared class MusicService
                             onMetadataChanged(MediaMetadataCompat metadata)
                                     => session.setMetadata(metadata);
                             onMetadataRetrieveError()
-                                    => playbackManager.updatePlaybackStateCompat(
+                                    => playbackManager.updatePlaybackState(
                                         getString(R.String.error_no_metadata));
                             onCurrentQueueIndexUpdated(Integer queueIndex)
                                     => playbackManager.handlePlayRequest();
@@ -155,7 +155,7 @@ shared class MusicService
         session.setSessionActivity(pi);
         session.setExtras(sessionExtras);
 
-        playbackManager.updatePlaybackStateCompat(null);
+        playbackManager.updatePlaybackState(null);
 
         mediaNotificationManager = MediaNotificationManager(this);
         if (!TvHelper.isTvUiMode(this)) {
@@ -281,7 +281,7 @@ shared class MusicService
     shared actual void onNotificationRequired()
             => mediaNotificationManager.startNotification();
 
-    shared actual void onPlaybackStateCompatUpdated(PlaybackStateCompat newState)
+    shared actual void onPlaybackStateUpdated(PlaybackStateCompat newState)
             => session.setPlaybackState(newState);
 //            => session.setPlaybackStateCompat(PlaybackStateCompatCompat.fromPlaybackStateCompat(newState));
 

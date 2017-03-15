@@ -68,7 +68,7 @@ shared class PlaybackManager(
         }
     }
 
-    shared void updatePlaybackStateCompat(String? error) {
+    shared void updatePlaybackState(String? error) {
 //        LogHelper.d(tag, "updatePlaybackStateCompat, playback state=``currentPlayback.state``");
         value position
                 = currentPlayback.connected
@@ -90,7 +90,7 @@ shared class PlaybackManager(
         if (exists currentMusic = queueManager.currentMusic) {
             stateBuilder.setActiveQueueItemId(currentMusic.queueId);
         }
-        serviceCallback.onPlaybackStateCompatUpdated(stateBuilder.build());
+        serviceCallback.onPlaybackStateUpdated(stateBuilder.build());
         if (state == PlaybackStateCompat.statePlaying
          || state == PlaybackStateCompat.statePaused) {
             serviceCallback.onNotificationRequired();
@@ -117,7 +117,7 @@ shared class PlaybackManager(
 //        LogHelper.d(tag, "handleStopRequest: mState=``currentPlayback.state`` error=", withError);
         currentPlayback.stop(true);
         serviceCallback.onPlaybackStop();
-        updatePlaybackStateCompat(withError);
+        updatePlaybackState(withError);
     }
 
     shared actual void onPlay() {
@@ -182,7 +182,7 @@ shared class PlaybackManager(
                 exists musicId = MediaIDHelper.extractMusicIDFromMediaID(mediaId)) {
                 musicProvider.setFavorite(musicId, !musicProvider.isFavorite(musicId));
             }
-            updatePlaybackStateCompat(null);
+            updatePlaybackState(null);
         } else {
 //            LogHelper.e(tag, "Unsupported action: ", action);
         }
@@ -196,7 +196,7 @@ shared class PlaybackManager(
             handlePlayRequest();
             queueManager.updateMetadata();
         } else {
-            updatePlaybackStateCompat("Could not find music");
+            updatePlaybackState("Could not find music");
         }
     }
 
@@ -211,10 +211,10 @@ shared class PlaybackManager(
         }
 
         onPlaybackStatusChanged(Integer state)
-                => updatePlaybackStateCompat(null);
+                => updatePlaybackState(null);
 
         onError(String error)
-                => updatePlaybackStateCompat(error);
+                => updatePlaybackState(error);
 
         setCurrentMediaId(String mediaId)
                 => queueManager.setQueueFromMusic(mediaId);
@@ -259,5 +259,5 @@ shared interface PlaybackServiceCallback {
     shared formal void onPlaybackStart();
     shared formal void onNotificationRequired();
     shared formal void onPlaybackStop();
-    shared formal void onPlaybackStateCompatUpdated(PlaybackStateCompat newState);
+    shared formal void onPlaybackStateUpdated(PlaybackStateCompat newState);
 }
