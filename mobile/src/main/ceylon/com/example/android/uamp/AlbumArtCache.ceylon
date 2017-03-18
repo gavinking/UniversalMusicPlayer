@@ -22,38 +22,43 @@ import java.lang {
 
 shared class AlbumArtCache {
 
-    static Integer maxAlbumArtCacheSize = 12 * 1024 * 1024;
-    static Integer maxArtWidth = 800;
-    static Integer maxArtHeight = 480;
-    static Integer maxArtWidthIcon = 128;
-    static Integer maxArtHeightIcon = 128;
-    static Integer bigBitmapIndex = 0;
-    static Integer iconBitmapIndex = 1;
+    static value maxAlbumArtCacheSize = 12 * 1024 * 1024;
+    static value maxArtWidth = 800;
+    static value maxArtHeight = 480;
+    static value maxArtWidthIcon = 128;
+    static value maxArtHeightIcon = 128;
+    static value bigBitmapIndex = 0;
+    static value iconBitmapIndex = 1;
 
 //    value tag = LogHelper.makeLogTag(`AlbumArtCache`);
 
-    value max = min { maxAlbumArtCacheSize, runtime.maxIntegerValue, Runtime.runtime.maxMemory() / 4 };
-    object mCache extends LruCache<String,ObjectArray<Bitmap>>(max) {
+    value max = min {
+        maxAlbumArtCacheSize,
+        runtime.maxIntegerValue,
+        Runtime.runtime.maxMemory() / 4
+    };
+    object cache extends LruCache<String,ObjectArray<Bitmap>>(max) {
         sizeOf(String key, ObjectArray<Bitmap> array)
-                => array.get(bigBitmapIndex).byteCount + array.get(iconBitmapIndex).byteCount;
+                => array.get(bigBitmapIndex).byteCount
+                 + array.get(iconBitmapIndex).byteCount;
     }
 
     shared new instance {}
 
     shared Bitmap? getBigImage(String? artUrl)
-            => if (exists result = mCache.get(artUrl))
+            => if (exists result = cache.get(artUrl))
             then result.get(bigBitmapIndex)
             else null;
 
     shared Bitmap? getIconImage(String? artUrl)
-            => if (exists result = mCache.get(artUrl))
+            => if (exists result = cache.get(artUrl))
             then result.get(iconBitmapIndex)
             else null;
 
     shared void fetch(String? artUrl, onFetched) {
         void onFetched(String? artUrl, Bitmap? bigImage, Bitmap? iconImage);
 
-        if (exists bitmap = mCache.get(artUrl)) {
+        if (exists bitmap = cache.get(artUrl)) {
 //            LogHelper.d(tag, "getOrFetch: album art is in cache, using it", artUrl);
             onFetched(artUrl, bitmap.get(bigBitmapIndex), bitmap.get(iconBitmapIndex));
         }
@@ -67,7 +72,7 @@ shared class AlbumArtCache {
                         value bitmap = BitmapHelper.fetchAndRescaleBitmap(artUrl, maxArtWidth, maxArtHeight);
                         value icon = BitmapHelper.scaleBitmap(bitmap, maxArtWidthIcon, maxArtHeightIcon);
                         value bitmaps = ObjectArray<Bitmap>.with { bitmap, icon };
-                        mCache.put(artUrl, bitmaps);
+                        cache.put(artUrl, bitmaps);
                         return bitmaps;
                     }
                     catch (IOException e) {
