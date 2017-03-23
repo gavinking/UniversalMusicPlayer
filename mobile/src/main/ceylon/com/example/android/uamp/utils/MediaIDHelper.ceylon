@@ -87,7 +87,7 @@ shared class MediaIDHelper {
                     exists metadata = MediaController.getMediaController(context)?.metadata,
                     exists itemMusicId = extractMusicIDFromMediaID(mediaItem.description.mediaId),
                     exists currentPlayingMediaId = metadata.description.mediaId)
-            then MediaIDHelper.equalIds(currentPlayingMediaId, itemMusicId)
+            then equalIds(currentPlayingMediaId, itemMusicId)
             else false;
 
     shared new () {}

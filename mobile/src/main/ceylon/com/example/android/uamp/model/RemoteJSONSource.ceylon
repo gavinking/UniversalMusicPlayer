@@ -72,7 +72,7 @@ shared class RemoteJSONSource() satisfies {MediaMetadata*} {
         }
     }
 
-    shared actual Iterator<MediaMetadata> iterator() {
+    shared actual function iterator() {
         try {
             value slashPos = catalogUrl.lastIndexOf("/");
             value path = catalogUrl[0:slashPos+1];

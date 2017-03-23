@@ -149,7 +149,7 @@ shared class PlaybackControlsFragment() extends Fragment() {
 //        LogHelper.d(tag, "onPlaybackStateChanged ", state);
         if (!activity exists) {
 //            LogHelper.w(tag, "onPlaybackStateChanged called when getActivity null," + "this should not happen if the callback was properly unregistered. Ignoring.");
-            return ;
+            return;
         }
         if (!exists state) {
             return;

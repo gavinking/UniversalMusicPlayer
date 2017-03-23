@@ -19,8 +19,10 @@ import android.support.v4.media {
 }
 import android.support.v4.media.session {
     MediaButtonReceiver,
-    MediaSession=MediaSessionCompat,
-    PlaybackState=PlaybackStateCompat
+    PlaybackState=PlaybackStateCompat,
+    MediaSession=MediaSessionCompat {
+        QueueItem
+    }
 }
 import android.support.v7.media {
     MediaRouter
@@ -131,7 +133,7 @@ shared class MusicService
                             onCurrentQueueIndexUpdated(Integer queueIndex)
                                     => playbackManager.handlePlayRequest();
                             shared actual void onQueueUpdated(String title,
-                                    List<MediaSession.QueueItem>? newQueue) {
+                                    List<QueueItem>? newQueue) {
                                 session.setQueue(newQueue);
                                 session.setQueueTitle(title);
                             }

@@ -8,8 +8,8 @@ import android.os {
     }
 }
 import android.support.v4.media.session {
-    MediaSession=MediaSessionCompat,
-    PlaybackState=PlaybackStateCompat
+    PlaybackState=PlaybackStateCompat,
+    MediaSession=MediaSessionCompat
 }
 
 import com.example.android.uamp {

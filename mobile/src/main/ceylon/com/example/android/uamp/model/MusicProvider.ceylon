@@ -12,8 +12,10 @@ import android.os {
 }
 import android.support.v4.media {
     MediaMetadata=MediaMetadataCompat,
-    MediaBrowser=MediaBrowserCompat,
-    MediaDescription=MediaDescriptionCompat
+    MediaDescription=MediaDescriptionCompat,
+    MediaBrowser=MediaBrowserCompat {
+        MediaItem
+    }
 }
 
 import com.example.android.uamp {
@@ -214,7 +216,7 @@ shared class MusicProvider({MediaMetadata*} source = RemoteJSONSource()) {
                 .setSubtitle(resources.getString(R.String.browse_genre_subtitle))
                 .setIconUri(Uri.parse("android.resource://com.example.android.uamp/drawable/ic_by_genre"))
                 .build();
-        return MediaBrowser.MediaItem(description, MediaBrowser.MediaItem.flagBrowsable);
+        return MediaItem(description, MediaItem.flagBrowsable);
     }
 
     function createBrowsableMediaItemForGenre(String genre, Resources resources) {
@@ -224,7 +226,7 @@ shared class MusicProvider({MediaMetadata*} source = RemoteJSONSource()) {
                 .setTitle(genre)
                 .setSubtitle(resources.getString(R.String.browse_musics_by_genre_subtitle, genre))
                 .build();
-        return MediaBrowser.MediaItem(description, MediaBrowser.MediaItem.flagBrowsable);
+        return MediaItem(description, MediaItem.flagBrowsable);
     }
 
     function createMediaItem(MediaMetadata metadata) {
@@ -235,17 +237,18 @@ shared class MusicProvider({MediaMetadata*} source = RemoteJSONSource()) {
                 = MediaMetadata.Builder(metadata)
                 .putString(MediaMetadata.metadataKeyMediaId, hierarchyAwareMediaID)
                 .build();
-        return MediaBrowser.MediaItem(copy.description, MediaBrowser.MediaItem.flagPlayable);
+        return MediaItem(copy.description, MediaItem.flagPlayable);
     }
 
     suppressWarnings("caseNotDisjoint")
-    shared List<MediaBrowser.MediaItem> getChildren(String mediaId, Resources resources) {
-        value mediaItems = ArrayList<MediaBrowser.MediaItem>();
+    shared List<MediaItem> getChildren(String mediaId, Resources resources) {
+        value mediaItems = ArrayList<MediaItem>();
         if (MediaIDHelper.isBrowseable(mediaId)) {
             switch (mediaId)
             case (mediaIdRoot) {
                 mediaItems.add(createBrowsableMediaItemForRoot(resources));
-            } case (mediaIdMusicsByGenre) {
+            }
+            case (mediaIdMusicsByGenre) {
                 for (genre in genres) {
                     mediaItems.add(createBrowsableMediaItemForGenre(genre, resources));
                 }
@@ -256,7 +259,8 @@ shared class MusicProvider({MediaMetadata*} source = RemoteJSONSource()) {
                         mediaItems.add(createMediaItem(metadata));
                     }
                 }
-            } else {
+            }
+            else {
                 //LogHelper.w(tag, "Skipping unmatched mediaId: ", mediaId);
             }
         }

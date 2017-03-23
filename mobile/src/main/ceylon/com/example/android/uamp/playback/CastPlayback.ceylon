@@ -33,7 +33,9 @@ import org.json {
 }
 import android.support.v4.media.session {
     PlaybackState=PlaybackStateCompat,
-    MediaSession=MediaSessionCompat
+    MediaSession=MediaSessionCompat {
+        QueueItem
+    }
 }
 import android.support.v4.media {
     MediaMetadata=MediaMetadataCompat
@@ -68,8 +70,8 @@ shared class CastPlayback(MusicProvider musicProvider, Context context)
 
     value remoteMediaClient
             = CastContext.getSharedInstance(appContext)
-        .sessionManager.currentCastSession
-        .remoteMediaClient;
+            .sessionManager.currentCastSession
+            .remoteMediaClient;
 
     shared variable actual Callback? callback = null;
 
@@ -91,7 +93,7 @@ shared class CastPlayback(MusicProvider musicProvider, Context context)
 
     shared actual Integer currentStreamPosition
             => !connected then this.currentPosition
-    else remoteMediaClient.approximateStreamPosition;
+            else remoteMediaClient.approximateStreamPosition;
 
     assign currentStreamPosition
             => this.currentPosition = currentStreamPosition;
@@ -99,7 +101,7 @@ shared class CastPlayback(MusicProvider musicProvider, Context context)
     shared actual void updateLastKnownStreamPosition()
             => currentPosition = currentStreamPosition;
 
-    shared actual void play(MediaSession.QueueItem item) {
+    shared actual void play(QueueItem item) {
         try {
             assert (exists id = item.description.mediaId);
             loadMedia(id, true);

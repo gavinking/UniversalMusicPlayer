@@ -130,8 +130,8 @@ shared abstract class BaseActivity()
         if (Build.VERSION.sdkInt >= 21) {
             value taskDesc
                     = ActivityManager.TaskDescription(title.string,
-                BitmapFactory.decodeResource(resources, R.Drawable.ic_launcher_white),
-                themeColor(this, R.Attr.colorPrimary, AndroidR.Color.darker_gray));
+                        BitmapFactory.decodeResource(resources, R.Drawable.ic_launcher_white),
+                        themeColor(this, R.Attr.colorPrimary, AndroidR.Color.darker_gray));
             setTaskDescription(taskDesc);
         }
         mediaBrowser = MediaBrowser(this,

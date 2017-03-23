@@ -12,7 +12,9 @@ import android.graphics.drawable {
     Drawable
 }
 import android.support.v4.media {
-    MediaBrowser=MediaBrowserCompat
+    MediaBrowser=MediaBrowserCompat {
+        MediaItem
+    }
 }
 import android.support.v4.media.session {
     PlaybackState=PlaybackStateCompat,
@@ -105,7 +107,7 @@ shared class MediaItemViewHolder {
         }
     }
 
-    shared static State getMediaItemState(Context context, MediaBrowser.MediaItem mediaItem) {
+    shared static State getMediaItemState(Context context, MediaItem mediaItem) {
         if (mediaItem.playable) {
             return MediaIDHelper.isMediaItemPlaying(context, mediaItem)
                 then getStateFromController(context)
@@ -116,7 +118,7 @@ shared class MediaItemViewHolder {
         }
     }
 
-    shared static View setupListView(Activity activity, View? view, ViewGroup parent, MediaBrowser.MediaItem item) {
+    shared static View setupListView(Activity activity, View? view, ViewGroup parent, MediaItem item) {
         initializeColorStateLists(activity);
 
         MediaItemViewHolder holder;

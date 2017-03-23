@@ -1,5 +1,7 @@
 import android.support.v4.media.session {
-    MediaSession=MediaSessionCompat
+    MediaSession=MediaSessionCompat {
+        QueueItem
+    }
 }
 
 shared interface Callback {
@@ -17,7 +19,7 @@ shared interface Playback {
     shared formal Boolean playing;
     shared formal variable Integer currentStreamPosition;
     shared formal void updateLastKnownStreamPosition();
-    shared formal void play(MediaSession.QueueItem item);
+    shared formal void play(QueueItem item);
     shared formal void pause();
     shared formal void seekTo(Integer position);
 

@@ -16,7 +16,9 @@ import android.os {
 }
 import android.support.v4.media.session {
     PlaybackState=PlaybackStateCompat,
-    MediaSession=MediaSessionCompat
+    MediaSession=MediaSessionCompat {
+        QueueItem
+    }
 }
 
 import com.example.android.uamp {
@@ -118,7 +120,7 @@ shared class LocalPlayback(Context context, MusicProvider musicProvider)
         }
     }
 
-    shared actual void play(MediaSession.QueueItem item) {
+    shared actual void play(QueueItem item) {
         playOnFocusGain = true;
         tryToGetAudioFocus();
         registerAudioNoisyReceiver();
