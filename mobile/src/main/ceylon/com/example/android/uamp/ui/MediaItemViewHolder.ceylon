@@ -92,14 +92,13 @@ shared class MediaItemViewHolder {
         }
     }
 
-    suppressWarnings("caseNotDisjoint")
     shared static State getStateFromController(Context context) {
         assert (is Activity context,
                 exists controller = MediaController.getMediaController(context));
         if (exists state = controller.playbackState?.state) {
             return switch (state)
-            case (PlaybackState.statePlaying) State.statePlaying
-            case (PlaybackState.stateError) State.stateNone
+            else case (PlaybackState.statePlaying) State.statePlaying
+            else case (PlaybackState.stateError) State.stateNone
             else State.statePaused;
         }
         else {

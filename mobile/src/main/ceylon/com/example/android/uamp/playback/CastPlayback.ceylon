@@ -191,7 +191,6 @@ shared class CastPlayback(MusicProvider musicProvider, Context context)
         }
     }
 
-    suppressWarnings("caseNotDisjoint")
     void updatePlaybackState() {
 //        LogHelper.d(tag, "onRemoteMediaPlayerStatusUpdated ", status);
         switch (status = remoteMediaClient.playerState)
@@ -200,16 +199,16 @@ shared class CastPlayback(MusicProvider musicProvider, Context context)
                 callback?.onCompletion();
             }
         }
-        case (MediaStatus.playerStateBuffering) {
+        else case (MediaStatus.playerStateBuffering) {
             state = PlaybackState.stateBuffering;
             callback?.onPlaybackStatusChanged(state);
         }
-        case (MediaStatus.playerStatePlaying) {
+        else case (MediaStatus.playerStatePlaying) {
             state = PlaybackState.statePlaying;
             setMetadataFromRemote();
             callback?.onPlaybackStatusChanged(state);
         }
-        case (MediaStatus.playerStatePaused) {
+        else case (MediaStatus.playerStatePaused) {
             state = PlaybackState.statePaused;
             setMetadataFromRemote();
             callback?.onPlaybackStatusChanged(state);

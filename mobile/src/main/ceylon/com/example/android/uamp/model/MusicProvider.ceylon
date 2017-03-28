@@ -240,15 +240,14 @@ shared class MusicProvider({MediaMetadata*} source = RemoteJSONSource()) {
         return MediaItem(copy.description, MediaItem.flagPlayable);
     }
 
-    suppressWarnings("caseNotDisjoint")
     shared List<MediaItem> getChildren(String mediaId, Resources resources) {
         value mediaItems = ArrayList<MediaItem>();
         if (MediaIDHelper.isBrowseable(mediaId)) {
             switch (mediaId)
-            case (mediaIdRoot) {
+            else case (mediaIdRoot) {
                 mediaItems.add(createBrowsableMediaItemForRoot(resources));
             }
-            case (mediaIdMusicsByGenre) {
+            else case (mediaIdMusicsByGenre) {
                 for (genre in genres) {
                     mediaItems.add(createBrowsableMediaItemForGenre(genre, resources));
                 }

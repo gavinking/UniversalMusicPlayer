@@ -49,7 +49,6 @@ shared class PlaybackControlsFragment() extends Fragment() {
 
     MediaController? mediaController => MediaController.getMediaController(activity);
 
-    suppressWarnings("caseNotDisjoint")
     shared actual View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         value rootView = inflater.inflate(R.Layout.fragment_playback_controls, container, false);
 
@@ -71,7 +70,7 @@ shared class PlaybackControlsFragment() extends Fragment() {
                 | PlaybackState.stateNone) {
                 controls?.play();
             }
-            case (PlaybackState.statePlaying
+            else case (PlaybackState.statePlaying
                 | PlaybackState.stateBuffering
                 | PlaybackState.stateConnecting) {
                 controls?.pause();
@@ -144,7 +143,6 @@ shared class PlaybackControlsFragment() extends Fragment() {
         }
     }
 
-    suppressWarnings("caseNotDisjoint")
     void onPlaybackStateChanged(PlaybackState? state) {
 //        LogHelper.d(tag, "onPlaybackStateChanged ", state);
         if (!activity exists) {
@@ -161,7 +159,7 @@ shared class PlaybackControlsFragment() extends Fragment() {
             | PlaybackState.stateStopped) {
             enablePlay = true;
         }
-        case (PlaybackState.stateError) {
+        else case (PlaybackState.stateError) {
 //            LogHelper.e(tag, "error PlaybackState: ", state.errorMessage);
             Toast.makeText(activity, state.errorMessage, Toast.lengthLong).show();
             enablePlay = false;

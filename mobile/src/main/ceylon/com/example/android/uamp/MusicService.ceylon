@@ -204,16 +204,15 @@ shared class MusicService
         registerCarConnectionReceiver();
     }
 
-    suppressWarnings("caseNotDisjoint")
     shared actual Integer onStartCommand(Intent? startIntent, Integer flags, Integer startId) {
         if (exists startIntent) {
             if (exists action = startIntent.action,
                 actionCmd==action) {
                 switch (command = startIntent.getStringExtra(cmdName))
-                case (cmdPause) {
+                else case (cmdPause) {
                     playbackManager.handlePauseRequest();
                 }
-                case (cmdStopCasting) {
+                else case (cmdStopCasting) {
                     CastContext.getSharedInstance(this).sessionManager.endCurrentSession(true);
                 }
                 else {}

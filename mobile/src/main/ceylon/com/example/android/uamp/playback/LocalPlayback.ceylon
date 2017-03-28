@@ -232,16 +232,15 @@ shared class LocalPlayback(Context context, MusicProvider musicProvider)
         callback?.onPlaybackStatusChanged(state);
     }
 
-    suppressWarnings("caseNotDisjoint")
     shared actual void onAudioFocusChange(Integer focusChange) {
 //        LogHelper.d(tag, "onAudioFocusChange. focusChange=", focusChange);
         switch (focusChange)
         case (AudioManager.audiofocusGain) {
             audioFocus = AudioFocus.focused;
         }
-        case (AudioManager.audiofocusLoss
-            | AudioManager.audiofocusLossTransient
-            | AudioManager.audiofocusLossTransientCanDuck) {
+        else case (AudioManager.audiofocusLoss
+                 | AudioManager.audiofocusLossTransient
+                 | AudioManager.audiofocusLossTransientCanDuck) {
             value canDuck = focusChange == AudioManager.audiofocusLossTransientCanDuck;
             audioFocus = canDuck then AudioFocus.noFocusCanDuck else AudioFocus.noFocusNoDuck;
             if (state == PlaybackState.statePlaying, !canDuck) {

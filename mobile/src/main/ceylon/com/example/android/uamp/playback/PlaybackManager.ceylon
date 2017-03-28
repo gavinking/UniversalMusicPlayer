@@ -222,7 +222,6 @@ shared class PlaybackManager(
 
     currentPlayback.callback = callback;
 
-    suppressWarnings("caseNotDisjoint")
     shared void switchToPlayback(Playback playback, Boolean resumePlaying) {
         value oldState = currentPlayback.state;
         value pos = currentPlayback.currentStreamPosition;
@@ -240,7 +239,7 @@ shared class PlaybackManager(
             | PlaybackState.statePaused) {
             playback.pause();
         }
-        case (PlaybackState.statePlaying) {
+        else case (PlaybackState.statePlaying) {
             if (resumePlaying,
                 exists currentMusic = queueManager.currentMusic) {
                 playback.play(currentMusic);

@@ -65,11 +65,10 @@ shared class QueueHelper {
 
         if (exists categoryType = hierarchy[0],
             exists categoryValue = hierarchy[1]) {
-            suppressWarnings ("caseNotDisjoint")
             value tracks
                     = switch (categoryType)
-                    case (mediaIdMusicsByGenre) musicProvider.getMusicsByGenre(categoryValue)
-                    case (mediaIdMusicsBySearch) musicProvider.searchMusicBySongTitle(categoryValue)
+                    else case (mediaIdMusicsByGenre) musicProvider.getMusicsByGenre(categoryValue)
+                    else case (mediaIdMusicsBySearch) musicProvider.searchMusicBySongTitle(categoryValue)
                     else null;
 
             return if (exists tracks) then convertToQueue(tracks, categoryType, categoryValue) else null;

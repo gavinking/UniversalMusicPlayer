@@ -6,7 +6,6 @@ import android.provider {
     MediaStore
 }
 
-suppressWarnings("caseNotDisjoint")
 shared class VoiceSearchParams(query, Bundle? extras) {
 
     shared String query;
@@ -36,22 +35,25 @@ shared class VoiceSearchParams(query, Bundle? extras) {
             case (null) {
                 isUnstructured = true;
             }
-            case (MediaStore.Audio.Genres.entryContentType) {
+            else case (MediaStore.Audio.Genres.entryContentType) {
                 isGenreFocus = true;
                 genre = extras.getString(genreKey) else "";
                 if (genre.empty) {
                     genre = query;
                 }
-            } case (MediaStore.Audio.Artists.entryContentType) {
+            }
+            else case (MediaStore.Audio.Artists.entryContentType) {
                 isArtistFocus = true;
                 genre = extras.getString(genreKey) else "";
                 artist = extras.getString(MediaStore.extraMediaArtist);
-            } case (MediaStore.Audio.Albums.entryContentType) {
+            }
+            else case (MediaStore.Audio.Albums.entryContentType) {
                 isAlbumFocus = true;
                 album = extras.getString(MediaStore.extraMediaAlbum);
                 genre = extras.getString(genreKey) else "";
                 artist = extras.getString(MediaStore.extraMediaArtist);
-            } case (MediaStore.Audio.Media.entryContentType) {
+            }
+            else case (MediaStore.Audio.Media.entryContentType) {
                 isSongFocus = true;
                 song = extras.getString(MediaStore.extraMediaTitle);
                 album = extras.getString(MediaStore.extraMediaAlbum);

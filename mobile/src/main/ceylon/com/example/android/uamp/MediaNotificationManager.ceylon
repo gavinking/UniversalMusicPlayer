@@ -223,19 +223,18 @@ shared class MediaNotificationManager {
     }
 
     object broadcastReceiver extends BroadcastReceiver() {
-        suppressWarnings("caseNotDisjoint")
         shared actual void onReceive(Context context, Intent intent) {
 //            LogHelper.d(tag, "Received intent with action " + action);
             switch (action = intent.action)
-            case (actionPause) {
+            else case (actionPause) {
                 transportControls?.pause();
-            } case (actionPlay) {
+            } else case (actionPlay) {
                 transportControls?.play();
-            } case (actionNext) {
+            } else case (actionNext) {
                 transportControls?.skipToNext();
-            } case (actionPrev) {
+            } else case (actionPrev) {
                 transportControls?.skipToPrevious();
-            } case (actionStopCasting) {
+            } else case (actionStopCasting) {
                 value i = Intent(context, `MusicService`);
                 i.setAction(MusicService.actionCmd);
                 i.putExtra(MusicService.cmdName, MusicService.cmdStopCasting);
@@ -297,7 +296,6 @@ shared class MediaNotificationManager {
 
     mediaControllerCallback = object extends MediaController.Callback() {
 
-        suppressWarnings("caseNotDisjoint")
         shared actual void onPlaybackStateChanged(PlaybackState state) {
             playbackState = state;
 //            LogHelper.d(tag, "Received new playback state", state);

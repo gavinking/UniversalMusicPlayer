@@ -112,7 +112,6 @@ shared class FullScreenPlayerActivity()
         }
     }
 
-    suppressWarnings("caseNotDisjoint")
     void updatePlaybackState(PlaybackState state) {
         mLastPlaybackState = state;
         if (exists extras = mediaController?.extras) {
@@ -131,21 +130,21 @@ shared class FullScreenPlayerActivity()
             mControllers.visibility = visible;
             scheduleSeekbarUpdate();
         }
-        case (PlaybackState.statePaused) {
+        else case (PlaybackState.statePaused) {
             mControllers.visibility = visible;
             mLoading.visibility = invisible;
             mPlayPause.visibility = visible;
             mPlayPause.setImageDrawable(mPlayDrawable);
             stopSeekbarUpdate();
         }
-        case (PlaybackState.stateNone |
+        else case (PlaybackState.stateNone |
               PlaybackState.stateStopped) {
             mLoading.visibility = invisible;
             mPlayPause.visibility = visible;
             mPlayPause.setImageDrawable(mPlayDrawable);
             stopSeekbarUpdate();
         }
-        case (PlaybackState.stateBuffering) {
+        else case (PlaybackState.stateBuffering) {
             mPlayPause.visibility = invisible;
             mLoading.visibility = visible;
             mLine3.setText(R.String.loading);
@@ -230,7 +229,6 @@ shared class FullScreenPlayerActivity()
         }
     }
 
-    suppressWarnings("caseNotDisjoint")
     shared actual void onCreate(Bundle? savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.Layout.activity_full_player);
@@ -272,13 +270,13 @@ shared class FullScreenPlayerActivity()
             if (exists state = mediaController.playbackState) {
                 value controls = mediaController.transportControls;
                 switch (state.state)
-                case (PlaybackState.statePlaying
-                    | PlaybackState.stateBuffering) {
+                else case (PlaybackState.statePlaying
+                         | PlaybackState.stateBuffering) {
                     controls.pause();
                     stopSeekbarUpdate();
                 }
-                case (PlaybackState.statePaused
-                    | PlaybackState.stateStopped) {
+                else case (PlaybackState.statePaused
+                         | PlaybackState.stateStopped) {
                     controls.play();
                     scheduleSeekbarUpdate();
                 }
