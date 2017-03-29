@@ -234,12 +234,7 @@ shared class PlaybackManager(
         currentPlayback = playback;
 
         switch (oldState)
-        case (PlaybackState.stateBuffering
-            | PlaybackState.stateConnecting
-            | PlaybackState.statePaused) {
-            playback.pause();
-        }
-        else case (PlaybackState.statePlaying) {
+        case (PlaybackState.statePlaying) {
             if (resumePlaying,
                 exists currentMusic = queueManager.currentMusic) {
                 playback.play(currentMusic);
@@ -248,6 +243,11 @@ shared class PlaybackManager(
             } else {
                 playback.stop(true);
             }
+        }
+        else case (PlaybackState.stateBuffering
+                 | PlaybackState.stateConnecting
+                 | PlaybackState.statePaused) {
+            playback.pause();
         }
         else {}
     }
